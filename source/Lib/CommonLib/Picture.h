@@ -57,6 +57,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <chrono>
 #include <atomic>
 
+//<Felipe>
+#include "ApproxInter.h"
+//<Felipe>
+
 //! \ingroup CommonLib
 //! \{
 
