@@ -1063,6 +1063,23 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area, c
     uint32_t area = totalWidth * totalHeight;
     CHECK( !area, "Trying to create a buffer with zero area" );
 
+
+	// <Arthur> e <Felipe>
+      // Atualiza nova variável com tamanho do buffer
+
+      if (ApproxInter::tmpBool && compID == COMP_Y) {
+        ApproxInter::frameBufferWidth = totalWidth;
+        ApproxInter::frameBufferHeight = totalHeight;
+        ApproxInter::xMargin = xmargin;
+        ApproxInter::yMargin = ymargin;
+
+        ApproxInter::collectBufferSize = false;
+        ApproxInter::tmpBool = false; 
+
+        //std::cout << extWidth << " " << extHeight << " " << ApproxInter::frameBufferWidth << " " << ApproxInter::frameBufferHeight << " " << ApproxInter::xMargin << " " << ApproxInter::yMargin << std::endl;
+      }
+    //<Arthur/> </Felipe>
+
     m_origin[i] = ( Pel* ) xMalloc( Pel, area );
     Pel* topLeft = m_origin[i] + totalWidth * ymargin + xmargin;
     bufs.push_back( PelBuf( topLeft, totalWidth, _area.width >> scaleX, _area.height >> scaleY ) );

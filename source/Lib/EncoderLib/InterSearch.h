@@ -58,12 +58,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 #include <vector>
 
-
-//<Felipe>
-#include "CommonLib/ApproxInter.h"
-#include "CommonLib/approx.h"
-//</Felipe>
-
 //! \ingroup EncoderLib
 //! \{
 
