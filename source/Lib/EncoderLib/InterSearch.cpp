@@ -2008,14 +2008,14 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   //<Felipe>
 
   // Felipe: calculate the beginBuffer and endBuffer limits for reconstructed samples buffer
-  const Pel *beginBuffer, *endBuffer;
+  /*const Pel *beginBuffer, *endBuffer;
 
   beginBuffer = cStruct.piRefY - (ApproxInter::frameBufferWidth * ApproxInter::yMargin + ApproxInter::xMargin); 
   endBuffer = beginBuffer + (ApproxInter::frameBufferWidth * ApproxInter::frameBufferHeight);
 
   // Felipe: starting approximation at reconstructed samples buffer at IME/FME  
   ApproxSS::add_approx((void*) beginBuffer, (void*) endBuffer, 0, 0, sizeof(Pel));
-  ApproxSS::start_level();
+  ApproxSS::start_level();*/
 
   //</Felipe>
 
@@ -2110,8 +2110,8 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
 
   //<Felipe>
   // Felipe: ending approximation at reconstructed samples buffer at IME/FME
-  ApproxSS::end_level();
-  ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);
+  /*ApproxSS::end_level();
+  ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);*/
   //</Felipe>
 }
 
@@ -5369,13 +5369,13 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   //<Felipe>
 
   // Felipe: calculate the beginBuffer and endBuffer limits for reconstructed samples buffer
-  const Pel *beginBuffer, *endBuffer;
+  /*const Pel *beginBuffer, *endBuffer;
   beginBuffer = refPic->getRecoBuf(COMP_Y).buf - (ApproxInter::frameBufferWidth * ApproxInter::yMargin + ApproxInter::xMargin); 
   endBuffer = beginBuffer + (ApproxInter::frameBufferWidth * ApproxInter::frameBufferHeight);
 
   // Felipe: starting of approxation to reconstructed samples buffer at AME  
   ApproxSS::add_approx((void*) beginBuffer, (void*) endBuffer, 0, 0, sizeof(Pel));
-  ApproxSS::start_level();
+  ApproxSS::start_level();*/
 
   //</Felipe>
 
@@ -5673,8 +5673,8 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   
   //<Felipe>
   // Felipe: ending approximation at reconstructed samples buffer at IME/FME
-  ApproxSS::end_level();
-  ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);
+  /*ApproxSS::end_level();
+  ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);*/
   //</Felipe>
 }
 

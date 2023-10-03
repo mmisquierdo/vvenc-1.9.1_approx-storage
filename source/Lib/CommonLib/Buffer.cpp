@@ -1067,7 +1067,7 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area, c
 	// <Arthur> e <Felipe>
       // Atualiza nova variável com tamanho do buffer
 
-      if (ApproxInter::tmpBool && compID == COMP_Y) {
+      /*if (ApproxInter::tmpBool && compID == COMP_Y) {
         ApproxInter::frameBufferWidth = totalWidth;
         ApproxInter::frameBufferHeight = totalHeight;
         ApproxInter::xMargin = xmargin;
@@ -1077,7 +1077,7 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area, c
         ApproxInter::tmpBool = false; 
 
         //std::cout << extWidth << " " << extHeight << " " << ApproxInter::frameBufferWidth << " " << ApproxInter::frameBufferHeight << " " << ApproxInter::xMargin << " " << ApproxInter::yMargin << std::endl;
-      }
+      }*/
     //<Arthur/> </Felipe>
 
     m_origin[i] = ( Pel* ) xMalloc( Pel, area );

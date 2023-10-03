@@ -212,9 +212,9 @@ void Picture::create( ChromaFormat _chromaFormat, const Size& size, unsigned _ma
   margin            =  _margin;
 
   //<Felipe>
-  if(ApproxInter::collectBufferSize) {
+  /*if(ApproxInter::collectBufferSize) {
     ApproxInter::tmpBool = true;
-  }
+  }*/
   //</Felipe>
 
   if( _decoder )

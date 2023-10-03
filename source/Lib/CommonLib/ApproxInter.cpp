@@ -1,9 +1,11 @@
 #include "ApproxInter.h"
 
+BufferRange::BufferRange(uint8_t * const initialAddress, uint8_t const * const finalAddress) : m_initialAddress(initialAddress), m_finalAddress(finalAddress) {}
+
 //double ApproxInter::MEReadBER;
 //double ApproxInter::MEWriteBER;
 
-unsigned ApproxInter::frameBufferWidth, ApproxInter::frameBufferHeight;
+/*unsigned ApproxInter::frameBufferWidth, ApproxInter::frameBufferHeight;
 unsigned ApproxInter::xMargin, ApproxInter::yMargin;
 
 bool ApproxInter::collectBufferSize, ApproxInter::tmpBool;
@@ -23,4 +25,4 @@ void ApproxInter::initDebug() {
     if(debugEnable) {
         fp.open("debug.txt", std::fstream::out);
     }
-}
+}*/
