@@ -1,12 +1,13 @@
 #ifndef APPROXME_H
-#define	APRROXME_H
+#define	APPROXME_H
 
 #include <fstream>
 #include <set>
+#include "approx.h"
 
 class BufferRange {
 	public:
-		uint8_t* const m_initialAddress;
+		uint8_t * const m_initialAddress;
 		uint8_t const * const m_finalAddress;
 
 		BufferRange(uint8_t * const initialAddress, uint8_t const * const finalAddress);
@@ -17,12 +18,18 @@ class BufferRange {
 		}
 };
 
-typedef std::set<BufferRange> AllocatedPelBuffersSet;
+typedef std::set<BufferRange> AllocatedBuffersSet;
 
 class ApproxInter {
+	private:
+		static AllocatedBuffersSet allocatedBuffers;
 
     public:
-		static AllocatedPelBuffersSet allocatedPelBuffers;
+		static void MarkBuffer(const BufferRange& toMark);
+		static void UnmarkBuffer(const BufferRange& toUnmark);
+		static void UnmarkBuffer(void const * const address);
+		static void InstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes);
+		static void UninstrumentIfMarked(void * const address);
 
         /*static std::fstream fp;
         static int debugEnable;

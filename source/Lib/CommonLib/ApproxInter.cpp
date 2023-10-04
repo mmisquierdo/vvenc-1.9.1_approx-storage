@@ -2,6 +2,41 @@
 
 BufferRange::BufferRange(uint8_t * const initialAddress, uint8_t const * const finalAddress) : m_initialAddress(initialAddress), m_finalAddress(finalAddress) {}
 
+AllocatedBuffersSet ApproxInter::allocatedBuffers{};
+
+void ApproxInter::MarkBuffer(const BufferRange& toMark) {
+	ApproxInter::allocatedBuffers.insert(toMark);
+}
+
+void ApproxInter::UnmarkBuffer(const BufferRange& toUnmark) {
+	ApproxInter::allocatedBuffers.erase(toUnmark);
+}
+
+void ApproxInter::UnmarkBuffer(void const * const address) {
+	ApproxInter::UnmarkBuffer(BufferRange((uint8_t*) address, ((uint8_t*) address) + 1));
+}
+
+void ApproxInter::InstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes) {
+	const BufferRange accessBuffer = BufferRange((uint8_t*) address, ((uint8_t*) address) + 1); //zero-sized access would be ignore in the case of a pointer to the buffer's first element
+
+	const AllocatedBuffersSet::const_iterator it = ApproxInter::allocatedBuffers.find(accessBuffer);
+
+	if (it != ApproxInter::allocatedBuffers.cend()) {
+		ApproxSS::add_approx(it->m_initialAddress, it->m_finalAddress, bufferId, configurationId, dataSizeInBytes);
+	}
+}
+
+void ApproxInter::UninstrumentIfMarked(void * const address) {
+	const BufferRange accessBuffer = BufferRange((uint8_t*) address, ((uint8_t*) address) + 1); //zero-sized access would be ignore in the case of a pointer to the buffer's first element
+
+	const AllocatedBuffersSet::const_iterator it = ApproxInter::allocatedBuffers.find(accessBuffer);
+
+	if (it != ApproxInter::allocatedBuffers.cend()) {
+		ApproxSS::remove_approx(it->m_initialAddress, it->m_finalAddress);
+	}
+}
+
+
 //double ApproxInter::MEReadBER;
 //double ApproxInter::MEWriteBER;
 
