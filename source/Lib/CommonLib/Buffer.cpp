@@ -52,10 +52,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Slice.h"
 #include "InterpolationFilter.h"
 
-//<Felipe>
-#include "ApproxInter.h"
-//</Felipe>
-
 //! \ingroup CommonLib
 //! \{
 

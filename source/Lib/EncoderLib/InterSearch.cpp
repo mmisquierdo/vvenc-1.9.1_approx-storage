@@ -1997,18 +1997,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   predQuarter.changePrecision(MV_PRECISION_INTERNAL, MV_PRECISION_QUARTER);
   m_pcRdCost->setPredictor( predQuarter );
   m_pcRdCost->setCostScale(2);
-
-  // Felipe: calculate the beginBuffer and endBuffer limits for reconstructed samples buffer
-  const Pel *beginBuffer, *endBuffer;
-
-  beginBuffer = cStruct.piRefY - (ApproxInter::frameBufferWidth * ApproxInter::yMargin + ApproxInter::xMargin); 
-  endBuffer = beginBuffer + (ApproxInter::frameBufferWidth * ApproxInter::frameBufferHeight);
-
-  // Felipe: starting approximation at reconstructed samples buffer at IME/FME  
-  ApproxSS::add_approx((size_t) beginBuffer, (size_t) endBuffer);
-  ApproxSS::start_level();
-
-
+  
   //  Do integer search
   if( m_motionEstimationSearchMethod == VVENC_MESEARCH_FULL || bBi )
   {
