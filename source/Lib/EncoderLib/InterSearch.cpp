@@ -266,11 +266,11 @@ void InterSearch::init( const VVEncCfg& encCfg, TrQuant* pTrQuant, RdCost* pRdCo
     m_tmpPredStorage[i].create( UnitArea( cform, Area( 0, 0, MAX_CU_SIZE, MAX_CU_SIZE ) ) );
   }
   m_tmpStorageLCU.create( UnitArea( cform, Area( 0, 0, MAX_CU_SIZE, MAX_CU_SIZE ) ) );
-  m_pTempPel = new Pel[ encCfg.m_CTUSize * encCfg.m_CTUSize ];
+  m_pTempPel = xMalloc(Pel, encCfg.m_CTUSize * encCfg.m_CTUSize); //new Pel[ encCfg.m_CTUSize * encCfg.m_CTUSize ];
   m_tmpAffiStorage.create(UnitArea(cform, Area(0, 0, MAX_CU_SIZE, MAX_CU_SIZE + 2)));  // allow overread by 2 samples
-  m_tmpAffiError = new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
-  m_tmpAffiDeri[0] = new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
-  m_tmpAffiDeri[1] = new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
+  m_tmpAffiError = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
+  m_tmpAffiDeri[0] = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
+  m_tmpAffiDeri[1] = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
 
   CompArea chromaArea( COMP_Cb, cform, Area( 0, 0, encCfg.m_CTUSize, encCfg.m_CTUSize ), true );
   for( int i = 0; i < 4; i++ )
@@ -284,7 +284,7 @@ void InterSearch::destroy()
 {
   if ( m_pTempPel )
   {
-    delete [] m_pTempPel;
+    xFree(m_pTempPel); //delete [] m_pTempPel;
     m_pTempPel = nullptr;
   }
 
@@ -294,19 +294,22 @@ void InterSearch::destroy()
   }
   m_tmpStorageLCU.destroy();
   m_tmpAffiStorage.destroy();
+  
   if (m_tmpAffiError != NULL)
   {
-    delete[] m_tmpAffiError;
+    xFree(m_tmpAffiError); //delete[] m_tmpAffiError;
     m_tmpAffiError = nullptr;
   }
+
   if (m_tmpAffiDeri[0] != NULL)
   {
-    delete[] m_tmpAffiDeri[0];
+    xFree(m_tmpAffiDeri[0]); //delete[] m_tmpAffiDeri[0];
     m_tmpAffiDeri[0] = nullptr;
   }
+
   if (m_tmpAffiDeri[1] != NULL)
   {
-    delete[] m_tmpAffiDeri[1];
+    xFree(m_tmpAffiDeri[1]); //delete[] m_tmpAffiDeri[1];
     m_tmpAffiDeri[1] = nullptr;
   }
 
