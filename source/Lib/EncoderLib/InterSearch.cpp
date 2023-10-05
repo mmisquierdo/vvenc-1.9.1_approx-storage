@@ -1977,6 +1977,12 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
 
   const Picture* refPic = cu.slice->getRefPic(refPicList, iRefIdxPred);
   CPelBuf buf = cu.cs->sps->wrapAroundEnabled ? refPic->getRecoWrapBuf(cu.blocks[COMP_Y]) : refPic->getRecoBuf(cu.blocks[COMP_Y]);
+  
+  //<Matheus>
+  Pel const * const recoBuffer = buf.buf;
+  ApproxInter::InstrumentIfMarked((void*) buf.buf, 0, 0, sizeof(Pel));
+  ApproxSS::start_level();
+  //</Matheus>
 
   TZSearchStruct cStruct;
   cStruct.pcPatternKey  = pcPatternKey;
@@ -1986,7 +1992,6 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   cStruct.useAltHpelIf  = cu.imv == IMV_HPEL;
   cStruct.zeroMV        = false;
   cStruct.uiBestSad     = MAX_DISTORTION;
-
 
   CodedCUInfo &relatedCU = m_modeCtrl->getBlkInfo( cu );
 
@@ -2021,7 +2026,6 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   ApproxSS::start_level();*/
 
   //</Felipe>
-
 
   //  Do integer search
   if( m_motionEstimationSearchMethod == VVENC_MESEARCH_FULL || bBi )
@@ -2116,6 +2120,11 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   /*ApproxSS::end_level();
   ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);*/
   //</Felipe>
+
+  //<Matheus>
+  ApproxInter::UninstrumentIfMarked((void*) recoBuffer);
+  ApproxSS::end_level();
+  //</Matheus>
 }
 
 void InterSearch::xClipMvSearch( Mv& rcMv, const Position& pos, const struct Size& size, const PreCalcValues& pcv, const int fppLinesSynchro )
@@ -5381,6 +5390,10 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   ApproxSS::start_level();*/
 
   //</Felipe>
+
+  //<Matheus>
+  //Pel const * const recoBuffer = 
+  //</Matheus>
 
 
   xPredAffineBlk(COMP_Y, cu, refPic, acMvTemp, predBuf, false, cu.cs->slice->clpRngs[COMP_Y], refPicList);
