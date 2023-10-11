@@ -180,6 +180,9 @@ public:
 
     return numIntra;
   }
+  
+  void addIntraApprox();
+  void removeIntraApprox();
 
 };
 
