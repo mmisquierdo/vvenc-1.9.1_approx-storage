@@ -361,7 +361,7 @@ void IntraPrediction::predIntraAng( const ComponentID compId, PelBuf& piPred, co
   // <Arthur>
   // Activate Intra BERs
   addIntraApprox();
-  start_level();
+  ApproxSS::start_level();
   // <Arthur/>
 
   switch (uiDirMode)
@@ -382,7 +382,7 @@ void IntraPrediction::predIntraAng( const ComponentID compId, PelBuf& piPred, co
   
   // <Arthur>
   // Deactivate Intra BERs
-  end_level();
+  ApproxSS::end_level();
   removeIntraApprox();
   // <Arthur/>
 
@@ -746,7 +746,7 @@ void IntraPrediction::initIntraPatternChType(const CodingUnit &cu, const CompAre
   // <Arthur>
   // Activate Intra BERs
   addIntraApprox();
-  start_level();
+  ApproxSS::start_level();
   // <Arthur/>
 
   // ----- Step 1: unfiltered reference samples -----
@@ -759,7 +759,7 @@ void IntraPrediction::initIntraPatternChType(const CodingUnit &cu, const CompAre
 
   // <Arthur>
   // Deactivate both Intra BERs
-  end_level();
+  ApproxSS::end_level();
   removeIntraApprox();
   // <Arthur/>
 }
@@ -1538,7 +1538,7 @@ void IntraPrediction::xGetLMParameters(const CodingUnit& cu, const ComponentID c
   // <Arthur>
   // Activate Intra BERs
   addIntraApprox();
-  start_level();
+  ApproxSS::start_level();
   // <Arthur/>
 
   if (aboveAvailable)
@@ -1567,7 +1567,7 @@ void IntraPrediction::xGetLMParameters(const CodingUnit& cu, const ComponentID c
 
   // <Arthur>
   // Deactivate Intra BERs
-  end_level();
+  ApproxSS::end_level();
   removeIntraApprox();
   // <Arthur/>
 
@@ -1649,14 +1649,14 @@ void IntraPrediction::initIntraMip( const CodingUnit& cu )
   // <Arthur>
   // Activate Intra BERs
   addIntraApprox();
-  start_level();
+  ApproxSS::start_level();
   // <Arthur/>
 
   m_matrixIntraPred.prepareInputForPred(CPelBuf(ptrSrc, srcStride, srcHStride), cu.Y(), cu.slice->sps->bitDepths[CH_L]);
 
   // <Arthur>
   // Deactivate Intra BERs
-  end_level();
+  ApproxSS::end_level();
   removeIntraApprox();
   // <Arthur/>
 }
@@ -1693,7 +1693,7 @@ void IntraPrediction::initIntraPatternChTypeISP(const CodingUnit& cu, const Comp
   // <Arthur>
   // Activate Intra BERs
   addIntraApprox();
-  start_level();
+  ApproxSS::start_level();
   // <Arthur/>
 
   // ----- Step 1: unfiltered reference samples -----
@@ -1802,7 +1802,7 @@ void IntraPrediction::initIntraPatternChTypeISP(const CodingUnit& cu, const Comp
 
   // <Arthur>
   // Deactivate both Intra BERs
-  end_level();
+  ApproxSS::end_level();
   removeIntraApprox();
   // <Arthur/>
 }
@@ -1831,9 +1831,9 @@ void IntraPrediction::addIntraApprox() {
   beginCrNeighborBuffer = getPredictorPtr(COMP_Cr);
   endCrNeighborBuffer = beginCrNeighborBuffer + bufferStride;
 
-  add_approx((unsigned long long)beginYNeighborBuffer, (unsigned long long)endYNeighborBuffer);
-  add_approx((unsigned long long)beginCbNeighborBuffer, (unsigned long long)endCbNeighborBuffer);
-  add_approx((unsigned long long)beginCrNeighborBuffer, (unsigned long long)endCrNeighborBuffer);
+  ApproxSS::add_approx((void *) beginYNeighborBuffer, (void *) endYNeighborBuffer, 1, 0, sizeof(Pel));
+  ApproxSS::add_approx((void *) beginCbNeighborBuffer, (void *) endCbNeighborBuffer, 2, 0, sizeof(Pel));
+  ApproxSS::add_approx((void *) beginCrNeighborBuffer, (void *) endCrNeighborBuffer, 3, 0, sizeof(Pel));
 }
 
 void IntraPrediction::removeIntraApprox() {
@@ -1850,9 +1850,9 @@ void IntraPrediction::removeIntraApprox() {
   beginCrNeighborBuffer = getPredictorPtr(COMP_Cr);
   endCrNeighborBuffer = beginCrNeighborBuffer + bufferStride;
 
-  remove_approx((unsigned long long)beginYNeighborBuffer, (unsigned long long)endYNeighborBuffer);
-  remove_approx((unsigned long long)beginCbNeighborBuffer, (unsigned long long)endCbNeighborBuffer);
-  remove_approx((unsigned long long)beginCrNeighborBuffer, (unsigned long long)endCrNeighborBuffer);
+  ApproxSS::remove_approx((void *) beginYNeighborBuffer,  (void *) endYNeighborBuffer);
+  ApproxSS::remove_approx((void *) beginCbNeighborBuffer, (void *) endCbNeighborBuffer);
+  ApproxSS::remove_approx((void *) beginCrNeighborBuffer, (void *) endCrNeighborBuffer);
 }
 
 } // namespace vvenc
