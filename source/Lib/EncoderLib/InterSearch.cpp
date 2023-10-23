@@ -1980,7 +1980,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   
   //<Matheus>
   Pel const * const recoBuffer = buf.buf;
-  ApproxInter::InstrumentIfMarked((void*) buf.buf, 0, 0, sizeof(Pel));
+  ApproxInter::InstrumentIfMarked((void*) buf.buf, 0, 1, sizeof(Pel));
   ApproxSS::start_level();
   //</Matheus>
 
@@ -4537,6 +4537,10 @@ void InterSearch::xPredAffineInterSearch( CodingUnit& cu,
                                           bool            enforceBcwPred,
                                           uint32_t        BcwIdxBits )
 {
+  //<Matheus>
+  std::cout << "TEST: xPredAffineInterSearch" << std::endl;
+  //</Matheus>
+
   const Slice &slice = *cu.slice;
 
   affineCost = MAX_DISTORTION;
@@ -5304,6 +5308,10 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   const AffineAMVPInfo& aamvpi,
   bool            bBi)
 {
+  //<Matheus>
+  std::cout << "TEST: xAffineMotionEstimation" << std::endl;
+  //</Matheus>
+
   if( cu.cs->sps->BCW && cu.BcwIdx != BCW_DEFAULT && !bBi && xReadBufferedAffineUniMv( cu, refPicList, iRefIdxPred, acMvPred, acMv, ruiBits, ruiCost, mvpIdx, aamvpi ) )
   {
     return;
@@ -5314,6 +5322,12 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   const int height = cu.Y().height;
 
   const Picture* refPic = cu.slice->getRefPic(refPicList, iRefIdxPred);
+  
+  //<Matheus>
+  Pel const * const recoBuffer = refPic->getRecoBuf(COMP_Y).buf;
+  ApproxInter::InstrumentIfMarked((void*) recoBuffer, 1, 1, sizeof(Pel));
+  ApproxSS::start_level();
+  //</Matheus>
 
   // Set Origin YUV: pcYuv
   CPelUnitBuf*   pBuf = &origBuf;
@@ -5390,11 +5404,6 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   ApproxSS::start_level();*/
 
   //</Felipe>
-
-  //<Matheus>
-  //Pel const * const recoBuffer = 
-  //</Matheus>
-
 
   xPredAffineBlk(COMP_Y, cu, refPic, acMvTemp, predBuf, false, cu.cs->slice->clpRngs[COMP_Y], refPicList);
 
@@ -5692,6 +5701,11 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   /*ApproxSS::end_level();
   ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);*/
   //</Felipe>
+  
+  //<Matheus>
+  ApproxInter::UninstrumentIfMarked((void*) recoBuffer);
+  ApproxSS::end_level();
+  //</Matheus>
 }
 
 void InterSearch::xEstimateAffineAMVP(CodingUnit& cu, AffineAMVPInfo& affineAMVPInfo, CPelUnitBuf& origBuf, RefPicList refPicList, int iRefIdx, Mv acMvPred[3], Distortion& distBiP)
