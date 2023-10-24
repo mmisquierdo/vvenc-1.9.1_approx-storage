@@ -5,6 +5,10 @@
 #include <set>
 #include "approx.h"
 
+#define APPROX_RECO_BUFFER true
+#define APPROX_ORIG_BUFFER true
+#define APPROX_FILT_BUFFER true
+
 class BufferRange {
 	public:
 		uint8_t * const m_initialAddress;
@@ -30,17 +34,6 @@ class ApproxInter {
 		static void UnmarkBuffer(void const * const address);
 		static void InstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes);
 		static void UninstrumentIfMarked(void * const address);
-
-        /*static std::fstream fp;
-        static int debugEnable;
-
-        //static double MEReadBER, MEWriteBER;
-        static unsigned frameBufferWidth, frameBufferHeight;
-        static unsigned xMargin, yMargin;
-        static bool collectBufferSize, tmpBool;
-
-        static void init();
-        static void initDebug();*/
 };
 
 #endif

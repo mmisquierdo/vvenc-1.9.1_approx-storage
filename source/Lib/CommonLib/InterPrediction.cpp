@@ -633,9 +633,21 @@ void InterPredInterpolation::destroy()
     {
       for( uint32_t j = 0; j < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; j++ )
       {
+		//<Matheus>
+		#if APPROX_FILT_BUFFER
+			ApproxInter::UninstrumentIfMarked((void*) m_filteredBlock[i][j][c]);
+		#endif
+		//</Matheus>
+
         xFree( m_filteredBlock[i][j][c] );
         m_filteredBlock[i][j][c] = nullptr;
       }
+
+	  //<Matheus>
+	  #if APPROX_FILT_BUFFER
+	    ApproxInter::UninstrumentIfMarked((void*) m_filteredBlockTmp[i][c]);
+	  #endif
+	  //</Matheus>
 
       xFree( m_filteredBlockTmp[i][c] );
       m_filteredBlockTmp[i][c] = nullptr;
@@ -666,10 +678,22 @@ void InterPredInterpolation::init()
       m_filteredBlockTmp[i][c] = ( Pel* ) xMalloc( Pel, ( extWidth + 4 ) * ( extHeight + 7 + 4 ) );
       VALGRIND_MEMCLEAR( m_filteredBlockTmp[i][c], sizeof( Pel ) * (extWidth + 4) * (extHeight + 7 + 4) );
 
+	  //<Matheus>
+	  #if APPROX_FILT_BUFFER
+	  	ApproxInter::InstrumentIfMarked((void*) m_filteredBlockTmp[i][c], 4, 1, sizeof(Pel));
+	  #endif
+	  //</Matheus>
+
       for( uint32_t j = 0; j < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; j++ )
       {
         m_filteredBlock[i][j][c] = ( Pel* ) xMalloc( Pel, extWidth * extHeight );
         VALGRIND_MEMCLEAR( m_filteredBlock[i][j][c], sizeof( Pel ) * extWidth * extHeight );
+
+		//<Matheus>
+		#if APPROX_FILT_BUFFER
+			ApproxInter::InstrumentIfMarked((void*) m_filteredBlock[i][j][c], 5, 1, sizeof(Pel));
+		#endif
+		//</Matheus>
       }
     }
   }
