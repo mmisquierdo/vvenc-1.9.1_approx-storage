@@ -436,6 +436,14 @@ public:
   void       setAffineModeSelected  ( bool flag ) { m_affineModeSelected = flag; }
 
 private:
+  //<Felipe> <Matheus>
+  // Felipe: definition of help functions to add/remove approximation at filtered samples buffer
+  #if APPROX_FILT_BUFFER_V2
+	void	addApproxFiltBuffer();
+	void	removeApproxFiltBuffer();
+  #endif
+  //</Felipe> </Matheus>
+
   void       xCalcMinDistSbt        ( CodingStructure &cs, const CodingUnit& cu, const uint8_t sbtAllowed );
   /// sub-function for motion vector refinement used in fractional-pel accuracy
   Distortion xPatternRefinement     ( const CPelBuf* pcPatternKey, Mv baseRefMv, int iFrac, Mv& rcMvFrac, Distortion& uiDistBest, int& patternId, CPelBuf* pattern, bool useAltHpelIf );

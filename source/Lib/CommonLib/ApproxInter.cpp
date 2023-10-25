@@ -23,6 +23,8 @@ void ApproxInter::InstrumentIfMarked(void * const address, const int64_t bufferI
 
 	if (it != ApproxInter::allocatedBuffers.cend()) {
 		ApproxSS::add_approx(it->m_initialAddress, it->m_finalAddress, bufferId, configurationId, dataSizeInBytes);
+	} else {
+		std::cout << "ApproxInter WARNING: buffer not marked for add_approx." << std::endl;
 	}
 }
 
@@ -33,9 +35,10 @@ void ApproxInter::UninstrumentIfMarked(void * const address) {
 
 	if (it != ApproxInter::allocatedBuffers.cend()) {
 		ApproxSS::remove_approx(it->m_initialAddress, it->m_finalAddress);
+	} else {
+		std::cout << "ApproxInter WARNING: buffer not marked for remove_approx." << std::endl;
 	}
 }
-
 
 //double ApproxInter::MEReadBER;
 //double ApproxInter::MEWriteBER;

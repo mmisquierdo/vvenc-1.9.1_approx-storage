@@ -1,13 +1,14 @@
 #ifndef APPROXME_H
 #define	APPROXME_H
 
-#include <fstream>
+#include <iostream>
 #include <set>
 #include "approx.h"
 
-#define APPROX_RECO_BUFFER true
-#define APPROX_ORIG_BUFFER true
-#define APPROX_FILT_BUFFER true
+#define APPROX_RECO_BUFFER false
+#define APPROX_ORIG_BUFFER false
+#define APPROX_FILT_BUFFER_V1 false //GENERALIST
+#define APPROX_FILT_BUFFER_V2 true  //SPECIFIC
 
 class BufferRange {
 	public:
