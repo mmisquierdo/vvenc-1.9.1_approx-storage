@@ -28,13 +28,13 @@ void ApproxInter::InstrumentIfMarked(void * const address, const int64_t bufferI
 	}
 }
 
-void ApproxInter::UninstrumentIfMarked(void * const address) {
+void ApproxInter::UninstrumentIfMarked(void * const address, const bool giveAwayRecords /*= true*/) {
 	const BufferRange accessBuffer = BufferRange((uint8_t*) address, ((uint8_t*) address) + 1); //zero-sized access would be ignore in the case of a pointer to the buffer's first element
 
 	const AllocatedBuffersSet::const_iterator it = ApproxInter::allocatedBuffers.find(accessBuffer);
 
 	if (it != ApproxInter::allocatedBuffers.cend()) {
-		ApproxSS::remove_approx(it->m_initialAddress, it->m_finalAddress);
+		ApproxSS::remove_approx(it->m_initialAddress, it->m_finalAddress, giveAwayRecords);
 	} else {
 		std::cout << "ApproxInter WARNING: buffer not marked for remove_approx." << std::endl;
 	}
