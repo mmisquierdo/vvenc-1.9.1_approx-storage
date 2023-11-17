@@ -4611,7 +4611,7 @@ void InterSearch::xPredAffineInterSearch( CodingUnit& cu,
                                           uint32_t        BcwIdxBits )
 {
   //<Matheus>
-  std::cout << "TEST: xPredAffineInterSearch" << std::endl;
+  //std::cout << "TEST: xPredAffineInterSearch" << std::endl;
   //</Matheus>
 
   const Slice &slice = *cu.slice;
@@ -5382,7 +5382,7 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   bool            bBi)
 {
   //<Matheus>
-  std::cout << "TEST: xAffineMotionEstimation" << std::endl;
+  //std::cout << "TEST: xAffineMotionEstimation" << std::endl;
   //</Matheus>
 
   if( cu.cs->sps->BCW && cu.BcwIdx != BCW_DEFAULT && !bBi && xReadBufferedAffineUniMv( cu, refPicList, iRefIdxPred, acMvPred, acMv, ruiBits, ruiCost, mvpIdx, aamvpi ) )
