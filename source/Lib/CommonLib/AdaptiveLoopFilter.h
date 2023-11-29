@@ -149,7 +149,7 @@ protected:
   bool                         m_created = false;
   short                        m_chromaCoeffFinal[VVENC_MAX_NUM_ALF_ALTERNATIVES_CHROMA][MAX_NUM_ALF_LUMA_COEFF];
   AlfParam*                    m_alfParamChroma;
-  Pel                          m_alfClippingValues[MAX_NUM_CH][MaxAlfNumClippingValues];
+  Pel                          m_alfClippingValues[MAX_NUM_CH][MaxAlfNumClippingValues]; //TODO: potential for instrumentation
   AlfFilterShape               m_filterShapesCcAlf[2];
   AlfFilterShape               m_filterShapes[MAX_NUM_CH];
   AlfClassifier*               m_classifier;
