@@ -381,8 +381,8 @@ int EncApp::encode()
       }
 
 		//<Matheus>
-		std::cout << "QUADRO FINALIZADO" << std::endl;
-		ApproxSS::next_period();
+		//std::cout << "QUADRO FINALIZADO" << std::endl;
+		//ApproxSS::next_period();
 		//</Matheus>
     }
 
