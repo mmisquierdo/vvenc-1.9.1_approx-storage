@@ -40,27 +40,57 @@ void ApproxInter::UninstrumentIfMarked(void * const address, const bool giveAway
 	}
 }
 
-//double ApproxInter::MEReadBER;
-//double ApproxInter::MEWriteBER;
 
-/*unsigned ApproxInter::frameBufferWidth, ApproxInter::frameBufferHeight;
-unsigned ApproxInter::xMargin, ApproxInter::yMargin;
+#if FELIPE_INSTRUMENTATION
+	#if APPROX_RECO_BUFFER
+		//double ApproxInter::MEReadBER;
+		//double ApproxInter::MEWriteBER;
 
-bool ApproxInter::collectBufferSize, ApproxInter::tmpBool;
+		unsigned ApproxInter::RECO::frameBufferWidth, ApproxInter::RECO::frameBufferHeight;
+		unsigned ApproxInter::RECO::xMargin, ApproxInter::RECO::yMargin;
 
-int ApproxInter::debugEnable;
+		bool ApproxInter::RECO::collectBufferSize, ApproxInter::RECO::tmpBool;
 
-std::fstream ApproxInter::fp;
+		int ApproxInter::RECO::debugEnable;
 
-void ApproxInter::init() {
-    //MEReadBER = 0.0;
-    //MEWriteBER = 0.0;
-    collectBufferSize = true;
-    tmpBool = false;
-}
+		std::fstream ApproxInter::RECO::fp;
 
-void ApproxInter::initDebug() {
-    if(debugEnable) {
-        fp.open("debug.txt", std::fstream::out);
-    }
-}*/
+		void ApproxInter::RECO::init() {
+			//MEReadBER = 0.0;
+			//MEWriteBER = 0.0;
+			collectBufferSize = true;
+			tmpBool = false;
+		}
+
+		void ApproxInter::RECO::initDebug() {
+			if(debugEnable) {
+				fp.open("debug.txt", std::fstream::out);
+			}
+		}
+	#endif
+
+	#if APPROX_ORIG_BUFFER
+		//double ApproxInter::MEReadBER;
+		//double ApproxInter::MEWriteBER;
+
+		unsigned ApproxInter::ORIG::frameOrigBufferWidth, ApproxInter::ORIG::frameOrigBufferHeight;
+		//unsigned ApproxInter::xMargin, ApproxInter::yMargin;
+
+		bool ApproxInter::ORIG::collectBufferSize, ApproxInter::ORIG::tmpBool;
+
+		int ApproxInter::ORIG::debugEnable;
+
+		std::fstream ApproxInter::ORIG::fp;
+
+		void ApproxInter::ORIG::init() {
+			collectBufferSize = true;
+			tmpBool = false;
+		}
+
+		void ApproxInter::ORIG::initDebug() {
+			if(debugEnable) {
+				fp.open("debug.txt", std::fstream::out);
+			}
+		}
+	#endif
+#endif

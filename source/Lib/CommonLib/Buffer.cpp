@@ -1019,6 +1019,24 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area )
 
     bufs.push_back( PelBuf( topLeft, totalWidth, totalWidth, totalHeight ) );
     topLeft += area;
+
+
+	#if FELIPE_INSTRUMENTATION
+		#if APPROX_ORIG_BUFFER
+			// <Arthur> e <Felipe>
+    		// Atualiza nova variável com tamanho do buffer
+			if(ApproxInter::ORIG::tmpBool && compID == COMP_Y) {
+				ApproxInter::ORIG::frameOrigBufferWidth = totalWidth;
+				ApproxInter::ORIG::frameOrigBufferHeight = totalHeight;
+
+				ApproxInter::ORIG::collectBufferSize = false;
+				ApproxInter::ORIG::tmpBool = false; 
+
+				//std::cout << extWidth << " " << extHeight << " " << ApproxInter::frameBufferWidth << " " << ApproxInter::frameBufferHeight << " " << ApproxInter::xMargin << " " << ApproxInter::yMargin << std::endl;
+			}
+			// <Arthur/> </Felipe>
+		#endif
+	#endif
   }
 
   m_maxArea = UnitArea( _chromaFormat, _area );
@@ -1064,21 +1082,25 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area, c
     CHECK( !area, "Trying to create a buffer with zero area" );
 
 
-	// <Arthur> e <Felipe>
-      // Atualiza nova variável com tamanho do buffer
+	#if FELIPE_INSTRUMENTATION
+		#if APPROX_RECO_BUFFER
+		// <Arthur> e <Felipe>
+		// Atualiza nova variável com tamanho do buffer
 
-      /*if (ApproxInter::tmpBool && compID == COMP_Y) {
-        ApproxInter::frameBufferWidth = totalWidth;
-        ApproxInter::frameBufferHeight = totalHeight;
-        ApproxInter::xMargin = xmargin;
-        ApproxInter::yMargin = ymargin;
+		if (ApproxInter::RECO::tmpBool && compID == COMP_Y) {
+			ApproxInter::RECO::frameBufferWidth = totalWidth;
+			ApproxInter::RECO::frameBufferHeight = totalHeight;
+			ApproxInter::RECO::xMargin = xmargin;
+			ApproxInter::RECO::yMargin = ymargin;
 
-        ApproxInter::collectBufferSize = false;
-        ApproxInter::tmpBool = false; 
+			ApproxInter::RECO::collectBufferSize = false;
+			ApproxInter::RECO::tmpBool = false; 
 
-        //std::cout << extWidth << " " << extHeight << " " << ApproxInter::frameBufferWidth << " " << ApproxInter::frameBufferHeight << " " << ApproxInter::xMargin << " " << ApproxInter::yMargin << std::endl;
-      }*/
-    //<Arthur/> </Felipe>
+			//std::cout << extWidth << " " << extHeight << " " << ApproxInter::frameBufferWidth << " " << ApproxInter::frameBufferHeight << " " << ApproxInter::xMargin << " " << ApproxInter::yMargin << std::endl;
+		}
+		//<Arthur/> </Felipe>
+		#endif
+	#endif
 
     m_origin[i] = ( Pel* ) xMalloc( Pel, area );
     Pel* topLeft = m_origin[i] + totalWidth * ymargin + xmargin;

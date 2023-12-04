@@ -71,7 +71,14 @@ POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char* argv[])
 {
 	//<Felipe>
-	//ApproxInter::init();
+	#if FELIPE_INSTRUMENTATION 
+		#if APPROX_RECO_BUFFER
+			ApproxInter::RECO::init();
+		#endif
+		#if APPROX_ORIG_BUFFER
+			ApproxInter::ORIG::init();
+		#endif
+	#endif
 	//</Felipe>
 
   vvenc_set_logging_callback( nullptr, msgFnc ); // register global log callback ( deprecated, will be removed)

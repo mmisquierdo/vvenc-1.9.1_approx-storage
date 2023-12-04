@@ -59,10 +59,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "CommonLib/TimeProfiler.h"
 
 
-//<Felipe>
+//<Felipe && Matheus>
 #include "CommonLib/ApproxInter.h"
 #include "CommonLib/approx.h"
-//</Felipe>
+//</Felipe && Matheus>
 
 #include <math.h>
 
@@ -1948,7 +1948,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   //<Matheus>
   #if APPROX_ORIG_BUFFER
 	Pel const * const approxOrigBuffer = origBuf.Y().buf;
-	ApproxInter::InstrumentIfMarked((void*) approxOrigBuffer, 2, 1, sizeof(Pel));
+	ApproxInter::InstrumentIfMarked((void*) approxOrigBuffer, ApproxInter::ORIG_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
 	ApproxSS::start_level();
   #endif
   //</Matheus>
@@ -1989,7 +1989,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   //<Matheus>
   #if APPROX_RECO_BUFFER
 	Pel const * const approxRecoBuffer = buf.buf;
-	ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, 0, 1, sizeof(Pel));
+	ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
 	ApproxSS::start_level();
   #endif
   //</Matheus>
@@ -2021,37 +2021,43 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   predQuarter.changePrecision(MV_PRECISION_INTERNAL, MV_PRECISION_QUARTER);
   m_pcRdCost->setPredictor( predQuarter );
   m_pcRdCost->setCostScale(2);
-
-  //ORIGINAL BUFFER
-  // Felipe: calculate the beginBuffer and endBuffer limits for original samples buffer
-  /*const Pel *beginBuffer, *endBuffer;
   
-  //std::cout << "[DBG] " << cu.lx() << "x" << cu.ly() << std::endl;
+  #if FELIPE_INSTRUMENTATION
+	#if APPROX_RECO_BUFFER
+		//RECONSTRUCTION BUFFER
+		//<Felipe>
 
-  //beginBuffer = cStruct.pcPatternKey->buf - (cu.lx() + ApproxInter::frameOrigBufferWidth * cu.ly()); 
-  //endBuffer = beginBuffer + (ApproxInter::frameOrigBufferWidth * ApproxInter::frameOrigBufferHeight);
+		// Felipe: calculate the beginBuffer and endBuffer limits for reconstructed samples buffer
+		const Pel *approxRecoBufferBegin, *approxRecoBufferEnd;
 
-  beginBuffer = cStruct.pcPatternKey->buf;
-  endBuffer = beginBuffer + (cStruct.pcPatternKey->width * cStruct.pcPatternKey->height);
+		approxRecoBufferBegin = cStruct.piRefY - (ApproxInter::RECO::frameBufferWidth * ApproxInter::RECO::yMargin + ApproxInter::RECO::xMargin); 
+		approxRecoBufferEnd = approxRecoBufferBegin + (ApproxInter::RECO::frameBufferWidth * ApproxInter::RECO::frameBufferHeight);
 
-  // Felipe: starting approximation at original samples buffer at IME/FME  
-  add_approx((size_t) beginBuffer, (size_t) endBuffer);
-  start_level();*/
-  
-  //RECONSTRUCTION BUFFER
-  //<Felipe>
+		// Felipe: starting approximation at reconstructed samples buffer at IME/FME  
+		ApproxSS::add_approx((void*) approxRecoBufferBegin, (void*) approxRecoBufferEnd, ApproxInter::RECO_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
+		ApproxSS::start_level();
 
-  // Felipe: calculate the beginBuffer and endBuffer limits for reconstructed samples buffer
-  /*const Pel *beginBuffer, *endBuffer;
+		//</Felipe>
+  	#endif
 
-  beginBuffer = cStruct.piRefY - (ApproxInter::frameBufferWidth * ApproxInter::yMargin + ApproxInter::xMargin); 
-  endBuffer = beginBuffer + (ApproxInter::frameBufferWidth * ApproxInter::frameBufferHeight);
+	#if APPROX_ORIG_BUFFER
+		//ORIGINAL BUFFER
+		// Felipe: calculate the beginBuffer and endBuffer limits for original samples buffer
+		const Pel *approxOrigBufferBegin, *approxOrigBufferEnd;
+		
+		//std::cout << "[DBG] " << cu.lx() << "x" << cu.ly() << std::endl;
 
-  // Felipe: starting approximation at reconstructed samples buffer at IME/FME  
-  ApproxSS::add_approx((void*) beginBuffer, (void*) endBuffer, 0, 0, sizeof(Pel));
-  ApproxSS::start_level();*/
+		//beginBuffer = cStruct.pcPatternKey->buf - (cu.lx() + ApproxInter::frameOrigBufferWidth * cu.ly()); 
+		//endBuffer = beginBuffer + (ApproxInter::frameOrigBufferWidth * ApproxInter::frameOrigBufferHeight);
 
-  //</Felipe>
+		approxOrigBufferBegin = cStruct.pcPatternKey->buf;
+		approxOrigBufferEnd = approxOrigBufferBegin + (cStruct.pcPatternKey->width * cStruct.pcPatternKey->height);
+
+		// Felipe: starting approximation at original samples buffer at IME/FME  
+		ApproxSS::add_approx((void*) approxOrigBufferBegin, (void*) approxOrigBufferEnd, ApproxInter::ORIG_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
+		ApproxSS::start_level();
+	#endif
+  #endif
 
   //  Do integer search
   if( m_motionEstimationSearchMethod == VVENC_MESEARCH_FULL || bBi )
@@ -2157,22 +2163,28 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     xPatternSearchIntRefine( cu, cStruct, rcMv, rcMvPred, riMVPIdx, ruiBits, ruiCost, amvpInfo, fWeight);
   }
   DTRACE(g_trace_ctx, D_ME, "   MECost<L%d,%d>: %6d (%d)  MV:%d,%d\n", (int)refPicList, (int)bBi, ruiCost, ruiBits, rcMv.hor << 2, rcMv.ver << 2);
+  
+  #if FELIPE_INSTRUMENTATION
+	#if APPROX_RECO_BUFFER
+		//<Felipe>
+		// Felipe: ending approximation at reconstructed samples buffer at IME/FME
+		ApproxSS::end_level();
+		ApproxSS::remove_approx((void*) approxRecoBufferBegin, (void*) approxRecoBufferEnd);
+		//</Felipe>
+	#endif
 
-  //<Felipe>
-  // Felipe: ending approximation at reconstructed samples buffer at IME/FME
-  /*ApproxSS::end_level();
-  ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);*/
-  //</Felipe>
+	#if APPROX_ORIG_BUFFER
+		// Felipe: ending approximation at original samples buffer at IME/FME
+		ApproxSS::end_level();
+		ApproxSS::remove_approx((void*) approxOrigBufferBegin, (void*) approxOrigBufferEnd);
+	#endif
 
-  // Felipe: ending approximation at original samples buffer at IME/FME
-  /*end_level();
-  remove_approx((size_t) beginBuffer, (size_t) endBuffer);*/
-
-  //<Felipe>
-  // Felipe: ending approximation at filtered samples buffer at FME
-  //end_level();
-  //removeApproxFiltBuffer();
-  //</Felipe>
+	//<Felipe>
+	// Felipe: ending approximation at filtered samples buffer at FME
+	//end_level();
+	//removeApproxFiltBuffer();
+	//</Felipe>
+  #endif
 
   //<Matheus>
   #if APPROX_RECO_BUFFER
@@ -5407,7 +5419,7 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   //<Matheus>
   #if APPROX_RECO_BUFFER
 	Pel const * const approxRecoBuffer = refPic->getRecoBuf(COMP_Y).buf;
-	ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, 1, 1, sizeof(Pel));
+	ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_AFFINE_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
 	ApproxSS::start_level();
   #endif
   //</Matheus>
@@ -5475,16 +5487,19 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
     acMvTemp[2].roundAffinePrecInternal2Amvr(cu.imv);
   }
   
-  //<Felipe>
+  #if FELIPE_INSTRUMENTATION
+	#if APPROX_RECO_BUFFER
+		//<Felipe>
+		// Felipe: calculate the beginBuffer and endBuffer limits for reconstructed samples buffer
+		const Pel *approxRecoBufferBegin, *approxRecoBufferEnd;
+		approxRecoBufferBegin = refPic->getRecoBuf(COMP_Y).buf - (ApproxInter::RECO::frameBufferWidth * ApproxInter::RECO::yMargin + ApproxInter::RECO::xMargin); 
+		approxRecoBufferEnd = approxRecoBufferBegin + (ApproxInter::RECO::frameBufferWidth * ApproxInter::RECO::frameBufferHeight);
 
-  // Felipe: calculate the beginBuffer and endBuffer limits for reconstructed samples buffer
-  /*const Pel *beginBuffer, *endBuffer;
-  beginBuffer = refPic->getRecoBuf(COMP_Y).buf - (ApproxInter::frameBufferWidth * ApproxInter::yMargin + ApproxInter::xMargin); 
-  endBuffer = beginBuffer + (ApproxInter::frameBufferWidth * ApproxInter::frameBufferHeight);
-
-  // Felipe: starting of approxation to reconstructed samples buffer at AME  
-  ApproxSS::add_approx((void*) beginBuffer, (void*) endBuffer, 0, 0, sizeof(Pel));
-  ApproxSS::start_level();*/
+		// Felipe: starting of approxation to reconstructed samples buffer at AME  
+		ApproxSS::add_approx((void*) approxRecoBufferBegin, (void*) approxRecoBufferEnd, ApproxInter::RECO_AFFINE_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
+		ApproxSS::start_level();
+	#endif
+  #endif
 
    // Felipe: calculate the beginBuffer and endBuffer limits for original samples buffer
   /*const Pel *beginBuffer, *endBuffer;
@@ -5793,11 +5808,15 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   ruiCost = uiCostBest;
   DTRACE(g_trace_ctx, D_COMMON, " (%d) uiBitsBest=%d, uiCostBest=%d\n", DTRACE_GET_COUNTER(g_trace_ctx, D_COMMON), uiBitsBest, uiCostBest);
   
-  //<Felipe>
-  // Felipe: ending approximation at reconstructed samples buffer at IME/FME
-  /*ApproxSS::end_level();
-  ApproxSS::remove_approx((void*) beginBuffer, (void*) endBuffer);*/
-  //</Felipe>
+  #if FELIPE_INSTRUMENTATION
+	#if APPROX_RECO_BUFFER
+		//<Felipe>
+		// Felipe: ending approximation at reconstructed samples buffer at IME/FME
+		/*ApproxSS::end_level();
+		ApproxSS::remove_approx((void*) approxRecoBufferBegin, (void*) approxRecoBuffeEnd);*/
+		//</Felipe>
+	#endif
+  #endif
   
   //<Matheus>
   #if APPROX_RECO_BUFFER
