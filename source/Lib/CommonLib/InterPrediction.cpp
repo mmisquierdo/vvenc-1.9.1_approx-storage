@@ -58,10 +58,6 @@ POSSIBILITY OF SUCH DAMAGE.
 //! \ingroup CommonLib
 //! \{
 
-//<Felipe>
-//int extWidthFiltered, extHeightFiltered;
-//</Felipe>
-
 namespace vvenc {
 
 void addBDOFAvgCore(const Pel* src0, int src0Stride, const Pel* src1, int src1Stride, Pel* dst, int dstStride, const Pel* gradX0, const Pel* gradX1, const Pel* gradY0, const Pel*gradY1, int gradStride, int width, int height, int tmpx, int tmpy, unsigned shift, int offset, const ClpRng& clpRng)
@@ -637,21 +633,26 @@ void InterPredInterpolation::destroy()
     {
       for( uint32_t j = 0; j < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; j++ )
       {
-		//<Matheus>
-		#if APPROX_FILT_BUFFER_V1
-			ApproxInter::UninstrumentIfMarked((void*) m_filteredBlock[i][j][c]);
-		#endif
-		//</Matheus>
+
+        //<Matheus>
+        #if MATHEUS_INSTRUMENTATION
+          #if APPROX_FILT_BUFFER_V1
+            ApproxInter::UninstrumentIfMarked((void*) m_filteredBlock[i][j][c]);
+          #endif
+        #endif
+        //</Matheus>
 
         xFree( m_filteredBlock[i][j][c] );
         m_filteredBlock[i][j][c] = nullptr;
       }
 
-	  //<Matheus>
-	  #if APPROX_FILT_BUFFER_V1
-	    ApproxInter::UninstrumentIfMarked((void*) m_filteredBlockTmp[i][c]);
-	  #endif
-	  //</Matheus>
+      //<Matheus>
+      #if MATHEUS_INSTRUMENTATION
+        #if APPROX_FILT_BUFFER_V1
+          ApproxInter::UninstrumentIfMarked((void*) m_filteredBlockTmp[i][c]);
+        #endif
+      #endif
+      //</Matheus>
 
       xFree( m_filteredBlockTmp[i][c] );
       m_filteredBlockTmp[i][c] = nullptr;
@@ -678,33 +679,41 @@ void InterPredInterpolation::init()
     extWidth = extWidth > (MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 16) ? extWidth : MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 16;
     extHeight = extHeight > (MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 1) ? extHeight : MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 1;
 
-	//<Felipe>
-	// Felipe: saving filtered samples buffer dimensions
-    //extWidthFiltered = extWidth;
-    //extHeightFiltered = extHeight;
-	//</Felipe>
+    #if FELIPE_INSTRUMENTATION
+      #if APPROX_FILT_BUFFER_V1 || APPROX_FILT_BUFFER_V2
+      //<Felipe>
+      // Felipe: saving filtered samples buffer dimensions
+      ApproxInter::FILT::extWidthFiltered = extWidth;
+      ApproxInter::FILT::extHeightFiltered = extHeight;
+      //</Felipe>
+      #endif
+    #endif
 
     for( uint32_t i = 0; i < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; i++ )
     {
       m_filteredBlockTmp[i][c] = ( Pel* ) xMalloc( Pel, ( extWidth + 4 ) * ( extHeight + 7 + 4 ) );
       VALGRIND_MEMCLEAR( m_filteredBlockTmp[i][c], sizeof( Pel ) * (extWidth + 4) * (extHeight + 7 + 4) );
 
-	  //<Matheus>
-	  #if APPROX_FILT_BUFFER_V1
-	  	ApproxInter::InstrumentIfMarked((void*) m_filteredBlockTmp[i][c], 4, 1, sizeof(Pel));
-	  #endif
-	  //</Matheus>
+      //<Matheus>
+      #if MATHEUS_INSTRUMENTATION
+        #if APPROX_FILT_BUFFER_V1
+          ApproxInter::InstrumentIfMarked((void*) m_filteredBlockTmp[i][c], 4, 1, sizeof(Pel));
+        #endif
+      #endif
+      //</Matheus>
 
       for( uint32_t j = 0; j < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; j++ )
       {
         m_filteredBlock[i][j][c] = ( Pel* ) xMalloc( Pel, extWidth * extHeight );
         VALGRIND_MEMCLEAR( m_filteredBlock[i][j][c], sizeof( Pel ) * extWidth * extHeight );
 
-		//<Matheus>
-		#if APPROX_FILT_BUFFER_V1
-			ApproxInter::InstrumentIfMarked((void*) m_filteredBlock[i][j][c], 5, 1, sizeof(Pel));
-		#endif
-		//</Matheus>
+        //<Matheus>
+        #if MATHEUS_INSTRUMENTATION
+          #if APPROX_FILT_BUFFER_V1
+            ApproxInter::InstrumentIfMarked((void*) m_filteredBlock[i][j][c], 5, 1, sizeof(Pel));
+          #endif
+        #endif
+        //</Matheus>
       }
     }
   }

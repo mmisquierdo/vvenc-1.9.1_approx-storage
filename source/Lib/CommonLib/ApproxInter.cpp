@@ -93,4 +93,10 @@ void ApproxInter::UninstrumentIfMarked(void * const address, const bool giveAway
 			}
 		}
 	#endif
+
+	#if APPROX_FILT_BUFFER_V1 || APPROX_FILT_BUFFER_V2	
+		//<Felipe>
+			int ApproxInter::FILT::extWidthFiltered, ApproxInter::FILT::extHeightFiltered;
+		//</Felipe>
+	#endif
 #endif
