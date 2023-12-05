@@ -1992,8 +1992,8 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   #if MATHEUS_INSTRUMENTATION
     #if APPROX_RECO_BUFFER
       Pel const * const approxRecoBuffer = buf.buf;
-      ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
-      ApproxSS::start_level();
+      //ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
+      //ApproxSS::start_level();
     #endif
   #endif
   //</Matheus>
@@ -2110,8 +2110,24 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
       }
     }
 
+	#if MATHEUS_INSTRUMENTATION
+		#if APPROX_RECO_BUFFER
+			//Pel const * const approxRecoBuffer = buf.buf;
+			ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
+			ApproxSS::start_level();
+		#endif
+  	#endif
+
     xSetSearchRange( cu, bestInitMv, iSrchRng, cStruct.searchRange );
     xPatternSearch ( cStruct, rcMv, ruiCost);
+
+	#if MATHEUS_INSTRUMENTATION
+		#if APPROX_RECO_BUFFER
+			ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
+			ApproxSS::end_level();
+		#endif
+	#endif
+    //</Matheus>
   }
   else if( bQTBTMV )
   {
@@ -2200,10 +2216,10 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
 
   //<Matheus>
   #if MATHEUS_INSTRUMENTATION
-    #if APPROX_RECO_BUFFER
+    /*#if APPROX_RECO_BUFFER
       ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
       ApproxSS::end_level();
-    #endif
+    #endif*/
     //</Matheus>
 
     //<Matheus>

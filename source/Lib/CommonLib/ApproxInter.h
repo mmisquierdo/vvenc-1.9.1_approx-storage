@@ -7,7 +7,7 @@
 	#include "approx.h"
 
 
-	#define MATHEUS_INSTRUMENTATION false
+	#define MATHEUS_INSTRUMENTATION true
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && true)
 
 
