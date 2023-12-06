@@ -8,7 +8,7 @@
 
 
 	#define MATHEUS_INSTRUMENTATION true
-	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && true)
+	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
 
 	#define APPROX_RECO_BUFFER true
@@ -44,6 +44,13 @@
 			constexpr int64_t FILT_MOTION_ESTIMATION_TEMP_BID = 4;
 			constexpr int64_t FILT_MOTION_ESTIMATION_BID = 5;
 			constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION_BID = 6;
+
+			constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN_BID = 7;
+			constexpr int64_t RECO_MOTION_ESTIMATION_TZ_BID = 8;
+			constexpr int64_t RECO_MOTION_ESTIMATION_FAST_BID = 9;
+			constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL_BID = 10;
+
+
 
 
 			void MarkBuffer(const BufferRange& toMark);
