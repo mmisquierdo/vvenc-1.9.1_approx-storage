@@ -1083,7 +1083,7 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area, c
 
 
 	#if FELIPE_INSTRUMENTATION
-		#if APPROX_RECO_BUFFER
+		#if APPROX_RECO_BUFFER_INTER
 		// <Arthur> e <Felipe>
 		// Atualiza nova variável com tamanho do buffer
 

@@ -42,7 +42,7 @@ void ApproxInter::UninstrumentIfMarked(void * const address, const bool giveAway
 
 
 #if FELIPE_INSTRUMENTATION
-	#if APPROX_RECO_BUFFER
+	#if APPROX_RECO_BUFFER_INTER
 		//double ApproxInter::MEReadBER;
 		//double ApproxInter::MEWriteBER;
 

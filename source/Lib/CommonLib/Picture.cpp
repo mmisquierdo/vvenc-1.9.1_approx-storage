@@ -214,7 +214,7 @@ void Picture::create( ChromaFormat _chromaFormat, const Size& size, unsigned _ma
   margin            =  _margin;
 
   #if FELIPE_INSTRUMENTATION
-	#if APPROX_RECO_BUFFER
+	#if APPROX_RECO_BUFFER_INTER
 		//<Felipe>
 		if(ApproxInter::RECO::collectBufferSize) {
 			ApproxInter::RECO::tmpBool = true;

@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 {
 	//<Felipe>
 	#if FELIPE_INSTRUMENTATION 
-		#if APPROX_RECO_BUFFER
+		#if APPROX_RECO_BUFFER_INTER
 			ApproxInter::RECO::init();
 		#endif
 		#if APPROX_ORIG_BUFFER

@@ -11,7 +11,16 @@
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
 
-	#define APPROX_RECO_BUFFER true
+	#define APPROX_RECO_BUFFER_INTER false //ativa instrumentação em toda a ME (excluindo affine)
+
+	//TODO?: MVP prediction?
+	#define APPROX_RECO_BUFFER_INTER_PATTERN false 
+	#define APPROX_RECO_BUFFER_INTER_TZ true
+	#define APPROX_RECO_BUFFER_INTER_FAST false
+	#define APPROX_RECO_BUFFER_INTER_FRACTIONAL false
+	#define APPROX_RECO_BUFFER_INTER_AFFINE false
+
+
 	#define APPROX_ORIG_BUFFER false
 	#define APPROX_FILT_BUFFER_V1 false	//GENERALIST
 	#define APPROX_FILT_BUFFER_V2 false	//SPECIFIC
@@ -63,7 +72,7 @@
 
 
 		#if FELIPE_INSTRUMENTATION
-			#if APPROX_RECO_BUFFER
+			#if APPROX_RECO_BUFFER_INTER
 				namespace RECO { 
 					//public:
 					extern std::fstream fp;
