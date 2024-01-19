@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -60,8 +60,9 @@ namespace CS
 {
   UnitArea  getArea                    (const CodingStructure &cs, const UnitArea& area, const ChannelType chType, const TreeType treeType);
   bool      isDualITree                (const CodingStructure &cs);
-  void      setRefinedMotionFieldCTU   ( CodingStructure& cs, const int ctuX, const int ctuY );
+  void      setRefinedMotionFieldCTU   (      CodingStructure &cs, const int ctuX, const int ctuY );
   void      setRefinedMotionField      (      CodingStructure &cs);
+  int       signalModeCons             (const CodingStructure &cs, const UnitArea &currArea, const PartSplit split, const ModeType modeTypeParent);
 }
 
 
@@ -180,7 +181,9 @@ namespace CU
   void     getIBCMergeCandidates        (const CodingUnit& cu, MergeCtx& mrgCtx, const int& mrgCandIdx = -1);
   void     fillIBCMvpCand               (CodingUnit& cu, AMVPInfo& amvpInfo);
   void     getIbcMVPsEncOnly            (CodingUnit& cu, Mv* mvPred, int& nbPred);
-  bool     isMvInRangeFPP               (const CodingUnit &cu, const Mv& mv, const int fppLinesSynchro, const ComponentID compID = COMP_Y, const int mvPrecShift = MV_FRACTIONAL_BITS_INTERNAL );
+  //bool     isMvInRangeFPP               (const CodingUnit &cu, const Mv& mv, const int fppLinesSynchro, const ComponentID compID = COMP_Y, const int mvPrecShift = MV_FRACTIONAL_BITS_INTERNAL );
+  bool     isMvInRangeFPP               (const int yB, const int nH, const int yMv, const int fppLinesSynchro, const PreCalcValues& pcv, const int yCompScale = 0, const int mvPrecShift = MV_FRACTIONAL_BITS_INTERNAL);
+  bool     isMotionBufInRangeFPP        (const CodingUnit& cu, const int fppLinesSynchro);
 }
 
 // TU tools

@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -134,24 +134,6 @@ void CodingStructure::releaseIntermediateData()
 {
   clearTUs();
   clearCUs();
-}
-
-const int CodingStructure::signalModeCons( const PartSplit split, Partitioner &partitioner, const ModeType modeTypeParent ) const
-{
-  if (CS::isDualITree(*this) || modeTypeParent != MODE_TYPE_ALL || partitioner.currArea().chromaFormat == CHROMA_444 || partitioner.currArea().chromaFormat == CHROMA_400 )
-    return LDT_MODE_TYPE_INHERIT;
-  int minLumaArea = partitioner.currArea().lumaSize().area();
-  if (split == CU_QUAD_SPLIT || split == CU_TRIH_SPLIT || split == CU_TRIV_SPLIT) // the area is split into 3 or 4 parts
-  {
-    minLumaArea = minLumaArea >> 2;
-  }
-  else if (split == CU_VERT_SPLIT || split == CU_HORZ_SPLIT) // the area is split into 2 parts
-  {
-    minLumaArea = minLumaArea >> 1;
-  }
-  int minChromaBlock = minLumaArea >> (getChannelTypeScaleX(CH_C, partitioner.currArea().chromaFormat) + getChannelTypeScaleY(CH_C, partitioner.currArea().chromaFormat));
-  bool is2xNChroma = (partitioner.currArea().chromaSize().width == 4 && split == CU_VERT_SPLIT) || (partitioner.currArea().chromaSize().width == 8 && split == CU_TRIV_SPLIT);
-  return minChromaBlock >= 16 && !is2xNChroma ? LDT_MODE_TYPE_INHERIT : ((minLumaArea < 32) || slice->isIntra()) ? LDT_MODE_TYPE_INFER : LDT_MODE_TYPE_SIGNAL;
 }
 
 CodingUnit* CodingStructure::getLumaCU( const Position& pos )
@@ -618,6 +600,8 @@ void CodingStructure::destroyTempBuffers()
 
   // swap the contents of the vector so that memory released
   std::vector<Mv>().swap( m_dmvrMvCache );
+  std::vector<CodingUnit*>().swap( cus );
+  std::vector<TransformUnit*>().swap( tus );
 }
 
 void CodingStructure::addMiToLut( static_vector<HPMVInfo, MAX_NUM_HMVP_CANDS>& lut, const HPMVInfo& mi )

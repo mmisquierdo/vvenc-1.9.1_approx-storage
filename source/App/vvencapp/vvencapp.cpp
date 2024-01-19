@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -357,7 +357,7 @@ int main( int argc, char* argv[] )
     int64_t framesToEncode = (vvenccfg.m_framesToBeEncoded == 0 || vvenccfg.m_framesToBeEncoded >= frameCount) ? frameCount : vvenccfg.m_framesToBeEncoded;
 
     apputils::Stats cStats;
-    cStats.init( vvenccfg.m_FrameRate, vvenccfg.m_FrameScale, (int)framesToEncode, "vvenc [info]: " );
+    cStats.init( vvenccfg.m_FrameRate, vvenccfg.m_FrameScale, (int)framesToEncode, vvenccfg.m_verbosity, "vvenc [info]: " );
     bool statsInfoReady = false;
 
     while( !bEof || !bEncodeDone )
@@ -404,6 +404,7 @@ int main( int argc, char* argv[] )
           if( statsInfoReady )
           {
             msgApp( nullptr, VVENC_INFO, cStats.getInfoString().c_str() );
+            fflush( stdout );
           }
         }
 
@@ -411,6 +412,14 @@ int main( int argc, char* argv[] )
         {
           // write output
           cOutBitstream.write( (const char*)AU.payload, AU.payloadUsedSize );
+          if( cOutBitstream.fail() )
+          {
+            msgApp( nullptr, VVENC_ERROR, "\nvvencapp [error]: write bitstream file failed (disk full?)\n");
+            vvenc_YUVBuffer_free_buffer( &cYUVInputBuffer );
+            vvenc_accessUnit_free_payload( &AU );
+            vvenc_encoder_close( enc );
+            return VVENC_ERR_UNSPECIFIED;
+          }
         }
         uiFrames++;
       }
@@ -426,6 +435,7 @@ int main( int argc, char* argv[] )
     if( vvencappCfg.m_printStats )
     {
       msgApp( nullptr, VVENC_INFO, cStats.getFinalStats().c_str() );
+      fflush( stdout );
     }
   }
 

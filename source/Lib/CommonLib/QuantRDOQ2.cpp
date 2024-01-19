@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -584,7 +584,7 @@ int QuantRDOQ2::xRateDistOptQuantFast( TransformUnit &tu, const ComponentID &com
 
   const bool scanFirstBlk = !bUseScalingList && log2CGSize == 4 && cctx.log2CGWidth() == 2;
 #if ENABLE_SIMD_OPT_QUANT && defined( TARGET_SIMD_X86 )
-  const bool isSimd       = read_x86_extension_flags() > SCALAR;
+  const bool isSimd       = read_x86_extension_flags() > x86_simd::SCALAR;
 #endif
 
   int subSetId = iScanPos >> log2CGSize;

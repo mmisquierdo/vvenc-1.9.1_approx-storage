@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -56,6 +56,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 namespace vvenc {
 
+using namespace x86_simd;
+
 // forward declaration
 class Mv;
 
@@ -99,7 +101,7 @@ protected:
 protected:
   void xWeightedAverage       ( const CodingUnit& cu, const CPelUnitBuf& pcYuvSrc0, const CPelUnitBuf& pcYuvSrc1, PelUnitBuf& pcYuvDst, const bool bdofApplied, PelUnitBuf *yuvPredTmp = NULL );
   void xPredAffineBlk         ( const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv* _mv, PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng, const RefPicList refPicList = REF_PIC_LIST_X);
-  void xPredInterBlk          ( const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv& _mv, PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng
+  void xPredInterBlk( const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv& _mv, PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng
                               , const bool bdofApplied
                               , const bool isIBC
                               , const RefPicList refPicList = REF_PIC_LIST_X
@@ -120,6 +122,7 @@ public:
                             PelUnitBuf &predDst, PelUnitBuf &predSrc0, PelUnitBuf &predSrc1);
 
   static bool isSubblockVectorSpreadOverLimit(int a, int b, int c, int d, int predType);
+  bool xIsAffineMvInRangeFPP (const CodingUnit& cu, const Mv* _mv, const int fppLinesSynchro, const int mvPrecShift = MV_FRACTIONAL_BITS_INTERNAL);
 };
 
 class DMVR : public InterPredInterpolation

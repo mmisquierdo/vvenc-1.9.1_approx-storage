@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -141,14 +141,6 @@ void CacheBlkInfoCtrl::init( const Slice &slice )
   m_pcv = slice.pps->pcv;
 }
 
-CodedCUInfo& CacheBlkInfoCtrl::getBlkInfo( const UnitArea& area )
-{
-  unsigned idx1, idx2, idx3, idx4;
-  getAreaIdxNew( area.Y(), *m_pcv, idx1, idx2, idx3, idx4 );
-//  DTRACE( g_trace_ctx, D_TMP, "%d loc %d %d %d %d\n", g_trace_ctx->getChannelCounter(D_TMP), idx1, idx2, idx3, idx4);
-  return *m_codedCUInfo[idx1][idx2][idx3][idx4];
-}
-
 void CacheBlkInfoCtrl::initBlk( const UnitArea& area, int poc )
 {
   unsigned idx1, idx2, idx3, idx4;
@@ -166,6 +158,14 @@ void CacheBlkInfoCtrl::initBlk( const UnitArea& area, int poc )
     cuInfo->poc       = poc;
     cuInfo->ctuRsAddr = ctuRsAddr;
   }
+}
+
+CodedCUInfo& CacheBlkInfoCtrl::getBlkInfo( const UnitArea& area )
+{
+  unsigned idx1, idx2, idx3, idx4;
+  getAreaIdxNew( area.Y(), *m_pcv, idx1, idx2, idx3, idx4 );
+//  DTRACE( g_trace_ctx, D_TMP, "%d loc %d %d %d %d\n", g_trace_ctx->getChannelCounter(D_TMP), idx1, idx2, idx3, idx4);
+  return *m_codedCUInfo[idx1][idx2][idx3][idx4];
 }
 
 void CodedCUInfo::setMv( const RefPicList refPicList, const int iRefIdx, const Mv& rMv )
@@ -948,7 +948,7 @@ bool EncModeCtrl::tryMode( const EncTestMode& encTestmode, const CodingStructure
     // also isXXAvailable in IntraPrediction.cpp need to be fixed to check availability within the same CU without isDecomp
     if (m_pcEncCfg->m_FastInferMerge && !slice.isIntra() && !slice.isIRAP() && !(cs.area.lwidth() == 4 && cs.area.lheight() == 4) && !partitioner.isConsIntra())
     {
-      if ((bestCS->slice->TLayer > (m_pcEncCfg->m_maxTLayer - (m_pcEncCfg->m_FastInferMerge & 7)))
+      if (bestCS && (bestCS->slice->TLayer > (m_pcEncCfg->m_maxTLayer - (m_pcEncCfg->m_FastInferMerge & 7)))
         && (bestCS->bestParent != nullptr) && bestCS->bestParent->cus.size() && (bestCS->bestParent->cus[0]->skip))
       {
         return false;
@@ -1017,7 +1017,6 @@ bool EncModeCtrl::tryMode( const EncTestMode& encTestmode, const CodingStructure
       }
       if (relatedCU.isIntra)
       {
-        cuECtx.bestIntraMode = relatedCU.bestIntraMode;
         cuECtx.isIntra = relatedCU.isIntra;
       }
     }
@@ -1135,10 +1134,6 @@ void EncModeCtrl::beforeSplit( Partitioner& partitioner )
     relatedCU.isIntra     = true;
     if (m_pcEncCfg->m_FastIntraTools)
     {
-      if (cuECtx.bestCS->cost < relatedCU.bestCost)
-      {
-        relatedCU.bestIntraMode = cuECtx.bestIntraMode;
-      }
       if ( cuECtx.intraWasTested && (!relatedCU.relatedCuIsValid || cuECtx.bestCS->cost < relatedCU.bestCost))
       {
         relatedCU.bestCost = cuECtx.bestCS->cost;

@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -501,6 +501,10 @@ static constexpr uint8_t MAX_TMP_BUFS = 6;
 
 static constexpr int QPA_MAX_NOISE_LEVELS = 8;
 
+static constexpr int FPPLS_ALF_DERIVE_LINES   = 1; ///< number of CTU lines for ALF filter derivation
+static constexpr int FPPLS_CCALF_DERIVE_LINES = 1; ///< number of CTU lines for CCALF filter derivation
+
+
 // ====================================================================================================================
 // Macro functions
 // ====================================================================================================================
@@ -578,9 +582,11 @@ inline std::string prnt( const char* fmt, ...)
 
 #if ( _WIN32 && ( _MSC_VER > 1300 ) ) || defined (__MINGW64_VERSION_MAJOR)
 #define xMalloc( type, len )        _aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
+#define xMalloc2( type, len, alg )  _aligned_malloc( sizeof(type)*(len), alg )
 #define xFree( ptr )                _aligned_free  ( ptr )
 #elif defined (__MINGW32__)
 #define xMalloc( type, len )        __mingw_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
+#define xMalloc2( type, len, alg )  __mingw_aligned_malloc( sizeof(type)*(len), alg )
 #define xFree( ptr )                __mingw_aligned_free( ptr )
 #else
 namespace detail {
@@ -595,11 +601,13 @@ static inline T* aligned_malloc(size_t len, size_t alignement) {
 }
 }
 #define xMalloc( type, len )        detail::aligned_malloc<type>( len, MEMORY_ALIGN_DEF_SIZE )
+#define xMalloc2( type, len, alg )  detail::aligned_malloc<type>( len, alg )
 #define xFree( ptr )                free( ptr )
 #endif
 
 #else
 #define xMalloc( type, len )        malloc   ( sizeof(type)*(len) )
+#define xMalloc2( type, len, alg )  malloc   ( sizeof(type)*(len) )
 #define xFree( ptr )                free     ( ptr )
 #endif //#if ALIGNED_MALLOC
 
@@ -632,22 +640,6 @@ static inline T* aligned_malloc(size_t len, size_t alignement) {
 #    define ALWAYS_INLINE
 #endif
 
-#ifdef TARGET_SIMD_X86
-typedef enum
-{
-  UNDEFINED = -1,
-  SCALAR = 0,
-  SSE41,
-  SSE42,
-  AVX,
-  AVX2,
-  AVX512
-} X86_VEXT;
-#endif
-
-template <typename ValueType> inline ValueType leftShiftU  (const ValueType value, const unsigned shift) { return value << shift; }
-template <typename ValueType> inline ValueType rightShiftU (const ValueType value, const unsigned shift) { return value >> shift; }
-
 #if defined( _WIN32 ) && defined( TARGET_SIMD_X86 )
 static inline unsigned int bit_scan_reverse( int a )
 {
@@ -669,6 +661,59 @@ static inline unsigned int bit_scan_reverse( int a )
 #endif
 
 #if ENABLE_SIMD_LOG2
+static inline int getLog2( int val )
+{
+  return bit_scan_reverse( val );
+}
+#else
+extern int8_t g_aucLog2[MAX_CU_SIZE + 1];
+static inline int getLog2( int val )
+{
+  CHECKD( g_aucLog2[2] != 1, "g_aucLog2[] has not been initialized yet." );
+  if( val > 0 && val < (int) sizeof( g_aucLog2 ) )
+  {
+    return g_aucLog2[val];
+  }
+  return std::log2( val );
+}
+#endif
+
+#if ENABLE_SIMD_OPT
+
+namespace x86_simd
+{
+#ifdef TARGET_SIMD_X86
+  typedef enum
+  {
+    UNDEFINED = -1,
+    SCALAR = 0,
+    SSE41,
+    SSE42,
+    AVX,
+    AVX2,
+    AVX512
+  } X86_VEXT;
+#endif
+}
+
+namespace arm_simd
+{
+#ifdef TARGET_SIMD_ARM
+  typedef enum
+  {
+    UNDEFINED = -1,
+    SCALAR    = 0,
+    NEON,
+  } ARM_VEXT;
+#endif   // TARGET_SIMD_ARM
+}   // namespace arm_simd
+
+#endif //ENABLE_SIMD_OPT
+
+template <typename ValueType> inline ValueType leftShiftU  (const ValueType value, const unsigned shift) { return value << shift; }
+template <typename ValueType> inline ValueType rightShiftU (const ValueType value, const unsigned shift) { return value >> shift; }
+
+#if ENABLE_SIMD_LOG2 && defined( TARGET_SIMD_X86 )
 static inline int floorLog2( int val )
 {
   CHECKD(val == 0, "invalid input value");

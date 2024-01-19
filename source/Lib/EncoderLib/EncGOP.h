@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -150,6 +150,7 @@ private:
   std::deque<PicApsGlobal*> m_globalApsList;
 
   std::vector<int>          m_globalCtuQpVector;
+  bool                      m_forceSCC;
 
 public:
   EncGOP( MsgLog& msglog );
@@ -190,6 +191,7 @@ private:
   void xSetupPicAps                   ( Picture* pic );
   void xInitPicsInCodingOrder         ( const PicList& picList );
   void xGetProcessingLists            ( std::list<Picture*>& procList, std::list<Picture*>& rcUpdateList, const bool lockStepMode );
+  void xInitGopQpCascade              ( Picture& keyPic, const PicList& picList );
   void xInitFirstSlice                ( Picture& pic, const PicList& picList, bool isEncodeLtRef );
   void xInitSliceTMVPFlag             ( PicHeader* picHeader, const Slice* slice );
   void xUpdateRPRtmvp                 ( PicHeader* picHeader, Slice* slice );
@@ -223,6 +225,8 @@ private:
     std::lock_guard<std::mutex> lock( m_gopEncMutex );
     return ( int ) m_freePicEncoderList.size() >= std::max(1, m_pcEncCfg->m_maxParallelFrames); 
   }
+  void xForceScc                      ( Picture& pic );
+
 };// END CLASS DEFINITION EncGOP
 
 } // namespace vvenc

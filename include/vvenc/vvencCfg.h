@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -80,7 +80,7 @@ typedef void (*vvencLoggingCallback)(void*, int, const char*, va_list);
 #define VVENC_MAX_TLAYER                      7      // Explicit temporal layer QP offset - max number of temporal layer
 #define VVENC_MAX_NUM_CQP_MAPPING_TABLES      3      // Maximum number of chroma QP mapping tables (Cb, Cr and joint Cb-Cr)
 #define VVENC_MAX_NUM_ALF_ALTERNATIVES_CHROMA 8
-#define VVENC_MCTF_RANGE                      4      // max number of frames used for MCTF filtering in forward / backward direction
+#define VVENC_MCTF_RANGE                      6      // max number of frames used for MCTF filtering in forward / backward direction
 #define VVENC_MAX_NUM_COMP                    3      // max number of components
 #define VVENC_MAX_QP_VALS_CHROMA              8      // max number qp vals in array
 #define VVENC_MAX_MCTF_FRAMES                 16
@@ -196,7 +196,7 @@ typedef enum
   VVENC_DRT_CRA                = 1,
   VVENC_DRT_IDR                = 2,
   VVENC_DRT_RECOVERY_POINT_SEI = 3,
-  VVENC_DRT_IDR2               = 4,
+  VVENC_DRT_IDR2               = 4,             //deprecated
   VVENC_DRT_CRA_CRE            = 5,             //constrained RASL encoding
 }vvencDecodingRefreshType;
 
@@ -759,7 +759,8 @@ typedef struct vvenc_config
   int                 m_explicitAPSid;
 
   bool                m_picReordering;
-  bool                m_reservedFlag[2];
+  bool                m_reservedFlag;
+  bool                m_poc0idr;
   int8_t              m_fppLinesSynchro;
   bool                m_blockImportanceMapping;
   bool                m_saoScc;
@@ -768,8 +769,12 @@ typedef struct vvenc_config
   int8_t              m_sliceTypeAdapt;                                                  // enable slice type adaptation (STA)
   bool                m_treatAsSubPic;
 
-  int                 m_RCMaxBitrate;                                                    // maximum bitrate in bps (default: 0 (RC disabled or least constrained VBR))
-  int                 m_reservedInt;
+#define VVENC_SET_MAXRATE_FACTOR(f) (-((int)(f*16+0.5)))
+  int                 m_RCMaxBitrate;                                                    // maximum bitrate in bps (default: 0 (RC disabled or least constrained VBR),
+                                                                                         // if negative, the absolute value is interpreted as a 4-bit fixed point multiplier of the target bitrate).
+                                                                                         // -24, i.e. -1.1000 binary, means the maxrate would be set to be the 1.5x of the target bitrate.
+                                                                                         // for convenience use VVENC_SET_MAXRATE_FACTOR, e.g. VVENC_SET_MAXRATE_FACTOR(1.5), to set the multiplier
+  int                 m_forceScc;
   double              m_reservedDouble[9];
 
   // internal state variables

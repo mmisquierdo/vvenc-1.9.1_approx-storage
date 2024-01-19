@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -57,6 +57,8 @@ POSSIBILITY OF SUCH DAMAGE.
 //! \{
 
 namespace vvenc {
+
+using namespace x86_simd;
 
 typedef void FwdTrans(const TCoeff*, TCoeff*, int, int, int, int);
 typedef void InvTrans(const TCoeff*, TCoeff*, int, int, int, int, const TCoeff, const TCoeff);
