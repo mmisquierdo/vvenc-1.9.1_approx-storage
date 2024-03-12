@@ -71,6 +71,8 @@ namespace vvenc {
 
 #define FIX_FOR_TEMPORARY_COMPILER_ISSUES_ENABLED         1 // Some compilers fail on particular code fragments, remove this when the compiler is fixed (or new version is used)
 
+#define IFP_RC_DETERMINISTIC                              0 // Enables Rate Control deterministic behavior (same results) when using IFP
+
 // ====================================================================================================================
 // General settings
 // ====================================================================================================================
@@ -147,7 +149,7 @@ namespace vvenc {
 
 
 #if defined( TARGET_SIMD_X86 ) && !defined( REAL_TARGET_X86 )
-#  define SIMD_EVERYWHERE_EXTENSION_LEVEL                 AVX2
+#  define SIMD_EVERYWHERE_EXTENSION_LEVEL                 SSE41
 #endif
 
 // End of SIMD optimizations

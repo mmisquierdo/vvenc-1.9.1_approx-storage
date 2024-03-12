@@ -38,7 +38,8 @@ function( check_missing_intrinsics )
   _check_intrinsic( _mm_storeu_si64      "${FLAG_msse41}" "int64_t a = 0; _mm_storeu_si64( &a, _mm_setzero_si128() );"                )
   _check_intrinsic( _mm_loadu_si32       "${FLAG_msse41}" "int32_t a = 0; __m128i x = _mm_loadu_si32( &a );"                          )
   _check_intrinsic( _mm_loadu_si64       "${FLAG_msse41}" "int64_t a = 0; __m128i x = _mm_loadu_si64( &a );"                          )
-  _check_intrinsic( _mm_cvtsi128_si64    "${FLAG_msse41}" "int64_t a = 0; a = _mm_cvtsi128_si64( _mm_setzero_si128() );"              ) 
+  _check_intrinsic( _mm_cvtsi128_si64    "${FLAG_msse41}" "int64_t a = 0; a = _mm_cvtsi128_si64( _mm_setzero_si128() );"              )
+  _check_intrinsic( _mm_cvtsi64_si128    "${FLAG_msse41}" "int64_t a = 0; __m128i x = _mm_cvtsi64_si128( a );"                        )  
   _check_intrinsic( _mm_extract_epi64    "${FLAG_msse41}" "int64_t a = 0; a = _mm_extract_epi64( _mm_setzero_si128(), 0 );"           )
 
   # AVX
@@ -80,5 +81,23 @@ function( _emscripten_enable_wasm_simd128 )
     # this is only used by try_compile(), check_c_compiler_flag(), and related functions,
     # but not by the actual build.
     set( CMAKE_REQUIRED_FLAGS -msimd128 PARENT_SCOPE )
+  endif()
+endfunction()
+
+function( check_problematic_compiler output_var compiler_id first_bad_version first_fixed_version )
+  if( CMAKE_CXX_COMPILER_ID STREQUAL "${compiler_id}"
+      AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "${first_bad_version}"
+      AND (
+        NOT "${first_fixed_version}"
+        OR CMAKE_CXX_COMPILER_VERSION VERSION_LESS "${first_fixed_version}" ) )
+
+    set( ${output_var} TRUE PARENT_SCOPE )
+
+    if( "${first_fixed_version}" )
+      set( ${output_var}_VERSION_RANGE "(${first_bad_version}...${first_fixed_version}]" PARENT_SCOPE )
+    else()
+      set( ${output_var}_VERSION_RANGE "(${first_bad_version}...)"                       PARENT_SCOPE )
+    endif()
+
   endif()
 endfunction()
