@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -524,9 +524,11 @@ private:
                                     const bool            bFastSettings = false
                                   );
 
-  void xClipMvSearch              ( Mv& rcMv, const Position& pos, const struct Size& size, const PreCalcValues& pcv, const int fppLinesSynchro );
+  void xClipMvSearch              ( Mv& rcMv, const Position& pos, const struct Size& size, const PreCalcValues& pcv, const int ifpLines );
 
-  void xSetSearchRange            ( const CodingUnit&     cu,
+  void xClipMvToFppLine           ( Mv& mv, const int yB, const int nH, const int ifpLines, const PreCalcValues& pcv );
+  void xCheckAndClipMvToFppLine   ( Mv& mv, const int yB, const int nH, const int ifpLines, const PreCalcValues& pcv );
+  void xSetSearchRange            ( const CodingUnit& cu,
                                     const Mv&             cMvPred,
                                     const int             iSrchRng,
                                     SearchRange&          sr                                  
@@ -592,7 +594,7 @@ private:
                                    bool                  bBi = false
                                  );
 
-  void        xEstimateAffineAMVP     ( CodingUnit& cu, AffineAMVPInfo& affineAMVPInfo, CPelUnitBuf& origBuf, RefPicList refPicList, int iRefIdx, Mv acMvPred[3], Distortion& distBiP);
+  bool        xEstimateAffineAMVP     ( CodingUnit& cu, AffineAMVPInfo& affineAMVPInfo, CPelUnitBuf& origBuf, RefPicList refPicList, int iRefIdx, Mv acMvPred[3], Distortion& distBiP);
 
   Distortion  xGetAffineTemplateCost  ( CodingUnit& cu, CPelUnitBuf& origBuf, PelUnitBuf& predBuf, Mv acMvCand[3], int iMVPIdx, int iMVPNum, RefPicList refPicList, int iRefIdx);
   void        xCopyAffineAMVPInfo     ( AffineAMVPInfo& src, AffineAMVPInfo& dst );

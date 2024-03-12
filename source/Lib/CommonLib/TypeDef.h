@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -70,6 +70,8 @@ namespace vvenc {
 #define JVET_M0497_MATRIX_MULT                            1 // 0: Fast method; 1: Matrix multiplication
 
 #define FIX_FOR_TEMPORARY_COMPILER_ISSUES_ENABLED         1 // Some compilers fail on particular code fragments, remove this when the compiler is fixed (or new version is used)
+
+#define IFP_RC_DETERMINISTIC                              0 // Enables Rate Control deterministic behavior (same results) when using IFP
 
 // ====================================================================================================================
 // General settings
@@ -147,7 +149,7 @@ namespace vvenc {
 
 
 #if defined( TARGET_SIMD_X86 ) && !defined( REAL_TARGET_X86 )
-#  define SIMD_EVERYWHERE_EXTENSION_LEVEL                 SSE42
+#  define SIMD_EVERYWHERE_EXTENSION_LEVEL                 SSE41
 #endif
 
 // End of SIMD optimizations
@@ -832,20 +834,6 @@ public:
     }
 
     return ret;
-  }
-
-  void defragment()
-  {
-    m_cache.clear();
-  
-    for( T* chunk : m_cacheChunks )
-    {
-      for( ptrdiff_t p = 0; p < DYN_CACHE_CHUNK_SIZE; p++ )
-      {
-        //m_cache.push_back( &chunk[DYN_CACHE_CHUNK_SIZE - p - 1] );
-        m_cache.push_back( &chunk[p] );
-      }
-    }
   }
 
   void cache( T* el )

@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -56,6 +56,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "EncStage.h"
 #include "PreProcess.h"
 #include "EncGOP.h"
+#include "CommonLib/x86/CommonDefX86.h"
 
 //! \ingroup EncoderLib
 //! \{
@@ -111,6 +112,13 @@ void EncLib::initEncoderLib( const vvenc_config& encCfg )
   // copy config parameter
   const_cast<VVEncCfg&>(m_encCfg) = encCfg;
 
+#if defined( REAL_TARGET_X86 ) && defined( _MSC_VER ) && _MSC_VER >= 1938 && _MSC_VER < 1939
+  if( read_x86_extension_flags() >= x86_simd::AVX2 )
+  {
+    msg.log( VVENC_WARNING, "WARNING: MSVC version 17.8 produces invalid AVX2 code, partially disabling AVX2!\n" );
+  }
+
+#endif
   // setup modified configs for rate control
   if( m_encCfg.m_RCNumPasses > 1 || m_encCfg.m_LookAhead )
   {
@@ -131,10 +139,11 @@ void EncLib::initEncoderLib( const vvenc_config& encCfg )
 #endif
 
 #if ENABLE_TIME_PROFILING
-  if( g_timeProfiler == nullptr )
+  if( g_timeProfiler )
   {
-    g_timeProfiler = timeProfilerCreate( encCfg );
+    delete g_timeProfiler;
   }
+  g_timeProfiler = timeProfilerCreate( encCfg );
 #endif
 }
 
@@ -166,12 +175,17 @@ void EncLib::uninitEncoderLib()
 
 #if ENABLE_TIME_PROFILING
 #if ENABLE_TIME_PROFILING_MT_MODE
-  for( auto& p : m_threadPool->getProfilers() )
+  if( m_threadPool )
   {
-    *g_timeProfiler += *p;
+    for(auto& p : m_threadPool->getProfilers())
+    {
+      *g_timeProfiler += *p;
+    }
   }
 #endif
   timeProfilerResults( g_timeProfiler );
+  delete g_timeProfiler;
+  g_timeProfiler = nullptr;
 #endif
   xUninitLib();
 }
@@ -423,7 +437,7 @@ void EncLib::encodePicture( bool flush, const vvencYUVBuffer* yuvInBuf, AccessUn
       }
     }
 
-    PROFILER_EXT_UPDATE( g_timeProfiler, P_TOP_LEVEL, pic->TLayer );
+    PROFILER_EXT_UPDATE( g_timeProfiler, P_TOP_LEVEL, 0 );
 
     // trigger stages
     isQueueEmpty = m_picsRcvd > 0 || ( m_picsRcvd <= 0 && flush );

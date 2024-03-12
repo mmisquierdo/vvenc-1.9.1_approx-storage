@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -64,9 +64,10 @@ public:
   GOPEntry         m_gopEntry;
   bool             m_isSccWeak;
   bool             m_isSccStrong;
+  bool             m_forceSCC;
   uint16_t         m_picVisActTL0;
   uint16_t         m_picVisActY;
-  uint16_t         m_picSpVisAct;
+  uint16_t         m_picSpVisAct[MAX_NUM_CH];
   int              m_picMemorySTA;
   uint16_t         m_picMotEstError;
   uint8_t          m_minNoiseLevels[QPA_MAX_NOISE_LEVELS];
@@ -88,9 +89,9 @@ public:
   PicShared()
   : m_isSccWeak     ( false )
   , m_isSccStrong   ( false )
+  , m_forceSCC      ( false )
   , m_picVisActTL0  ( 0 )
   , m_picVisActY    ( 0 )
-  , m_picSpVisAct   ( 0 )
   , m_picMemorySTA  ( 0 )
   , m_picMotEstError( 0 )
   , m_picAuxQpOffset( 0 )
@@ -104,6 +105,7 @@ public:
   {
     std::fill_n( m_prevShared, NUM_QPA_PREV_FRAMES, nullptr );
     std::fill_n( m_minNoiseLevels, QPA_MAX_NOISE_LEVELS, 255u );
+    m_picSpVisAct[CH_L] = m_picSpVisAct[CH_C] = 0;
     m_gopEntry.setDefaultGOPEntry();
   };
 
@@ -137,9 +139,9 @@ public:
 
     m_isSccWeak    = false;
     m_isSccStrong  = false;
+    m_forceSCC     = false;
     m_picVisActTL0 = 0;
     m_picVisActY   = 0;
-    m_picSpVisAct  = 0;
     m_picMemorySTA = 0;
     m_cts          = yuvInBuf->cts;
     m_poc          = poc;
@@ -152,6 +154,7 @@ public:
     m_picAuxQpOffset = 0;
     std::fill_n( m_prevShared, NUM_QPA_PREV_FRAMES, nullptr );
     std::fill_n( m_minNoiseLevels, QPA_MAX_NOISE_LEVELS, 255u );
+    m_picSpVisAct[CH_L] = m_picSpVisAct[CH_C] = 0;
     m_gopEntry.setDefaultGOPEntry();
   }
 
@@ -164,7 +167,7 @@ public:
     pic->isSccStrong    = m_isSccStrong;
     pic->picVisActTL0   = m_picVisActTL0;
     pic->picVisActY     = m_picVisActY;
-    pic->picSpVisAct    = m_picSpVisAct;
+    pic->picSpVisAct    = m_picSpVisAct[CH_L];
     pic->picMemorySTA   = m_picMemorySTA;
     pic->poc            = m_poc;
     pic->cts            = m_cts;

@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -53,6 +53,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <atomic>
 
 namespace vvenc {
+
+using namespace x86_simd;
 
 class NoMallocThreadPool;
 
@@ -112,7 +114,6 @@ struct TemporalFilterSourcePicInfo
   Array2D<MotionVector> mvs;
   int                   index;
 };
-
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
@@ -159,7 +160,7 @@ private:
   static const int      m_padding;
   static const int16_t  m_interpolationFilter4[16][4];
   static const int16_t  m_interpolationFilter8[16][8];
-  static const double   m_refStrengths[3][4];
+  static const double   m_refStrengths[2][6];
   static const int      m_cuTreeThresh[4];
   static const double   m_cuTreeCenter;
 
@@ -188,6 +189,8 @@ private:
   void bilateralFilter  (const PelStorage &orgPic, std::deque<TemporalFilterSourcePicInfo> &srcFrameInfo, PelStorage &newOrgPic, double overallStrength) const;
 
   void xFinalizeBlkLine (const PelStorage &orgPic, std::deque<TemporalFilterSourcePicInfo> &srcFrameInfo, PelStorage &newOrgPic, int yStart, const double sigmaSqCh[MAX_NUM_CH], double overallStrenght) const;
+
+  void motionEstimationMCTF(Picture* curPic, std::deque<TemporalFilterSourcePicInfo>& srcFrameInfo, const PelStorage& origBuf, PelStorage& origSubsampled2, PelStorage& origSubsampled4, PelStorage& origSubsampled8, std::vector<double>& mvErr, double& minError, bool addLevel, bool calcErr);
 
 }; // END CLASS DEFINITION MCTF
 

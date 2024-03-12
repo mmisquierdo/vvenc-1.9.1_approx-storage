@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -292,7 +292,7 @@ void TrQuant::xDeQuant(const TransformUnit& tu,
                        const ComponentID   &compID,
                        const QpParam       &cQP)
 {
-  PROFILER_SCOPE_AND_STAGE( 1, _TPROF, P_QUANT );
+  PROFILER_SCOPE_AND_STAGE( 1, _TPROF, P_DEQUANT );
   m_quant->dequant( tu, dstCoeff, compID, cQP );
 }
 

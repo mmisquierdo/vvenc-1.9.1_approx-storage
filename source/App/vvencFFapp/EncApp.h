@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -107,7 +107,7 @@ public:
 
   bool  parseCfg( int argc, char* argv[] );           ///< parse configuration file to fill member variables
   int   encode();                                     ///< main encoding function
-  void  outputAU ( const vvencAccessUnit& au );            ///< write encoded access units to bitstream
+  int   outputAU ( const vvencAccessUnit& au );            ///< write encoded access units to bitstream
   static void outputYuv( void*, vvencYUVBuffer* );      ///< write reconstructed yuv output
 
   bool isShowVersionHelp()

@@ -1,12 +1,12 @@
 /* -----------------------------------------------------------------------------
 The copyright in this software is being made available under the Clear BSD
-License, included below. No patent rights, trademark rights and/or 
-other Intellectual Property Rights other than the copyrights concerning 
+License, included below. No patent rights, trademark rights and/or
+other Intellectual Property Rights other than the copyrights concerning
 the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -40,4 +40,27 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ------------------------------------------------------------------------------------------- */
 
-#include "../MCTFX86.h"
+/** \file     CommonDefARM.h
+ */
+
+#pragma once
+
+#include "CommonDef.h"
+
+#ifdef TARGET_SIMD_ARM
+
+#ifdef USE_NEON
+#define SIMDARM NEON
+#include <arm_neon.h>
+#endif
+
+namespace vvenc
+{
+using namespace arm_simd;
+
+ARM_VEXT read_arm_extension_flags( ARM_VEXT request = arm_simd::UNDEFINED );
+// std::string read_arm_extension_name();
+
+}   // namespace vvdec
+
+#endif   // TARGET_SIMD_ARM

@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -1071,12 +1071,16 @@ void InterpolationFilter::xWeightedGeoBlk(const ClpRngs &clpRngs, const CodingUn
 void InterpolationFilter::initInterpolationFilter( bool enable )
 {
 #if ENABLE_SIMD_OPT_MCIF
-#ifdef TARGET_SIMD_X86
   if ( enable )
   {
+#ifdef TARGET_SIMD_X86
     initInterpolationFilterX86();
-  }
 #endif
+		
+#ifdef TARGET_SIMD_ARM
+    initInterpolationFilterARM();
+#endif
+  }
 #endif
 }
 

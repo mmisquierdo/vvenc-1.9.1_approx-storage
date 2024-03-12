@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -223,13 +223,13 @@ const std::vector<SVPair<vvencDecodingRefreshType>> DecodingRefreshTypeToEnumMap
   { "cra",                   VVENC_DRT_CRA },
   { "idr",                   VVENC_DRT_IDR },
   { "rpsei",                 VVENC_DRT_RECOVERY_POINT_SEI },
-  { "idr2",                  VVENC_DRT_IDR2 },
+  { "idr2",                  VVENC_DRT_IDR2 }, //deprecated
   { "cra_cre",               VVENC_DRT_CRA_CRE },
   { "0",                     VVENC_DRT_NONE },
   { "1",                     VVENC_DRT_CRA },
   { "2",                     VVENC_DRT_IDR },
   { "3",                     VVENC_DRT_RECOVERY_POINT_SEI },
-  { "4",                     VVENC_DRT_IDR2 },
+  { "4",                     VVENC_DRT_IDR2 },  //deprecated
   { "5",                     VVENC_DRT_CRA_CRE },
 };
 
@@ -380,6 +380,24 @@ const std::vector<SVPair<int>> BitrateAbrevToIntMap =
   { "bps",                1 }   // bit/sec
 };
 
+const std::vector<SVPair<int>> BitrateOrScaleAbrevToIntMap =
+{
+  { "Mbps",         1000000 },  // mega bit/sec
+  { "M",            1000000 },
+  { "kbps",            1000 },  // kilo bit/sec
+  { "k",               1000 },
+  { "bps",                1 },  //      bit/sec
+  { "x",                -16 }   // negative value: multiplier of target bitrate, with a fixed-point accuracy of 4 bit
+};
+
+const std::vector<SVPair<bool>> IfpToValueMap =
+{
+  { "0",   false },
+  { "off", false },
+  { "1",   1 },
+  { "on",  1 },
+};
+
 //// ====================================================================================================================
 //// string <-> enum
 //// ====================================================================================================================
@@ -494,8 +512,8 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
   IStreamToRefVec<uint32_t>         toNumTiles                   ( { &c->m_numTileCols, &c->m_numTileRows }, true, 'x'       );
 
   IStreamToFunc<BitDepthAndColorSpace>    toInputFormatBitdepth  ( setInputBitDepthAndColorSpace, this, c, &BitColorSpaceToIntMap, YUV420_8 );
-  IStreamToAbbr<int,int>                  toBitrate              ( &c->m_RCTargetBitrate, &BitrateAbrevToIntMap );
-  IStreamToAbbr<int,int>                  toMaxRate              ( &c->m_RCMaxBitrate,    &BitrateAbrevToIntMap );
+  IStreamToAbbr<int,int>                  toBitrate              ( &c->m_RCTargetBitrate,             &BitrateAbrevToIntMap );
+  IStreamToAbbr<int,int>                  toMaxRate              ( &c->m_RCMaxBitrate,                &BitrateOrScaleAbrevToIntMap );
   IStreamToEnum<vvencDecodingRefreshType> toDecRefreshType       ( &c->m_DecodingRefreshType,         &DecodingRefreshTypeToEnumMap );
 
   IStreamToEnum<int>                toAud                        ( &c->m_AccessUnitDelimiter,         &FlagToIntMap );
@@ -518,8 +536,8 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
   IStreamToArr<unsigned int>        toTileColumnWidth            ( &c->m_tileColumnWidth[0], 10 );
   IStreamToArr<unsigned int>        toTileRowHeight              ( &c->m_tileRowHeight[0], 10 );
 
-  IStreamToArr<int>                 toMCTFFrames                 ( &c->m_vvencMCTF.MCTFFrames[0], VVENC_MAX_MCTF_FRAMES   );
-  IStreamToArr<double>              toMCTFStrengths              ( &c->m_vvencMCTF.MCTFStrengths[0], VVENC_MAX_MCTF_FRAMES);
+  IStreamToArr<int>                 toMCTFFrames                 ( &c->m_vvencMCTF.MCTFFrames[0], VVENC_MAX_MCTF_FRAMES, &c->m_vvencMCTF.numFrames );
+  IStreamToArr<double>              toMCTFStrengths              ( &c->m_vvencMCTF.MCTFStrengths[0], VVENC_MAX_MCTF_FRAMES, &c->m_vvencMCTF.numStrength );
   IStreamToEnum<int>                toColorPrimaries             ( &c->m_colourPrimaries,        &ColorPrimariesToIntMap );
   IStreamToEnum<int>                toTransferCharacteristics    ( &c->m_transferCharacteristics,&TransferCharacteristicsToIntMap );
   IStreamToEnum<int>                toColorMatrix                ( &c->m_matrixCoefficients,     &ColorMatrixToIntMap );
@@ -537,7 +555,9 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
 
   IStreamToInt8                     toSliceTypeAdapt              ( &c->m_sliceTypeAdapt );
   IStreamToInt8                     toSelectiveRDOQ               ( &c->m_useSelectiveRDOQ );
-  IStreamToInt8                     toFppLinesSynchro             ( &c->m_fppLinesSynchro );
+  IStreamToInt8                     toForceScc                    ( &c->m_forceScc );
+  IStreamToInt8                     toIfpLines                    ( &c->m_ifpLines );
+  IStreamToEnum<bool>               toUseIfp                      ( &c->m_ifp, &IfpToValueMap );
 
   po::Options opts;
   if( m_easyMode )
@@ -618,14 +638,16 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
     ("bitrate,b",                                       toBitrate,                                           "bitrate for rate control (0: constant-QP encoding without rate control; otherwise\n"
                                                                                                              "bits/second; use e.g. 1.5M, 1.5Mbps, 1500k, 1500kbps, 1500000bps, 1500000)")
     ("maxrate,m",                                       toMaxRate,                                           "approximate maximum instantaneous bitrate for constrained VBR in rate control (0:\n"
-                                                                                                             "no rate cap; use e.g. 3.5M, 3.5Mbps, 3500k, 3500kbps, 3500000bps, 3500000)")
+                                                                                                             "no rate cap; use e.g. 3.5M, 3.5Mbps, 3500k, 3500kbps, 3500000bps, 3500000), use suffix 'x' "
+                                                                                                             "to specify as a multiple of target bitrate")
     ("passes,p",                                        c->m_RCNumPasses,                                    "number of encoding passes with rate control (1: single-pass, -1, 2: two-pass RC)")
     ("pass",                                            c->m_RCPass,                                         "rate control pass for two-pass rate control (-1: both, 1: first, 2: second pass)")
     ("rcstatsfile",                                     m_RCStatsFileName,                                   "rate control statistics file name")
     ("qp,q",                                            c->m_QP,                                             "quantization parameter, QP (0, 1, .. 63)")
     ("qpa",                                             toQPA,                                               "enable perceptually motivated QP adaptation based on XPSNR model (0: off, 1: on)", true)
-    ("threads,t",                                       c->m_numThreads,                                     "number of threads (multithreading; -1: resolution < 720p: 4, >= 720p: 8 threads)")
-    ("refreshtype,-rt",                                 toDecRefreshType,                                    "intra refresh type (idr, cra, idr2, cra_cre: CRA, constrained RASL picture encoding)")
+    ("threads,t",                                       c->m_numThreads,                                     "number of threads (multithreading; -1: resolution < 720p: 4, < 5K 2880p: 8, >= 5K 2880p: 12 threads)")
+    ("ifp",                                             toUseIfp,                                            "inter-frame parallelization(IFP) (0: off, 1: on, with sync. offset of two CTU lines)")
+    ("refreshtype,-rt",                                 toDecRefreshType,                                    "intra refresh type (idr, cra, cra_cre: CRA, constrained RASL picture encoding)")
     ("refreshsec,-rs",                                  c->m_IntraPeriodSec,                                 "intra period/refresh in seconds")
     ("intraperiod,-ip",                                 c->m_IntraPeriod,                                    "intra period in frames (0: specify intra period in seconds instead, see -refreshsec)")
     ("tiles",                                           toNumTiles,                                          "number of tile columns and rows")
@@ -635,7 +657,7 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
   {
     opts.setSubSection("Threading, performance");
     opts.addOptions()
-    ("Threads,t",                                       c->m_numThreads,                                     "Number of threads")
+    ("Threads,t",                                       c->m_numThreads,                                     "number of threads (multithreading; -1: resolution < 720p: 4, < 5K 2880p: 8, >= 5K 2880p: 12 threads)")
     ("preset",                                          toPreset,                                            "select preset for specific encoding setting (faster, fast, medium, slow, slower, medium_lowDecEnergy)")
     ("Tiles",                                           toNumTiles,                                          "Set number of tile columns and rows")
     ;
@@ -644,9 +666,10 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
     opts.addOptions()
     ("IntraPeriod,-ip",                                c->m_IntraPeriod,                                     "Intra period in frames (0: use intra period in seconds (refreshsec), else: n*gopsize)")
     ("RefreshSec,-rs",                                 c->m_IntraPeriodSec,                                  "Intra period/refresh in seconds")
-    ("DecodingRefreshType,-dr",                        toDecRefreshType,                                     "Intra refresh type (0:none, 1:CRA, 2:IDR, 3:RecPointSEI, 4:IDR2, 5:CRA_CRE - CRA with constrained encoding for RASL pictures)")
+    ("DecodingRefreshType,-dr",                        toDecRefreshType,                                     "intra refresh type (idr, cra, cra_cre: CRA, constrained RASL picture encoding, none, rpsei: Recovery Point SEI)")
     ("GOPSize,g",                                      c->m_GOPSize,                                         "GOP size of temporal structure (16,32)")
     ("PicReordering",                                  c->m_picReordering,                                   "Allow reordering of pictures (0:off, 1:on), should be disabled for low delay requirements")
+    ("POC0IDR",                                        c->m_poc0idr,                                         "start encoding with POC 0 IDR" )
     ;
 
     opts.setSubSection("Rate control, Perceptual Quantization");
@@ -660,6 +683,7 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
     ("MaxBitrate",                                      toMaxRate,                                           "Rate control: approximate maximum instantaneous bitrate [bits/second] (0: no rate cap; least constraint)" )
     ("PerceptQPA,-qpa",                                 c->m_usePerceptQPA,                                  "Enable perceptually motivated QP adaptation, XPSNR based (0:off, 1:on)", true)
     ("STA",                                             toSliceTypeAdapt,                                    "Enable slice type adaptation at GOPSize>8 (-1: auto, 0: off, 1: adapt slice type, 2: adapt NAL unit type)")
+    ("MinIntraDistance",                                c->m_minIntraDist,                                   "With STA: set a minimum coded frame distance to the previous intra frame (-1: GOPSize)" )
     ;
 
     opts.setSubSection("Quantization parameters");
@@ -846,6 +870,7 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
     ("AddGOP32refPics",                                 c->m_addGOP32refPics,                                "Use different QP offsets and reference pictures in GOP structure")
     ("NumRefPics",                                      c->m_numRefPics,                                     "Number of reference pictures in RPL (0: default for RPL, <10: apply for all temporal layers, >=10: each decimal digit specifies the number for a temporal layer, last digit applying to the highest TL)" )
     ("NumRefPicsSCC",                                   c->m_numRefPicsSCC,                                  "Number of reference pictures in RPL for SCC pictures (semantic analogue to NumRefPics, -1: equal to NumRefPics)" )
+    ("ForceSCC",                                        toForceScc,                                          "Force SCC treatment, instead of detection (<=0: use detection, 1: treat all frames as not SCC, 2: treat all frames as weak SCC, 3: treat all frames as strong SCC)" )
     ;
 
     opts.setSubSection("Low-level QT-BTT partitioning options");
@@ -1058,7 +1083,9 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
     ("TileColumnWidthArray",                            toTileColumnWidth,                                   "Tile column widths in units of CTUs. Last column width in list will be repeated uniformly to cover any remaining picture width")
     ("TileRowHeightArray",                              toTileRowHeight,                                     "Tile row heights in units of CTUs. Last row height in list will be repeated uniformly to cover any remaining picture height")
     ("TileParallelCtuEnc",                              c->m_tileParallelCtuEnc,                             "Allow parallel CTU block search in different tiles")
-    ("FppLinesSynchro",                                 toFppLinesSynchro,                                   "(experimental) Number of CTU-lines synchronization due to MV restriction for FPP mode")
+    ("FppLinesSynchro",                                 toIfpLines,                                          "(deprecated) Inter-Frame Parallelization(IFP) explicit CTU-lines synchronization offset (-1: default mode with two lines, 0: off)")
+    ("IFPLines",                                        toIfpLines,                                          "Inter-Frame Parallelization(IFP) explicit CTU-lines synchronization offset (-1: default mode with two lines, 0: off)")
+    ("IFP",                                             toUseIfp,                                            "Inter-Frame Parallelization(IFP) (0: off, 1: on, with default setting of IFPLines)")
     ;
 
     opts.setSubSection("Coding tools");
@@ -1133,7 +1160,8 @@ int parse( int argc, char* argv[], vvenc_config* c, std::ostream& rcOstr )
     ("bitrate",                                         toBitrate,                                           "bitrate for rate control (0: constant-QP encoding without rate control, otherwise "
                                                                                                              "bits/second; use e.g. 1.5M, 1.5Mbps, 1500k, 1500kbps, 1500000bps, 1500000)")
     ("maxrate",                                         toMaxRate,                                           "approximate maximum instantaneous bitrate for constrained VBR in rate control (0: "
-                                                                                                             "no rate cap; use e.g. 3.5M, 3.5Mbps, 3500k, 3500kbps, 3500000bps, 3500000)")
+                                                                                                             "no rate cap; use e.g. 3.5M, 3.5Mbps, 3500k, 3500kbps, 3500000bps, 3500000), use suffix 'x' "
+                                                                                                             "to specify as a multiple of target bitrate")
     ("qpa",                                             toQPA,                                               "Enable perceptually motivated QP adaptation, XPSNR based (0:off, 1:on)", true)
     ;
   }

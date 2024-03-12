@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -196,7 +196,7 @@ void EncRCPic::clipTargetQP (std::list<EncRCPic*>& listPreviousPictures, const i
     }
     if ((*it)->frameLevel == frameLevel - 1 && (*it)->picQP >= 0) // last temporal level
     {
-      lastPrevTLQP = ((*it)->picQP * (frameLevel == 1 ? 3 : 4)) >> 2;
+      lastPrevTLQP = (frameLevel == 1 ? ((*it)->picQP * 3) >> 2 : std::max<int> (encRCSeq->lastIntraQP, (*it)->picQP));
     }
     if ((*it)->frameLevel == 1 && frameLevel == 0 && refreshParams && lastCurrTLQP < 0)
     {
@@ -367,14 +367,14 @@ int RateCtrl::getBaseQP()
         sumFrBits = uint64_t (0.5 + sumFrBits * sqrt (hpEner / (hpEnerPic * firstPassData.size())));
       }
     }
-    baseQP = int (24.5 - log (d) / log (2.0)); // QPstart, equivalent to round (24 + 2*log2 (resRatio))
+    baseQP = int (24.5 - log (std::max (1.0, d)) / log (2.0)); // QPstart, round(24 + 2*log2(resRatio))
     d = (double) m_pcEncCfg->m_RCTargetBitrate * (double) firstPassData.size() / (encRCSeq->frameRate * sumFrBits);
     d = firstPassBaseQP - (105.0 / 128.0) * sqrt ((double) std::max (1, firstPassBaseQP)) * log (d) / log (2.0);
     baseQP = int (0.5 + d + 0.5 * std::max (0.0, baseQP - d));
   }
   else if (m_pcEncCfg->m_LookAhead)
   {
-    baseQP = int (24.5 - log (d) / log (2.0)); // QPstart, equivalent to round (24 + 2*log2 (resRatio))
+    baseQP = int (24.5 - log (std::max (1.0, d)) / log (2.0)); // QPstart, round(24 + 2*log2(resRatio))
     d = MAX_QP_PERCEPT_QPA - 2.0 - 1.5 * firstQPOffset - 0.5 * log ((double) encRCSeq->intraPeriod / encRCSeq->gopSize) / log (2.0);
     baseQP = int (0.5 + d + 0.5 * std::max (0.0, baseQP - d));
   }
@@ -772,9 +772,9 @@ void RateCtrl::processFirstPassData( const bool flush, const int poc /*= -1*/ )
           m_firstPassCache.pop_front();
         }
 
-        // the chunk is considered either to contain a particular number of pictures or up to next TID0 picture (including it)
+        // the chunk is considered to contain a particular number of pictures up to the picture starting the next GOP (including it)
         // in flush-mode, ensure the deterministic definition of last chunk
-        if( ( count >= m_pcEncCfg->m_GOPSize + 1 || ( picStat.tempLayer == 0 && m_listRCFirstPassStats.size() > 2 ) ) && !( flush && m_numPicAddedToList > m_numPicStatsTotal - m_pcEncCfg->m_GOPSize ) )
+        if( ( count >= m_pcEncCfg->m_GOPSize + 1 || ( m_listRCFirstPassStats.size() > 2 && picStat.isStartOfGop ) ) && !( flush && m_numPicAddedToList > m_numPicStatsTotal - m_pcEncCfg->m_GOPSize ) )
           break;
       }
     }
@@ -818,6 +818,10 @@ void RateCtrl::xProcessFirstPassData( const bool flush, const int poc )
 
 double RateCtrl::getAverageBitsFromFirstPass()
 {
+  const uint16_t vaMin = 1u << (encRCSeq->bitDepth - 6);
+  const int16_t factor = (m_pcEncCfg->m_QP > 27 ? 2 : 3);
+  const uint32_t shift = (m_pcEncCfg->m_QP > 37 ? 1 : 4);
+  int vaTm1 = 0, vaTm2 = 0; // temporal memories
   uint64_t totalBitsFirstPass = 0;
   std::list<TRCPassStats>::iterator it;
 
@@ -860,7 +864,20 @@ double RateCtrl::getAverageBitsFromFirstPass()
 
   for (it = m_listRCFirstPassStats.begin(); it != m_listRCFirstPassStats.end(); it++) // for two-pass RC
   {
-    totalBitsFirstPass += it->numBits;
+    const int vaTmp = std::max (0, (it->visActY << (12 - encRCSeq->bitDepth)) - it->spVisAct);
+    const int vaSum = vaTmp + vaTm2; // improve rate match on temporally downsampled or very dark videos
+
+    if (vaSum > 0 && vaTm1 * 2 * factor < vaSum && vaTm2 * 4 > vaTmp * 3 && vaTm2 * 3 < vaTmp * 4)
+    {
+      totalBitsFirstPass += (it->numBits * uint64_t (vaSum + vaTm1 * 2) * factor + (vaSum * 2)) / (vaSum * (factor + 1));
+    }
+    else
+    {
+      totalBitsFirstPass += (it->visActY >= vaMin && it->visActY < vaMin + (1u << shift) ? (it->numBits * (it->visActY + 1u - vaMin)) >> shift : it->numBits);
+    }
+
+    vaTm2 = vaTm1;
+    vaTm1 = vaTmp;
   }
 
   return totalBitsFirstPass / (double) m_listRCFirstPassStats.size();
@@ -1175,7 +1192,7 @@ void RateCtrl::initRateControlPic( Picture& pic, Slice* slice, int& qp, double& 
       {
         if ( it->poc == slice->poc && it->numBits > 0 )
         {
-          const double sqrOfResRatio = double( m_pcEncCfg->m_SourceWidth * m_pcEncCfg->m_SourceHeight ) / ( 3840.0 * 2160.0 );
+          const double sqrOfResRatio = std::min( 1.0, double( m_pcEncCfg->m_SourceWidth * m_pcEncCfg->m_SourceHeight ) / ( 3840.0 * 2160.0 ) );
           const int firstPassSliceQP = it->qp;
           const int budgetRelaxScale = ( encRCSeq->maxGopRate + 0.5 < 2.0 * (double)encRCSeq->targetRate * encRCSeq->gopSize / encRCSeq->frameRate ? 2 : 3 ); // quarters
           const bool isRateCapperMax = ( encRCSeq->maxGopRate + 0.5 >= 3.0 * (double)encRCSeq->targetRate * encRCSeq->gopSize / encRCSeq->frameRate );
@@ -1268,7 +1285,7 @@ void RateCtrl::initRateControlPic( Picture& pic, Slice* slice, int& qp, double& 
           tmpVal = updateQPstartModelVal() + log (sqrOfResRatio) / log (2.0); // GOP's QPstart
           d /= (double)it->numBits;
           d = firstPassSliceQP - ( 105.0 / 128.0 ) * sqrt( (double)std::max( 1, firstPassSliceQP ) ) * log( d ) / log( 2.0 );
-          sliceQP = int( 0.5 + d + 0.5 * std::max( 0.0, tmpVal - d ) + encRCSeq->qpCorrection[ frameLevel ] );
+          sliceQP = int( 0.5 + d + ( it->isIntra ? 0.375 : 0.5 ) * std::max( 0.0, tmpVal - d ) + encRCSeq->qpCorrection[ frameLevel ] );
 
           encRcPic->clipTargetQP( getPicList(), ( m_pcEncCfg->m_LookAhead ? getBaseQP() : m_pcEncCfg->m_QP ) + ( it->isIntra ? m_pcEncCfg->m_intraQPOffset : 0 ), 5 - budgetRelaxScale,
                                   ( it->poc < encRCSeq->gopSize ? 0 : ( m_pcEncCfg->m_maxTLayer + 1 ) >> 1 ), sqrOfResRatio, sliceQP, &encRCSeq->lastAverageQP );

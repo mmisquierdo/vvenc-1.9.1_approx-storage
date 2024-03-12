@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -80,6 +80,7 @@ class GOPCfg
     bool m_picReordering;
     int  m_refreshType;
     int  m_fixIntraPeriod;
+    bool m_poc0idr;
     int  m_maxGopSize;
     int  m_defGopSize;
     int  m_nextListIdx;
@@ -92,6 +93,8 @@ class GOPCfg
     int  m_maxTid;
     int  m_firstPassMode;
     int  m_defaultNumActive[ 2 ];
+    int  m_minIntraDist;
+    int  m_lastIntraPOC;
 
   public:
     GOPCfg( MsgLog& _m )
@@ -101,6 +104,7 @@ class GOPCfg
       , m_picReordering   ( false )
       , m_refreshType     ( 0 )
       , m_fixIntraPeriod  ( 0 )
+      , m_poc0idr         ( false )
       , m_maxGopSize      ( 0 )
       , m_defGopSize      ( 0 )
       , m_nextListIdx     ( 0 )
@@ -113,6 +117,8 @@ class GOPCfg
       , m_maxTid          ( 0 )
       , m_firstPassMode   ( 0 )
       , m_defaultNumActive{ 0, 0 }
+      , m_minIntraDist    ( -1 )
+      , m_lastIntraPOC    ( -1 )
     {
     };
 
@@ -120,17 +126,19 @@ class GOPCfg
     {
     };
 
-    void initGopList( int refreshType, int intraPeriod, int gopSize, int leadFrames, bool bPicReordering, const vvencGOPEntry cfgGopList[ VVENC_MAX_GOP ], const vvencMCTF& mctfCfg, int firstPassMode );
+    void initGopList( int refreshType, bool poc0idr, int intraPeriod, int gopSize, int leadFrames, bool bPicReordering, const vvencGOPEntry cfgGopList[ VVENC_MAX_GOP ], const vvencMCTF& mctfCfg, int firstPassMode, int m_minIntraDist );
     void getNextGopEntry( GOPEntry& gopEntry );
     void startIntraPeriod( GOPEntry& gopEntry );
-    void fixStartOfLastGop( GOPEntry& gopEntry ) const;
+    void fixStartOfLastGop( GOPEntry& gopEntry );
     void getDefaultRPLLists( RPLList& rpl0, RPLList& rpl1 ) const;
+    void setLastIntraSTA( int poc ) { m_lastIntraPOC = poc; }
 
     int  getMaxTLayer() const                             { return m_maxTid; }
     const std::vector<int>& getMaxDecPicBuffering() const { return m_maxDecPicBuffering; }
     const std::vector<int>& getNumReorderPics() const     { return m_numReorderPics; }
     int  getDefaultNumActive( int l ) const               { return m_defaultNumActive[ l ]; }
 
+    bool isSTAallowed( int poc ) const;
     bool hasNonZeroTemporalId() const;
     bool hasLeadingPictures() const;
     bool isChromaDeltaQPEnabled() const;

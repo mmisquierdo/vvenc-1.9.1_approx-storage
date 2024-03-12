@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -90,7 +90,7 @@ class PreProcess : public EncStage
     Picture* xGetStartOfLastGop   ( const PicList& picList ) const;
     void     xLinkPrevQpaBufs     ( Picture* pic, const PicList& picList ) const;
     void     xGetVisualActivity   ( Picture* pic, const PicList& picList ) const;
-    uint16_t xGetPicVisualActivity( Picture* curPic, const Picture* refPic1, const Picture* refPic2 ) const;
+    uint16_t xGetPicVisualActivity( Picture* curPic, const Picture* refPic1, const Picture* refPic2, const bool doChroma ) const;
     void     xDetectSTA           ( Picture* pic, const PicList& picList );
     void     xDetectScc           ( Picture* pic ) const;
     void     xDisableTempDown     ( Picture* pic, const PicList& picList );

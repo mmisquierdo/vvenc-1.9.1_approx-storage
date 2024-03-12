@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -70,6 +70,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #  include <malloc.h>
 #endif
 
+#if defined( TARGET_SIMD_ARM )
+#  include "CommonLib/arm/CommonDefARM.h"
+#endif
 
 #if _DEBUG
 #define HANDLE_EXCEPTION 0
@@ -796,6 +799,9 @@ const char* VVEncImpl::setSIMDExtension( const char* simdId )
     try
     {
       read_x86_extension_flags( request_ext );
+#if defined( TARGET_SIMD_ARM )
+      read_arm_extension_flags( request_ext == x86_simd::UNDEFINED ? arm_simd::UNDEFINED : request_ext != x86_simd::SCALAR ? arm_simd::NEON : arm_simd::SCALAR );
+#endif
     }
     catch( Exception& )
     {
@@ -803,23 +809,28 @@ const char* VVEncImpl::setSIMDExtension( const char* simdId )
       THROW( "requested SIMD level (" << simdReqStr << ") not supported by current CPU (max " << read_x86_extension_name() << ")." );
     }
 
-#  if ENABLE_SIMD_OPT_BUFFER
+#if ENABLE_SIMD_OPT_BUFFER
+  #if defined( TARGET_SIMD_X86 )
     g_pelBufOP.initPelBufOpsX86();
-#  endif
-#  if ENABLE_SIMD_TRAFO
-    g_tCoeffOps.initTCoeffOpsX86();
-#  endif
+  #endif
+  #if defined( TARGET_SIMD_ARM )
+    g_pelBufOP.initPelBufOpsARM();
+  #endif
+#endif
+#if ENABLE_SIMD_TRAFO
+  g_tCoeffOps.initTCoeffOpsX86();
+#endif
 
     return read_x86_extension_name().c_str();
   }
-#  if HANDLE_EXCEPTION
+#if HANDLE_EXCEPTION
   catch( Exception& e )
   {
     MsgLog msg;
     msg.log( VVENC_ERROR, "\n%s\n", e.what() );
     return nullptr;
   }
-#  endif   // HANDLE_EXCEPTION
+#endif   // HANDLE_EXCEPTION
 #else      // !TARGET_SIMD_X86
   if( !simdReqStr.empty() && simdReqStr != "SCALAR" )
   {
@@ -854,7 +865,7 @@ std::string VVEncImpl::createEncoderInfoStr()
 
 
   std::string cInfoStr;
-  cInfoStr  = "Fraunhofer VVC Encoder ver. " VVENC_VERSION;
+  cInfoStr  = "VVenC, the Fraunhofer H.266/VVC Encoder, version " VVENC_VERSION;
   cInfoStr += " ";
   cInfoStr += cssCap.str();
 

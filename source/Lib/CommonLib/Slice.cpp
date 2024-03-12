@@ -6,7 +6,7 @@ the Software are granted under this license.
 
 The Clear BSD License
 
-Copyright (c) 2019-2023, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
+Copyright (c) 2019-2024, Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. & The VVenC Authors.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -443,7 +443,7 @@ void Slice::updateRefPicCounter( int step )
   }
 }
 
-bool Slice::checkRefPicsReconstructed() const
+bool Slice::checkAllRefPicsReconstructed() const
 {
   for ( int refList = 0; refList < NUM_REF_PIC_LIST_01; refList++ )
   {
@@ -451,6 +451,23 @@ bool Slice::checkRefPicsReconstructed() const
     for ( int i = 0; i < numOfActiveRef; i++ )
     {
       if ( ! refPicList[ refList ][ i ]->isReconstructed )
+      {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool Slice::checkAllRefPicsAccessible() const
+{
+  for ( int refList = 0; refList < NUM_REF_PIC_LIST_01; refList++ )
+  {
+    int numOfActiveRef = numRefIdx[ refList ];
+    for ( int i = 0; i < numOfActiveRef; i++ )
+    {
+      if ( ! refPicList[ refList ][ i ]->isInProcessList )
       {
         return false;
       }
