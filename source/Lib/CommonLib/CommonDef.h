@@ -584,65 +584,65 @@ inline std::string prnt( const char* fmt, ...)
 //<Matheus>
 
 namespace ApproxSignaling {
-	template <typename T> 
-	static T* alligned_malloc(void* (*allocFunction)(const size_t, const size_t), const size_t len) {
-		T * const bufferStart = (T*) allocFunction(sizeof(T)*(len), MEMORY_ALIGN_DEF_SIZE);
+  template <typename T> 
+  static T* alligned_malloc(void* (*allocFunction)(const size_t, const size_t), const size_t len, const size_t alignment) {
+    T * const bufferStart = (T*) allocFunction(sizeof(T)*(len), alignment);
 
-		T const * const bufferEnd = bufferStart + len;
-		ApproxInter::MarkBuffer(BufferRange((uint8_t*) bufferStart, (uint8_t*) bufferEnd));
-		
-		return bufferStart;
-	}
+    T const * const bufferEnd = bufferStart + len;
+    ApproxInter::MarkBuffer(BufferRange((uint8_t*) bufferStart, (uint8_t*) bufferEnd));
+    
+    return bufferStart;
+  }
 
-	template <typename T> 
-	static T* regular_malloc(void* (*allocFunction)(const size_t), const size_t len) {
-		T * const bufferStart = (T*) allocFunction(sizeof(T)*(len));
+  template <typename T> 
+  static T* regular_malloc(void* (*allocFunction)(const size_t), const size_t len) {
+    T * const bufferStart = (T*) allocFunction(sizeof(T)*(len));
 
-		T const * const bufferEnd = bufferStart + len;
-		ApproxInter::MarkBuffer(BufferRange((uint8_t*) bufferStart, (uint8_t*) bufferEnd));
+    T const * const bufferEnd = bufferStart + len;
+    ApproxInter::MarkBuffer(BufferRange((uint8_t*) bufferStart, (uint8_t*) bufferEnd));
 
-		return bufferStart;
-	}
+    return bufferStart;
+  }
 
-	static void free(void (*freeFunction)(void * const), void * const prt) noexcept {
-		ApproxInter::UnmarkBuffer(prt);
+  static void free(void (*freeFunction)(void * const), void * const prt) noexcept {
+    ApproxInter::UnmarkBuffer(prt);
 
-		freeFunction(prt);
-	}
+    freeFunction(prt);
+  }
 }
 //</Matheus>
 
 #if ALIGNED_MALLOC
+  #if ( _WIN32 && ( _MSC_VER > 1300 ) ) || defined (__MINGW64_VERSION_MAJOR)
+    #define xMalloc( type, len )        ApproxSignaling::alligned_malloc<type>(&_aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)          //_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
+    #define xMalloc2( type, len, alg )  ApproxSignaling::alligned_malloc<type>(&_aligned_malloc, len, alg)                            //_aligned_malloc( sizeof(type)*(len), alg )
+    #define xFree( ptr )                ApproxSignaling::free(&_aligned_free, ptr)                                                    //_aligned_free  ( ptr )
+  #elif defined (__MINGW32__)
+    #define xMalloc( type, len )        ApproxSignaling::alligned_malloc<type>(&__mingw_aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)   //__mingw_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
+    #define xMalloc2( type, len, alg )  ApproxSignaling::alligned_malloc<type>(&__mingw_aligned_malloc, len, alg)                     //__mingw_aligned_malloc( sizeof(type)*(len), alg )
+    #define xFree( ptr )                ApproxSignaling::free(&__mingw_aligned_free, ptr)                                             //__mingw_aligned_free( ptr )
+  #else
+    namespace detail {
+                                                                            //template<typename T>
+      static inline void* aligned_malloc(size_t len, size_t alignement) {   //static inline T* aligned_malloc(size_t len, size_t alignement) {
+        void * p = NULL;                                                    //  T* p = NULL;
+        if( posix_memalign( (void**)&p, alignement, len) )                  //  if( posix_memalign( (void**)&p, alignement, sizeof(T)*(len) ) )
+        {                                                                   //  {
+          THROW("posix_memalign failed");                                   //    THROW("posix_memalign failed");
+        }                                                                   //  }
+        return p;                                                           //  return p;
+        }                                                                   //}
+    }
+    
+    #define xMalloc( type, len )        ApproxSignaling::alligned_malloc<type>(&detail::aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)   //detail::aligned_malloc<type>( len, MEMORY_ALIGN_DEF_SIZE )
+    #define xMalloc2( type, len, alg )  ApproxSignaling::alligned_malloc<type>(&detail::aligned_malloc, len, alg)                     //detail::aligned_malloc<type>( len, alg )
+    #define xFree( ptr )                ApproxSignaling::free(&free, ptr)                                                             //free( ptr )
+  #endif
 
-#if ( _WIN32 && ( _MSC_VER > 1300 ) ) || defined (__MINGW64_VERSION_MAJOR)
-#define xMalloc( type, len )        _aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
-#define xMalloc2( type, len, alg )  _aligned_malloc( sizeof(type)*(len), alg )
-#define xFree( ptr )                _aligned_free  ( ptr )
-#elif defined (__MINGW32__)
-#define xMalloc( type, len )        __mingw_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
-#define xMalloc2( type, len, alg )  __mingw_aligned_malloc( sizeof(type)*(len), alg )
-#define xFree( ptr )                __mingw_aligned_free( ptr )
-#else
-namespace detail {
-template<typename T>
-static inline T* aligned_malloc(size_t len, size_t alignement) {
-  T* p = NULL;
-  if( posix_memalign( (void**)&p, alignement, sizeof(T)*(len) ) )
-  {
-    THROW("posix_memalign failed");
-  }
-  return p;
-}
-}
-#define xMalloc( type, len )        detail::aligned_malloc<type>( len, MEMORY_ALIGN_DEF_SIZE )
-#define xMalloc2( type, len, alg )  detail::aligned_malloc<type>( len, alg )
-#define xFree( ptr )                free( ptr )
-#endif
-
-#else
-#define xMalloc( type, len )        malloc   ( sizeof(type)*(len) )
-#define xMalloc2( type, len, alg )  malloc   ( sizeof(type)*(len) )
-#define xFree( ptr )                free     ( ptr )
+  #else
+    #define xMalloc( type, len )        ApproxSignaling::regular_malloc<type>(&malloc, len)                                           //malloc   ( sizeof(type)*(len) )
+    #define xMalloc2( type, len, alg )  ApproxSignaling::regular_malloc<type>(&malloc, len)                                           //malloc   ( sizeof(type)*(len) )
+    #define xFree( ptr )                ApproxSignaling::free(&free, ptr)                                                             //free     ( ptr )
 #endif //#if ALIGNED_MALLOC
 
 #if defined _MSC_VER
