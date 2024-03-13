@@ -5574,10 +5574,6 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   const AffineAMVPInfo& aamvpi,
   bool            bBi)
 {
-  //<Matheus>
-  //std::cout << "TEST: xAffineMotionEstimation" << std::endl;
-  //</Matheus>
-
   if( cu.cs->sps->BCW && cu.BcwIdx != BCW_DEFAULT && !bBi && xReadBufferedAffineUniMv( cu, refPicList, iRefIdxPred, acMvPred, acMv, ruiBits, ruiCost, mvpIdx, aamvpi ) )
   {
     return;
@@ -5587,25 +5583,21 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   const int width = cu.Y().width;
   const int height = cu.Y().height;
 
-  const Picture* refPic = cu.slice->getRefPic(refPicList, iRefIdxPred);
+  const Picture* refPic = cu.slice->getRefPic(refPicList, iRefIdxPred); //MATHEUS NOTE: only used in xPredAffineBlk
   
-  //<Matheus>
   #if MATHEUS_INSTRUMENTATION
     #if APPROX_RECO_BUFFER_INTER_AFFINE
       Pel const * const approxRecoBuffer = refPic->getRecoBuf(COMP_Y).buf;
       ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_AFFINE_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
       ApproxSS::start_level();
     #endif
-    //</Matheus>
 
-    //<Matheus>
     #if APPROX_ORIG_BUFFER
       Pel const * const approxOrigBuffer = origBuf.Y().buf;
       ApproxInter::InstrumentIfMarked((void*) approxOrigBuffer, ApproxInter::ORIG_AFFINE_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
       ApproxSS::start_level();
     #endif
   #endif
-  //</Matheus>
 
   // Set Origin YUV: pcYuv
   CPelUnitBuf*   pBuf = &origBuf;
@@ -5614,7 +5606,7 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   CPelUnitBuf  origBufTmpCnst;
 
   // if Bi, set to ( 2 * Org - ListX )
-  if (bBi)
+  if (bBi) //MATHEUS TODO: origBufTemp
   {
     PelUnitBuf  origBufTmp = m_tmpStorageLCU.getCompactBuf(cu);
     // NOTE: Other buf contains predicted signal from another direction
@@ -5691,6 +5683,7 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   {
     acMvTemp[2].roundAffinePrecInternal2Amvr(cu.imv);
   }
+
   #if FELIPE_INSTRUMENTATION
     #if APPROX_RECO_BUFFER_INTER_AFFINE
       //<Felipe>
@@ -5849,7 +5842,7 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
     if (bAllZero)
       break;
 
-    // do motion compensation with updated mv
+    // do motion compensation with updated mv //MATHEUS NOTE: MOTION COMPENSATION!!!
     for (int i = 0; i < mvNum; i++)
     {
       acMvTemp[i] += acDeltaMv[i];
@@ -6050,19 +6043,15 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   
 
   #if MATHEUS_INSTRUMENTATION
-    //<Matheus>
     #if APPROX_RECO_BUFFER_INTER_AFFINE
       ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
       ApproxSS::end_level();
     #endif
-    //</Matheus>
     
-    //<Matheus>
     #if APPROX_ORIG_BUFFER
       ApproxInter::UninstrumentIfMarked((void*) approxOrigBuffer);
       ApproxSS::end_level();
     #endif
-    //</Matheus>
 
     #if APPROX_PRED_BUFFER
       ApproxInter::UninstrumentIfMarked((void*) approxPredBuffer);

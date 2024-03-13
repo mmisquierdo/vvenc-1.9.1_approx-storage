@@ -11,7 +11,7 @@
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
 
-	#define APPROX_RECO_BUFFER_INTER false //ativa instrumentação em toda a ME (excluindo affine)
+	#define APPROX_RECO_BUFFER_INTER true //ativa instrumentação em toda a ME (excluindo affine)
 
 	#define APPROX_RECO_BUFFER_INTER_MVP false 
 	#define APPROX_RECO_BUFFER_INTER_PATTERN false 
