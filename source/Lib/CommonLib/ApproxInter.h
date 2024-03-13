@@ -13,7 +13,7 @@
 
 	#define APPROX_RECO_BUFFER_INTER false //ativa instrumentação em toda a ME (excluindo affine)
 
-	//TODO?: MVP prediction?
+	#define APPROX_RECO_BUFFER_INTER_MVP false 
 	#define APPROX_RECO_BUFFER_INTER_PATTERN false 
 	#define APPROX_RECO_BUFFER_INTER_TZ true
 	#define APPROX_RECO_BUFFER_INTER_FAST false
@@ -48,12 +48,14 @@
 		//public:
 			constexpr int64_t RECO_MOTION_ESTIMATION_BID = 0;
 			constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION_BID = 1;
-			constexpr int64_t ORIG_MOTION_ESTIMATION_BID = 2; 
+			constexpr int64_t ORIG_MOTION_ESTIMATION_BID = 2;
+			constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION_BID = 11;
 			constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION_BID = 3;
 			constexpr int64_t FILT_MOTION_ESTIMATION_TEMP_BID = 4;
 			constexpr int64_t FILT_MOTION_ESTIMATION_BID = 5;
 			constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION_BID = 6;
 
+			constexpr int64_t RECO_MOTION_ESTIMATION_MVP_BID = 12;
 			constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN_BID = 7;
 			constexpr int64_t RECO_MOTION_ESTIMATION_TZ_BID = 8;
 			constexpr int64_t RECO_MOTION_ESTIMATION_FAST_BID = 9;
@@ -67,6 +69,9 @@
 			void UnmarkBuffer(void const * const address);
 			void InstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes);
 			void UninstrumentIfMarked(void * const address, const bool giveAwayRecords = true);
+
+			void PrintMacrosStates();
+			void PrintMacroState(const std::string& macroName, const bool macroStatus, const std::string& tab = "\t");
 
 
 

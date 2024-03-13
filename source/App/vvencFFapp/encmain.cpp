@@ -81,6 +81,10 @@ int main(int argc, char* argv[])
 	#endif
 	//</Felipe>
 
+  //<Matheus>
+  ApproxInter::PrintMacrosStates();
+  //</Matheus>
+
   vvenc_set_logging_callback( nullptr, msgFnc ); // register global log callback ( deprecated, will be removed)
 
   std::string simdOpt;

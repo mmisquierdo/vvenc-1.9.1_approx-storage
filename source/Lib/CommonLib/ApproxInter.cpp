@@ -40,6 +40,32 @@ void ApproxInter::UninstrumentIfMarked(void * const address, const bool giveAway
 	}
 }
 
+void ApproxInter::PrintMacroState(const std::string& macroName, const bool macroStatus, const std::string& tab /*= "\t"*/) {
+	std::cout << tab << macroName << ": " << (macroStatus ? "Enabled" : "Disabled") << std::endl;
+}
+
+void ApproxInter::PrintMacrosStates() {
+	std::cout << "APPROX MACROS STATES" << std::endl;
+
+	ApproxInter::PrintMacroState("MATHEUS_INSTRUMENTATION", 			MATHEUS_INSTRUMENTATION);
+	ApproxInter::PrintMacroState("FELIPE_INSTRUMENTATION", 				FELIPE_INSTRUMENTATION);
+
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER", 			APPROX_RECO_BUFFER_INTER);
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_PATTERN", 	APPROX_RECO_BUFFER_INTER_PATTERN);
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_TZ", 		APPROX_RECO_BUFFER_INTER_TZ);
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_FAST", 		APPROX_RECO_BUFFER_INTER_FAST);
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_FRACTIONAL",	APPROX_RECO_BUFFER_INTER_FRACTIONAL);
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_AFFINE", 	APPROX_RECO_BUFFER_INTER_AFFINE);
+
+	ApproxInter::PrintMacroState("APPROX_ORIG_BUFFER", 					APPROX_ORIG_BUFFER);
+	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V1", 				APPROX_FILT_BUFFER_V1);
+	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V2", 				APPROX_FILT_BUFFER_V2);
+	ApproxInter::PrintMacroState("APPROX_PRED_BUFFER", 					APPROX_PRED_BUFFER);
+
+	std::cout << std::endl;
+}
+
+
 
 #if FELIPE_INSTRUMENTATION
 	#if APPROX_RECO_BUFFER_INTER
