@@ -1235,7 +1235,7 @@ bool EncModeCtrl::useModeResult( const EncTestMode& encTestmode, CodingStructure
   // for now just a simple decision based on RD-cost or choose tempCS if bestCS is not yet coded
   if( tempCS->cost != MAX_DOUBLE && ( !cuECtx.bestCS || ( ( tempCS->cost + ( useEDO ? tempCS->costDbOffset : 0 ) ) < ( cuECtx.bestCS->cost + ( useEDO ? cuECtx.bestCS->costDbOffset : 0 ) ) ) ) )
   {
-    cuECtx.bestCS   = tempCS;
+    cuECtx.bestCS   = tempCS; //MATHEUS NOTE: IMPORTANT???
     cuECtx.bestCU   = tempCS->cus[0];
     cuECtx.bestTU   = cuECtx.bestCU->firstTU;
     cuECtx.bestMode = encTestmode;

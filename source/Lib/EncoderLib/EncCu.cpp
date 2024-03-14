@@ -455,7 +455,7 @@ void EncCu::xCompressCtu( CodingStructure& cs, const UnitArea& area, const unsig
 
 
 
-bool EncCu::xCheckBestMode( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode, const bool useEDO )
+bool EncCu::xCheckBestMode( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode, const bool useEDO ) //MATHEUS NOTE: IMPORTANT??!!
 {
   bool bestCSUpdated = false;
 
@@ -724,6 +724,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       {
         checkIbc = false;
       }
+
       if( isReuseCU )
       {
         xReuseCachedResult( tempCS, bestCS, partitioner );
@@ -743,6 +744,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
             if (cu)
               cu->mmvdSkip = cu->skip == false ? false : cu->mmvdSkip;
           }
+
           if (m_pcEncCfg->m_Geo && cs.slice->isInterB() && !bestCS->cus.empty())
           {
             EncTestMode encTestModeGeo = { ETM_MERGE_GEO, ETO_STANDARD, qp, lossless };
@@ -751,10 +753,11 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
               xCheckRDCostMergeGeo(tempCS, bestCS, partitioner, encTestModeGeo);
             }
           }
+
           EncTestMode encTestMode = { ETM_INTER_ME, ETO_STANDARD, qp, lossless };
           if (m_modeCtrl.tryMode(encTestMode, cs, partitioner))
           {
-            xCheckRDCostInter(tempCS, bestCS, partitioner, encTestMode);
+            xCheckRDCostInter(tempCS, bestCS, partitioner, encTestMode); //MATHEUS NOTE: important
           }
 
           if (m_pcEncCfg->m_AMVRspeed)
@@ -767,7 +770,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
               const bool skipAltHpelIF = ( int( ( encTestMode.opts & ETO_IMV ) >> ETO_IMV_SHIFT ) == 4 ) && ( bestIntPelCost > 1.25 * bestCS->cost );
               if (!skipAltHpelIF)
               {
-                xCheckRDCostInterIMV(tempCS, bestCS, partitioner, encTestMode );
+                xCheckRDCostInterIMV(tempCS, bestCS, partitioner, encTestMode ); //MATHEUS NOTE: important
               }
             }
           }
@@ -796,7 +799,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         EncTestMode encTestMode( {ETM_INTRA, ETO_STANDARD, qp, lossless} );
         if( !partitioner.isConsInter() && m_modeCtrl.tryMode( encTestMode, cs, partitioner ) )
         {
-          xCheckRDCostIntra( tempCS, bestCS, partitioner, encTestMode );
+          xCheckRDCostIntra( tempCS, bestCS, partitioner, encTestMode ); //MATHEUS NOTE: important
         }
       } // reusing cu
 
@@ -1458,6 +1461,8 @@ void EncCu::xCheckRDCostIntra( CodingStructure *&tempCS, CodingStructure *&bestC
   tempCS->fracBits = m_CABACEstimator->getEstFracBits();
   tempCS->cost = m_cRdCost.calcRdCost(tempCS->fracBits, tempCS->dist);
 
+  //MATHEUS NOTE: PRINT AQUI? PARECE PROXIMO DO FINAL PARA O INTRA
+
   xEncodeDontSplit(*tempCS, partitioner);
 
   xCheckDQP(*tempCS, partitioner);
@@ -1468,6 +1473,13 @@ void EncCu::xCheckRDCostIntra( CodingStructure *&tempCS, CodingStructure *&bestC
   }
 
   DTRACE_MODE_COST(*tempCS, m_cRdCost.getLambda(true));
+
+  //<Matheus>
+  if (cu.slice->isInterB() || cu.slice->isInterP()) {
+    std::cout << "xCheckRDCostIntra: " << tempCS->cost << std::endl;
+  }
+  //</Matheus>
+
   xCheckBestMode(tempCS, bestCS, partitioner, encTestMode, m_EDO);
 
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_MODES_TESTED][0][!tempCS->slice->isIntra() + tempCS->slice->depth] );
@@ -2951,6 +2963,10 @@ void EncCu::xCheckRDCostIBCMode(CodingStructure*& tempCS, CodingStructure*& best
 
 void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode )
 {
+  //<Matheus>
+  ApproxInter::bestTempCost = 666;
+  //</Matheus>
+
   PROFILER_SCOPE_AND_STAGE_EXT( 1, _TPROF, P_INTER_MVD, tempCS, partitioner.chType );
   tempCS->initStructData( encTestMode.qp );
 
@@ -3010,6 +3026,7 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
     double bestCostInter = StopInterRes ? m_mergeBestSATDCost : MAX_DOUBLE;
 
     bool stopTest = m_cInterSearch.predInterSearch(cu, partitioner, bestCostInter);
+	//MATHEUS NOTE: PRINT AQUI? talvez pegue o best geral? NO FINAL NA FUNÇÃO?
 
     if (StopInterRes && (bestCostInter != m_mergeBestSATDCost))
     {
@@ -3059,6 +3076,13 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
       }
     }
   }
+
+  //<Matheus>
+  if (ApproxInter::bestTempCost != 666) {
+    std::cout << "xCheckRDCostInter: " << ApproxInter::bestTempCost << std::endl;
+  }
+  //</Matheus>
+
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_MODES_TESTED][0][!tempCS->slice->isIntra() + tempCS->slice->depth] );
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L && !tempCS->slice->isIntra(), g_cuCounters2D[CU_MODES_TESTED][Log2( tempCS->area.lheight() )][Log2( tempCS->area.lwidth() )] );
 }
@@ -3216,6 +3240,7 @@ void EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
           
           double bestCostInter = MAX_DOUBLE;
           m_cInterSearch.predInterSearch(cu, partitioner, bestCostInter);
+		  //MATHEUS NOTE: PRINT AQUI?
           
           if ( cu.interDir <= 3 )
           {
@@ -3331,6 +3356,13 @@ void EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
 
     tempCS->initStructData(encTestMode.qp);
   }
+
+  //<Matheus>
+  if (ApproxInter::bestTempCost != 666) {
+    std::cout << "xCheckRDCostInterIMV: " << ApproxInter::bestTempCost << std::endl;
+  }
+  //</Matheus>
+
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_MODES_TESTED][0][!tempCS->slice->isIntra() + tempCS->slice->depth] );
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L && !tempCS->slice->isIntra(), g_cuCounters2D[CU_MODES_TESTED][Log2( tempCS->area.lheight() )][Log2( tempCS->area.lwidth() )] );
 }
@@ -3746,11 +3778,13 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
     {
       numSbtRdo = 0;
     }
+
     //fast algorithm
     if( ( histBestSbt != MAX_UCHAR && !CU::isSbtMode( histBestSbt ) ) || m_cInterSearch.getSkipSbtAll() )
     {
       numSbtRdo = 0;
     }
+
     if( bestCost != MAX_DOUBLE && sbtOffCost != MAX_DOUBLE )
     {
       double th = 1.07;
@@ -3759,11 +3793,13 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
         assert( m_sbtCostSave[1] <= m_sbtCostSave[0] );
         th *= ( m_sbtCostSave[0] / m_sbtCostSave[1] );
       }
+
       if( sbtOffCost > bestCost * th )
       {
         numSbtRdo = 0;
       }
     }
+
     if( !sbtOffRootCbf && sbtOffCost != MAX_DOUBLE )
     {
       double th = Clip3( 0.05, 0.55, ( 27 - cu->qp ) * 0.02 + 0.35 );
@@ -3916,6 +3952,12 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
   }
 
   tempCS->cost = currBestCost;
+
+  //<Matheus>
+  ApproxInter::bestTempCost = currBestCost;
+  //</Matheus>
+
+  //MATHEUS NOTE: PRINT AQUI? PARECE O FINAL PARA O INTER
 }
 
 void EncCu::xEncodeDontSplit( CodingStructure &cs, Partitioner &partitioner )

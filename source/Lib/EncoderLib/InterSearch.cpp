@@ -2447,7 +2447,7 @@ void InterSearch::xPatternSearch( TZSearchStruct&  cStruct,
         uiSadBest = uiSad;
         iBestX    = x;
         iBestY    = y;
-        m_cDistParam.maximumDistortionForEarlyExit = uiSad;
+        m_cDistParam.maximumDistortionForEarlyExit = uiSad; //MATHEUS NOTE: IMPORTANTE
       }
     }
     piRef += cStruct.iRefStride;
@@ -5609,6 +5609,13 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   if (bBi) //MATHEUS TODO: origBufTemp
   {
     PelUnitBuf  origBufTmp = m_tmpStorageLCU.getCompactBuf(cu);
+
+    #if MATHEUS_INSTRUMENTATION && APPROX_ORIG_BUFFER
+      Pel const * const approxTempOrigBuffer = origBuf.Y().buf;
+      ApproxInter::InstrumentIfMarked((void*) approxTempOrigBuffer, ApproxInter::TEMP_ORIG_AFFINE_MOTION_ESTIMATION_BID, 1, sizeof(Pel));
+      ApproxSS::start_level();
+    #endif
+
     // NOTE: Other buf contains predicted signal from another direction
     PelUnitBuf otherBuf = m_tmpPredStorage[1 - (int)refPicList].getCompactBuf( cu );
     origBufTmp.copyFrom(origBuf);
@@ -6020,19 +6027,15 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
 
   #if FELIPE_INSTRUMENTATION
     #if APPROX_RECO_BUFFER_INTER_AFFINE
-      //<Felipe>
       // Felipe: ending approximation at reconstructed samples buffer at IME/FME
       ApproxSS::end_level();
       ApproxSS::remove_approx((void*) approxRecoBufferBegin, (void*) approxRecoBufferEnd);
-      //</Felipe>
     #endif
 
     #if APPROX_ORIG_BUFFER
-      //<Felipe>
       // Felipe: ending approximation at original samples buffer at IME/FME
       ApproxSS::end_level();
       ApproxSS::remove_approx((void*) approxOrigBufferBegin, (void*) approxOrigBufferEnd);
-      //</Felipe>
     #endif
 
     #if APPROX_PRED_BUFFER
@@ -6051,6 +6054,11 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
     #if APPROX_ORIG_BUFFER
       ApproxInter::UninstrumentIfMarked((void*) approxOrigBuffer);
       ApproxSS::end_level();
+
+      if (bBi) {
+        ApproxInter::UninstrumentIfMarked((void*) approxTempOrigBuffer);
+        ApproxSS::end_level();
+      }
     #endif
 
     #if APPROX_PRED_BUFFER

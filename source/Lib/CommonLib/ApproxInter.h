@@ -7,24 +7,24 @@
 	#include "approx.h"
 
 
-	#define MATHEUS_INSTRUMENTATION true
+	#define MATHEUS_INSTRUMENTATION 			true
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
 
-	#define APPROX_RECO_BUFFER_INTER true //ativa instrumentação em toda a ME (excluindo affine)
+	#define APPROX_RECO_BUFFER_INTER 			true //ativa instrumentação em toda a ME (excluindo affine)
 
-	#define APPROX_RECO_BUFFER_INTER_MVP false 
-	#define APPROX_RECO_BUFFER_INTER_PATTERN false 
-	#define APPROX_RECO_BUFFER_INTER_TZ true
-	#define APPROX_RECO_BUFFER_INTER_FAST false
-	#define APPROX_RECO_BUFFER_INTER_FRACTIONAL false
-	#define APPROX_RECO_BUFFER_INTER_AFFINE false
+	#define APPROX_RECO_BUFFER_INTER_MVP 		false 
+	#define APPROX_RECO_BUFFER_INTER_PATTERN 	false 
+	#define APPROX_RECO_BUFFER_INTER_TZ 		false
+	#define APPROX_RECO_BUFFER_INTER_FAST 		false
+	#define APPROX_RECO_BUFFER_INTER_FRACTIONAL	false
+	#define APPROX_RECO_BUFFER_INTER_AFFINE 	false
 
 
-	#define APPROX_ORIG_BUFFER false
-	#define APPROX_FILT_BUFFER_V1 false	//GENERALIST
-	#define APPROX_FILT_BUFFER_V2 false	//SPECIFIC
-	#define APPROX_PRED_BUFFER false
+	#define APPROX_ORIG_BUFFER 					false
+	#define APPROX_FILT_BUFFER_V1 				false	//GENERALIST
+	#define APPROX_FILT_BUFFER_V2 				false	//SPECIFIC
+	#define APPROX_PRED_BUFFER 					false
 
 	class BufferRange {
 		public:
@@ -51,6 +51,7 @@
 			constexpr int64_t ORIG_MOTION_ESTIMATION_BID = 2;
 			constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION_BID = 11;
 			constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION_BID = 3;
+			constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION_BID = 13;
 			constexpr int64_t FILT_MOTION_ESTIMATION_TEMP_BID = 4;
 			constexpr int64_t FILT_MOTION_ESTIMATION_BID = 5;
 			constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION_BID = 6;
@@ -60,6 +61,10 @@
 			constexpr int64_t RECO_MOTION_ESTIMATION_TZ_BID = 8;
 			constexpr int64_t RECO_MOTION_ESTIMATION_FAST_BID = 9;
 			constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL_BID = 10;
+
+
+			//cost print
+			extern double bestTempCost;
 
 
 

@@ -4,6 +4,9 @@ BufferRange::BufferRange(uint8_t * const initialAddress, uint8_t const * const f
 
 AllocatedBuffersSet ApproxInter::allocatedBuffers{};
 
+//cost print
+double ApproxInter::bestTempCost = 666;
+
 void ApproxInter::MarkBuffer(const BufferRange& toMark) {
 	ApproxInter::allocatedBuffers.insert(toMark);
 }
