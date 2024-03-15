@@ -730,7 +730,13 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         xReuseCachedResult( tempCS, bestCS, partitioner );
       }
       else
-      {
+      { 
+        #if PRINT_COST
+          if (slice.isInterB() || slice.isInterP()) {
+            std::cout << "Block Size: " << cs.area.lwidth() << ", " << cs.area.lheight() << std::endl;
+          }
+        #endif
+
         // add first pass modes
         if ( !slice.isIntra() && !slice.isIRAP() && !( cs.area.lwidth() == 4 && cs.area.lheight() == 4 ) && !partitioner.isConsIntra() )
         {
@@ -2963,9 +2969,9 @@ void EncCu::xCheckRDCostIBCMode(CodingStructure*& tempCS, CodingStructure*& best
 
 void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode )
 {
-  //<Matheus>
-  ApproxInter::bestTempCost = 666;
-  //</Matheus>
+  #if PRINT_COST
+    ApproxInter::bestTempCost = 666;
+  #endif
 
   PROFILER_SCOPE_AND_STAGE_EXT( 1, _TPROF, P_INTER_MVD, tempCS, partitioner.chType );
   tempCS->initStructData( encTestMode.qp );
@@ -3077,11 +3083,11 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
     }
   }
 
-  //<Matheus>
-  if (ApproxInter::bestTempCost != 666) {
-    std::cout << "xCheckRDCostInter: " << ApproxInter::bestTempCost << std::endl;
-  }
-  //</Matheus>
+  #if PRINT_COST
+    if (ApproxInter::bestTempCost != 666) {
+      std::cout << "xCheckRDCostInter: " << ApproxInter::bestTempCost << std::endl;
+    }
+  #endif
 
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_MODES_TESTED][0][!tempCS->slice->isIntra() + tempCS->slice->depth] );
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L && !tempCS->slice->isIntra(), g_cuCounters2D[CU_MODES_TESTED][Log2( tempCS->area.lheight() )][Log2( tempCS->area.lwidth() )] );
@@ -3357,11 +3363,11 @@ void EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
     tempCS->initStructData(encTestMode.qp);
   }
 
-  //<Matheus>
-  if (ApproxInter::bestTempCost != 666) {
-    std::cout << "xCheckRDCostInterIMV: " << ApproxInter::bestTempCost << std::endl;
-  }
-  //</Matheus>
+  #if PRINT_COST
+    if (ApproxInter::bestTempCost != 666) {
+      std::cout << "xCheckRDCostInterIMV: " << ApproxInter::bestTempCost << std::endl;
+    }
+  #endif
 
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_MODES_TESTED][0][!tempCS->slice->isIntra() + tempCS->slice->depth] );
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L && !tempCS->slice->isIntra(), g_cuCounters2D[CU_MODES_TESTED][Log2( tempCS->area.lheight() )][Log2( tempCS->area.lwidth() )] );
@@ -3953,9 +3959,9 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
 
   tempCS->cost = currBestCost;
 
-  //<Matheus>
-  ApproxInter::bestTempCost = currBestCost;
-  //</Matheus>
+  #if PRINT_COST
+    ApproxInter::bestTempCost = currBestCost;
+  #endif
 
   //MATHEUS NOTE: PRINT AQUI? PARECE O FINAL PARA O INTER
 }

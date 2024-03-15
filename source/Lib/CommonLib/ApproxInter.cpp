@@ -4,8 +4,9 @@ BufferRange::BufferRange(uint8_t * const initialAddress, uint8_t const * const f
 
 AllocatedBuffersSet ApproxInter::allocatedBuffers{};
 
-//cost print
-double ApproxInter::bestTempCost = 666;
+#if PRINT_COST
+	double ApproxInter::bestTempCost = 666;
+#endif
 
 void ApproxInter::MarkBuffer(const BufferRange& toMark) {
 	ApproxInter::allocatedBuffers.insert(toMark);
@@ -64,6 +65,8 @@ void ApproxInter::PrintMacrosStates() {
 	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V1", 				APPROX_FILT_BUFFER_V1);
 	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V2", 				APPROX_FILT_BUFFER_V2);
 	ApproxInter::PrintMacroState("APPROX_PRED_BUFFER", 					APPROX_PRED_BUFFER);
+
+	ApproxInter::PrintMacroState("PRINT_COST", 							PRINT_COST);
 
 	std::cout << std::endl;
 }

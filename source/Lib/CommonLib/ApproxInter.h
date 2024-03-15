@@ -26,6 +26,8 @@
 	#define APPROX_FILT_BUFFER_V2 				false	//SPECIFIC
 	#define APPROX_PRED_BUFFER 					false
 
+	#define PRINT_COST 							true
+
 	class BufferRange {
 		public:
 			uint8_t * const m_initialAddress;
@@ -63,10 +65,9 @@
 			constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL_BID = 10;
 
 
-			//cost print
-			extern double bestTempCost;
-
-
+			#if PRINT_COST
+				extern double bestTempCost;
+			#endif
 
 
 			void MarkBuffer(const BufferRange& toMark);
