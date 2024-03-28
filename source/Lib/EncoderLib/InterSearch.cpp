@@ -57,6 +57,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "CommonLib/dtrace_next.h"
 #include "CommonLib/dtrace_buffer.h"
 #include "CommonLib/TimeProfiler.h"
+#include "CommonLib/approx.h"
 
 #include <math.h>
 
@@ -5412,6 +5413,18 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   // pred YUV
   PelUnitBuf  predBuf = m_tmpAffiStorage.getCompactBuf(cu);
 
+  // <Yasmin>
+  // Felipe: calculating and adding approximations at AME prediction buffer
+  const Pel *beginBuffer, *endBuffer;  
+  int bufferStride = predBuf.Y().width * predBuf.Y().height;
+
+  beginBuffer = predBuf.Y().buf;
+  endBuffer = beginBuffer + bufferStride;
+
+  ApproxSS::add_approx((void *) beginBuffer, (void *) endBuffer, 1, 0, sizeof(Pel));
+  ApproxSS::start_level();
+  // <Yasmin/>
+
   // Set start Mv position, use input mv as started search mv
   Mv acMvTemp[3];
   ::memcpy(acMvTemp, acMv, sizeof(Mv) * 3);
@@ -5753,6 +5766,11 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   ruiBits = uiBitsBest;
   ruiCost = uiCostBest;
   DTRACE(g_trace_ctx, D_COMMON, " (%d) uiBitsBest=%d, uiCostBest=%d\n", DTRACE_GET_COUNTER(g_trace_ctx, D_COMMON), uiBitsBest, uiCostBest);
+
+  // <Yasmin>
+  ApproxSS::end_level();
+  ApproxSS::remove_approx((void *) beginBuffer,  (void *) endBuffer);
+  // <Yasmin/>
 }
 
 bool InterSearch::xEstimateAffineAMVP(CodingUnit& cu, AffineAMVPInfo& affineAMVPInfo, CPelUnitBuf& origBuf, RefPicList refPicList, int iRefIdx, Mv acMvPred[3], Distortion& distBiP)
