@@ -55,6 +55,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <memory.h>
 #include <algorithm>
 
+// <Yasmin>
+int extWidthFiltered, extHeightFiltered;
+// <Yasmin/>
+
 //! \ingroup CommonLib
 //! \{
 
@@ -661,6 +665,13 @@ void InterPredInterpolation::init()
     int extHeight = MAX_CU_SIZE + (2 * BDOF_EXTEND_SIZE + 2) + 1;
     extWidth = extWidth > (MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 16) ? extWidth : MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 16;
     extHeight = extHeight > (MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 1) ? extHeight : MAX_CU_SIZE + (2 * DMVR_NUM_ITERATION) + 1;
+    
+    // <Yasmin>
+    // Felipe: saving filtered samples buffer dimensions
+    extWidthFiltered = extWidth;
+    extHeightFiltered = extHeight;
+    // <Yasmin/>
+    
     for( uint32_t i = 0; i < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; i++ )
     {
       m_filteredBlockTmp[i][c] = ( Pel* ) xMalloc( Pel, ( extWidth + 4 ) * ( extHeight + 7 + 4 ) );
