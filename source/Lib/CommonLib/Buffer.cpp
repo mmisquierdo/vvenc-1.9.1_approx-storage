@@ -51,6 +51,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Unit.h"
 #include "Slice.h"
 #include "InterpolationFilter.h"
+#include "ApproxInter.h"
 
 //! \ingroup CommonLib
 //! \{
@@ -1015,6 +1016,21 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area )
 
     bufs.push_back( PelBuf( topLeft, totalWidth, totalWidth, totalHeight ) );
     topLeft += area;
+
+    // <Yasmin/>
+    // <Arthur> e <Felipe>
+    // Atualiza nova variável com tamanho do buffer
+
+    if(ApproxInter::tmpBool && compID == COMP_Y) {
+      ApproxInter::frameOrigBufferWidth = totalWidth;
+      ApproxInter::frameOrigBufferHeight = totalHeight;
+
+      ApproxInter::collectBufferSize = false;
+      ApproxInter::tmpBool = false; 
+    }
+
+    // <Arthur/> </Felipe>
+    // <Yasmin/>
   }
 
   m_maxArea = UnitArea( _chromaFormat, _area );

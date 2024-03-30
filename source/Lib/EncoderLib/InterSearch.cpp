@@ -58,6 +58,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "CommonLib/dtrace_buffer.h"
 #include "CommonLib/TimeProfiler.h"
 
+#include "CommonLib/ApproxInter.h"
+#include "CommonLib/approx.h"
+
 #include <math.h>
 
  //! \ingroup EncoderLib
@@ -2047,6 +2050,18 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   m_pcRdCost->setPredictor( predQuarter );
   m_pcRdCost->setCostScale(2);
   
+  // <Yasmin>
+  // Felipe: calculate the beginBuffer and endBuffer limits for original samples buffer
+  const Pel *beginBuffer, *endBuffer;
+
+  beginBuffer = cStruct.pcPatternKey->buf;
+  endBuffer = beginBuffer + (cStruct.pcPatternKey->width * cStruct.pcPatternKey->height);
+
+  // Felipe: starting approximation at original samples buffer at IME/FME  
+  ApproxSS::add_approx((void *) beginBuffer, (void *) endBuffer, 1, 0, sizeof(Pel));
+  ApproxSS::start_level();
+  // <Yasmin/>
+
   //  Do integer search
   if( m_motionEstimationSearchMethod == VVENC_MESEARCH_FULL || bBi )
   {
@@ -2134,6 +2149,13 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     xPatternSearchIntRefine( cu, cStruct, rcMv, rcMvPred, riMVPIdx, ruiBits, ruiCost, amvpInfo, fWeight);
   }
   DTRACE(g_trace_ctx, D_ME, "   MECost<L%d,%d>: %6d (%d)  MV:%d,%d\n", (int)refPicList, (int)bBi, ruiCost, ruiBits, rcMv.hor << 2, rcMv.ver << 2);
+  
+  // <Yasmin>
+  // Felipe: ending approximation at original samples buffer at IME/FME
+  ApproxSS::end_level();
+  ApproxSS::remove_approx((void *) beginBuffer,  (void *) endBuffer);
+  // <Yasmin/>
+
 }
 
 void InterSearch::xClipMvSearch( Mv& rcMv, const Position& pos, const struct Size& size, const PreCalcValues& pcv, const int ifpLines )
@@ -5451,6 +5473,19 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   {
     acMvTemp[2].roundAffinePrecInternal2Amvr(cu.imv);
   }
+  
+    // <Yasmin/>
+    // Felipe: calculate the beginBuffer and endBuffer limits for original samples buffer
+    const Pel *beginBuffer, *endBuffer;
+
+    beginBuffer = pBuf->Y().buf;
+    endBuffer = beginBuffer + (pBuf->Y().width * pBuf->Y().height);
+
+    // Felipe: starting of approxation to original samples buffer at AME  
+    ApproxSS::add_approx((void *) beginBuffer, (void *) endBuffer, 2, 0, sizeof(Pel));
+    ApproxSS::start_level();
+    // <Yasmin/>
+
   if( !m_pcEncCfg->m_ifpLines || xIsAffineMvInRangeFPP( cu, acMvTemp, m_pcEncCfg->m_ifpLines ) )
   {
     xPredAffineBlk(COMP_Y, cu, refPic, acMvTemp, predBuf, false, cu.cs->slice->clpRngs[COMP_Y], refPicList);
@@ -5753,6 +5788,14 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   ruiBits = uiBitsBest;
   ruiCost = uiCostBest;
   DTRACE(g_trace_ctx, D_COMMON, " (%d) uiBitsBest=%d, uiCostBest=%d\n", DTRACE_GET_COUNTER(g_trace_ctx, D_COMMON), uiBitsBest, uiCostBest);
+  
+  // <Yasmin>
+  // Felipe: ending of approxation to reconstructed samples buffer at AME  
+  ApproxSS::end_level();
+  ApproxSS::remove_approx((void *) beginBuffer, (void *) endBuffer);
+
+  // <Yasmin/>
+
 }
 
 bool InterSearch::xEstimateAffineAMVP(CodingUnit& cu, AffineAMVPInfo& affineAMVPInfo, CPelUnitBuf& origBuf, RefPicList refPicList, int iRefIdx, Mv acMvPred[3], Distortion& distBiP)
