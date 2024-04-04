@@ -57,6 +57,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <math.h>
 #include "vvenc/vvencCfg.h"
 
+#include "CommonLib/approx.h"
+
 //! \ingroup EncoderLib
 //! \{
 
@@ -213,6 +215,9 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
   }
   DistParam distParam    = m_pcRdCost->setDistParam( piOrg, piPred, sps.bitDepths[ CH_L ], DF_HAD_2SAD); // Use HAD (SATD) cost
 
+  addIntraOrigApprox(distParam.org, COMP_Y);
+  ApproxSS::start_level();
+
   const int numHadCand = (testMip ? 2 : 1) * 3;
 
   //*** Derive (regular) candidates using Hadamard
@@ -242,7 +247,8 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
 
     m_parentCandList.push_back( ModeInfo( false, false, 0, NOT_INTRA_SUBPARTITIONS, mode ) );
   }
-   
+
+     
   for( int decDst = 1 << m_pcEncCfg->m_IntraEstDecBit; decDst > 0; decDst >>= 1 )
   {
     for( unsigned idx = 0; idx < m_parentCandList.size(); idx++ )
@@ -272,9 +278,13 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
         distParam.cur.buf = piPred.buf = m_SortedPelUnitBufs->getTestBuf().Y().buf;
         predIntraAng( COMP_Y, piPred, cu );
 
+        
+
         // Use the min between SAD and HAD as the cost criterion
         // SAD is scaled by 2 to align with the scaling of HAD
         Distortion minSadHad = distParam.distFunc( distParam );
+
+
 
         uint64_t fracModeBits = xFracModeBitsIntraLuma( cu, mpmLst );
 
@@ -296,6 +306,8 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
     m_parentCandList.resize( RdModeList.size() );
     std::copy( RdModeList.cbegin(), RdModeList.cend(), m_parentCandList.begin() );
   }
+
+   
 
   const bool isFirstLineOfCtu = (((cu.block(COMP_Y).y)&((cu.cs->sps)->CTUSize - 1)) == 0);
   if( m_pcEncCfg->m_MRL && ! isFirstLineOfCtu )
@@ -384,6 +396,9 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
     const double thresholdHadCost = 1.0 + 1.4 / sqrt((double)(cu.lwidth()*cu.lheight()));
     xReduceHadCandList(RdModeList, CandCostList, *m_SortedPelUnitBufs, numModesForFullRD, thresholdHadCost, mipHadCost, cu, fastMip);
   }
+
+  ApproxSS::end_level();
+  removeIntraOrigApprox(distParam.org);
 
   if( m_pcEncCfg->m_bFastUDIUseMPMEnabled )
   {
@@ -804,6 +819,10 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
     DistParam distParamSadCr  = m_pcRdCost->setDistParam( orgCr, predCr, cu.cs->sps->bitDepths[ CH_C ], DF_SAD);
     DistParam distParamSatdCr = m_pcRdCost->setDistParam( orgCr, predCr, cu.cs->sps->bitDepths[ CH_C ], DF_HAD);
 
+    addIntraOrigApprox(orgCb, COMP_Cb);
+    addIntraOrigApprox(orgCr, COMP_Cr);
+    ApproxSS::start_level();
+
     cu.intraDir[1] = MDLM_L_IDX; // temporary assigned, just to indicate this is a MDLM mode. for luma down-sampling operation.
 
     initIntraPatternChType(cu, cu.Cb());
@@ -853,6 +872,10 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
       sad += std::min(sadCr, satdCr);
       satdSortedCost[idx] = sad;
     }
+
+    ApproxSS::end_level();
+    removeIntraOrigApprox(orgCb);
+    removeIntraOrigApprox(orgCr);    
 
     // sort the mode based on the cost from small to large.
     for (int i = uiMinMode; i <= uiMaxMode - 1; i++)
@@ -2999,6 +3022,30 @@ void IntraSearch::xSpeedUpIntra(double bestcost, int& EndMode, int& speedIntra, 
       speedIntra |= 1;
     }
   }
+}
+
+void IntraSearch::addIntraOrigApprox(CPelBuf origBuffer, ComponentID comp) {
+    const Pel *beginOrigBuffer, *endOrigBuffer;
+
+    int bufferStride = origBuffer.stride * origBuffer.height;
+    //int bufferStride = 128*128;
+
+    beginOrigBuffer = origBuffer.buf;
+    endOrigBuffer = beginOrigBuffer + bufferStride;
+
+    ApproxSS::add_approx((void *) beginOrigBuffer, (void *) endOrigBuffer, comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
+}
+
+void IntraSearch::removeIntraOrigApprox(CPelBuf origBuffer) {
+    const Pel *beginOrigBuffer, *endOrigBuffer;
+
+    int bufferStride = origBuffer.stride * origBuffer.height;
+    //int bufferStride = 128*128;
+
+    beginOrigBuffer = origBuffer.buf;
+    endOrigBuffer = beginOrigBuffer + bufferStride;
+
+    ApproxSS::remove_approx((void *) beginOrigBuffer, (void *) endOrigBuffer);
 }
 
 } // namespace vvenc
