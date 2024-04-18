@@ -11,12 +11,12 @@
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
 
-	#define APPROX_RECO_BUFFER_INTER 			true //ativa instrumentação em toda a ME (excluindo affine)
+	#define APPROX_RECO_BUFFER_INTER 			false //ativa instrumentação em toda a ME (excluindo affine)
 
-	#define APPROX_RECO_BUFFER_INTER_MVP 		false 
-	#define APPROX_RECO_BUFFER_INTER_PATTERN 	false 
-	#define APPROX_RECO_BUFFER_INTER_TZ 		false
-	#define APPROX_RECO_BUFFER_INTER_FAST 		false
+	#define APPROX_RECO_BUFFER_INTER_MVP 		true 
+	#define APPROX_RECO_BUFFER_INTER_PATTERN 	true 
+	#define APPROX_RECO_BUFFER_INTER_TZ 		true
+	#define APPROX_RECO_BUFFER_INTER_FAST 		true
 	#define APPROX_RECO_BUFFER_INTER_FRACTIONAL	false
 	#define APPROX_RECO_BUFFER_INTER_AFFINE 	false
 
@@ -26,7 +26,7 @@
 	#define APPROX_FILT_BUFFER_V2 				false	//SPECIFIC
 	#define APPROX_PRED_BUFFER 					false
 
-	#define PRINT_COST 							true
+	#define PRINT_COST 							false
 
 	class BufferRange {
 		public:

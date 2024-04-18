@@ -1480,11 +1480,13 @@ void EncCu::xCheckRDCostIntra( CodingStructure *&tempCS, CodingStructure *&bestC
 
   DTRACE_MODE_COST(*tempCS, m_cRdCost.getLambda(true));
 
-  //<Matheus>
-  if (cu.slice->isInterB() || cu.slice->isInterP()) {
-    std::cout << "xCheckRDCostIntra: " << tempCS->cost << std::endl;
-  }
-  //</Matheus>
+  #if PRINT_COST
+	//<Matheus>
+	if (cu.slice->isInterB() || cu.slice->isInterP()) {
+		std::cout << "xCheckRDCostIntra: " << tempCS->cost << std::endl;
+	}
+	//</Matheus>
+  #endif
 
   xCheckBestMode(tempCS, bestCS, partitioner, encTestMode, m_EDO);
 

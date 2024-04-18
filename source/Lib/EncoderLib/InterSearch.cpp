@@ -2115,8 +2115,8 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   if( m_motionEstimationSearchMethod == VVENC_MESEARCH_FULL || bBi )
   {
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_MVP
-      Pel const * const approxRecoBuffer = buf.buf;
-      ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_MVP_BID, 1, sizeof(Pel));
+      Pel const * const approxRecoBufferMVP = buf.buf;
+      ApproxInter::InstrumentIfMarked((void*) approxRecoBufferMVP, ApproxInter::RECO_MOTION_ESTIMATION_MVP_BID, 1, sizeof(Pel));
       ApproxSS::start_level();
   	#endif
 
@@ -2165,13 +2165,13 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     }
 
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_MVP
-      ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
+      ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferMVP);
       ApproxSS::end_level();
     #endif
 
 	  #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_PATTERN
-      Pel const * const approxRecoBuffer = buf.buf;
-      ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_PATTERN_BID, 1, sizeof(Pel));
+      Pel const * const approxRecoBufferPattern = buf.buf;
+      ApproxInter::InstrumentIfMarked((void*) approxRecoBufferPattern, ApproxInter::RECO_MOTION_ESTIMATION_PATTERN_BID, 1, sizeof(Pel));
       ApproxSS::start_level();
   	#endif
 
@@ -2179,15 +2179,15 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     xPatternSearch ( cStruct, rcMv, ruiCost);
 
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_PATTERN
-      ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
+      ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferPattern);
       ApproxSS::end_level();
     #endif
   }
   else if( bQTBTMV )
   {
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_TZ
-      Pel const * const approxRecoBuffer = buf.buf;
-      ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_TZ_BID, 1, sizeof(Pel));
+      Pel const * const approxRecoBufferTZ = buf.buf;
+      ApproxInter::InstrumentIfMarked((void*) approxRecoBufferTZ, ApproxInter::RECO_MOTION_ESTIMATION_TZ_BID, 1, sizeof(Pel));
       ApproxSS::start_level();
   	#endif
 
@@ -2196,15 +2196,15 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     xTZSearch( cu, refPicList, iRefIdxPred, cStruct, rcMv, ruiCost, false, true );
 
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_TZ
-      ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
+      ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferTZ);
       ApproxSS::end_level();
     #endif
   }
   else
   {
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_FAST
-      Pel const * const approxRecoBuffer = buf.buf;
-      ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_FAST_BID, 1, sizeof(Pel));
+      Pel const * const approxRecoBufferFast = buf.buf;
+      ApproxInter::InstrumentIfMarked((void*) approxRecoBufferFast, ApproxInter::RECO_MOTION_ESTIMATION_FAST_BID, 1, sizeof(Pel));
       ApproxSS::start_level();
   	#endif
 
@@ -2214,7 +2214,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     relatedCU.setMv( refPicList, iRefIdxPred, rcMv );
 
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_FAST
-      ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
+      ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferFast);
       ApproxSS::end_level();
     #endif
   }
@@ -2240,8 +2240,8 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     #endif
 
     #if APPROX_RECO_BUFFER_INTER_FRACTIONAL
-      Pel const * const approxRecoBuffer = buf.buf;
-      ApproxInter::InstrumentIfMarked((void*) approxRecoBuffer, ApproxInter::RECO_MOTION_ESTIMATION_FRACTIONAL_BID, 1, sizeof(Pel));
+      Pel const * const approxRecoBufferFrac = buf.buf;
+      ApproxInter::InstrumentIfMarked((void*) approxRecoBufferFrac, ApproxInter::RECO_MOTION_ESTIMATION_FRACTIONAL_BID, 1, sizeof(Pel));
       ApproxSS::start_level();
     #endif
   #endif
@@ -2272,7 +2272,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
 
   #if MATHEUS_INSTRUMENTATION
     #if APPROX_RECO_BUFFER_INTER_FRACTIONAL
-      ApproxInter::UninstrumentIfMarked((void*) approxRecoBuffer);
+      ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferFrac);
       ApproxSS::end_level();
     #endif
   #endif
