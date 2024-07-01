@@ -66,6 +66,8 @@ namespace vvenc {
 
 #define PLTCtx(c) SubCtx( Ctx::Palette, c )
 
+
+
 IntraSearch::IntraSearch()
   : m_pSaveCS       (nullptr)
   , m_pcEncCfg      (nullptr)
@@ -111,6 +113,10 @@ void IntraSearch::init(const VVEncCfg &encCfg, TrQuant *pTrQuant, RdCost *pRdCos
     m_orgResiCb[i].create( chromaArea );
     m_orgResiCr[i].create( chromaArea );
   }
+
+  approxIntraOrigBufferY = xMalloc(Pel, 128 * 128);
+  approxIntraOrigBufferCb = xMalloc(Pel, 64 * 64);
+  approxIntraOrigBufferCr = xMalloc(Pel, 64 * 64);
 }
 
 void IntraSearch::destroy()
@@ -305,9 +311,7 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
 
     m_parentCandList.resize( RdModeList.size() );
     std::copy( RdModeList.cbegin(), RdModeList.cend(), m_parentCandList.begin() );
-  }
-
-   
+  } 
 
   const bool isFirstLineOfCtu = (((cu.block(COMP_Y).y)&((cu.cs->sps)->CTUSize - 1)) == 0);
   if( m_pcEncCfg->m_MRL && ! isFirstLineOfCtu )
@@ -398,7 +402,7 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
   }
 
   ApproxSS::end_level();
-  removeIntraOrigApprox(distParam.org);
+  removeIntraOrigApprox(distParam.org, COMP_Y);
 
   if( m_pcEncCfg->m_bFastUDIUseMPMEnabled )
   {
@@ -874,8 +878,8 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
     }
 
     ApproxSS::end_level();
-    removeIntraOrigApprox(orgCb);
-    removeIntraOrigApprox(orgCr);    
+    removeIntraOrigApprox(orgCb, COMP_Cb);
+    removeIntraOrigApprox(orgCr, COMP_Cr);    
 
     // sort the mode based on the cost from small to large.
     for (int i = uiMinMode; i <= uiMaxMode - 1; i++)
@@ -3025,27 +3029,62 @@ void IntraSearch::xSpeedUpIntra(double bestcost, int& EndMode, int& speedIntra, 
 }
 
 void IntraSearch::addIntraOrigApprox(CPelBuf origBuffer, ComponentID comp) {
-    const Pel *beginOrigBuffer, *endOrigBuffer;
+    //const Pel *beginOrigBuffer, *endOrigBuffer;
 
     int bufferStride = origBuffer.stride * origBuffer.height;
-    //int bufferStride = 128*128;
 
-    beginOrigBuffer = origBuffer.buf;
-    endOrigBuffer = beginOrigBuffer + bufferStride;
+    //beginOrigBuffer = origBuffer.buf;
+    //endOrigBuffer = beginOrigBuffer + bufferStride;
 
-    ApproxSS::add_approx((void *) beginOrigBuffer, (void *) endOrigBuffer, comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
+    if(comp == COMP_Y) {
+      bkpOrigBufferY = origBuffer.buf;
+      ApproxSS::add_approx((void *) approxIntraOrigBufferY, (void *) (approxIntraOrigBufferY + (128*128)), comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
+      for (size_t i = 0; i < bufferStride; i++) {
+        approxIntraOrigBufferY[i]  = origBuffer.buf[i];
+      }
+      origBuffer.buf = approxIntraOrigBufferY;
+    }
+    else if(comp == COMP_Cb) {
+      bkpOrigBufferCb = origBuffer.buf;
+      ApproxSS::add_approx((void *) approxIntraOrigBufferCb, (void *) (approxIntraOrigBufferCb + (64*64)), comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
+      for (size_t i = 0; i < bufferStride; i++) {
+        approxIntraOrigBufferCb[i] = origBuffer.buf[i];
+      }
+      origBuffer.buf = approxIntraOrigBufferCb;
+    }
+    else { //comp == COMP_Cr
+      bkpOrigBufferCr = origBuffer.buf;
+      ApproxSS::add_approx((void *) approxIntraOrigBufferCr, (void *) (approxIntraOrigBufferCr + (64*64)), comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
+      for (size_t i = 0; i < bufferStride; i++) {
+        approxIntraOrigBufferCr[i] = origBuffer.buf[i];
+      }
+      origBuffer.buf = approxIntraOrigBufferCr;
+    }    
 }
 
-void IntraSearch::removeIntraOrigApprox(CPelBuf origBuffer) {
-    const Pel *beginOrigBuffer, *endOrigBuffer;
+void IntraSearch::removeIntraOrigApprox(CPelBuf origBuffer, ComponentID comp) {
+    //const Pel *beginOrigBuffer, *endOrigBuffer;
 
-    int bufferStride = origBuffer.stride * origBuffer.height;
+    //int bufferStride = origBuffer.stride * origBuffer.height;
     //int bufferStride = 128*128;
 
-    beginOrigBuffer = origBuffer.buf;
-    endOrigBuffer = beginOrigBuffer + bufferStride;
+    //beginOrigBuffer = origBuffer.buf;
+    //endOrigBuffer = beginOrigBuffer + bufferStride;
 
-    ApproxSS::remove_approx((void *) beginOrigBuffer, (void *) endOrigBuffer);
+    if(comp == COMP_Y) {
+      ApproxSS::remove_approx((void *) approxIntraOrigBufferY, (void *) (approxIntraOrigBufferY + (128*128)));
+      origBuffer.buf = bkpOrigBufferY;
+    }
+    else if(comp == COMP_Cb) {
+      ApproxSS::remove_approx((void *) approxIntraOrigBufferCb, (void *) (approxIntraOrigBufferCb + (64*64)));
+      origBuffer.buf = bkpOrigBufferCb;
+    }
+    else { //comp == COMP_Cr
+      ApproxSS::remove_approx((void *) approxIntraOrigBufferCr, (void *) (approxIntraOrigBufferCr + (64*64)));
+      origBuffer.buf = bkpOrigBufferCr;
+    }
+
+    
 }
 
 } // namespace vvenc

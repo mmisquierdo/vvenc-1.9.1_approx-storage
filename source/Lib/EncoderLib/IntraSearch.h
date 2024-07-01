@@ -91,6 +91,14 @@ private:
   CompStorage         m_orgResiCb[5], m_orgResiCr[5]; // 0:std, 1-3:jointCbCr, 4:crossComp
   std::vector<ModeInfo>
                       m_parentCandList;
+  
+  Pel* approxIntraOrigBufferY;
+  Pel* approxIntraOrigBufferCb;
+  Pel* approxIntraOrigBufferCr;
+
+  const Pel* bkpOrigBufferY;
+  const Pel* bkpOrigBufferCb;
+  const Pel* bkpOrigBufferCr;
 
 protected:
   // interface to option
@@ -210,7 +218,7 @@ private:
   void      xReduceHadCandList        ( static_vector<T, N>& candModeList, static_vector<double, N>& candCostList, SortedPelUnitBufs<M>& sortedPelBuffer, int& numModesForFullRD, const double thresholdHadCost, const double* mipHadCost, const CodingUnit& cu, const bool fastMip);
   
   void      addIntraOrigApprox        (CPelBuf origBuffer, ComponentID comp);
-  void      removeIntraOrigApprox        (CPelBuf origBuffer);
+  void      removeIntraOrigApprox        (CPelBuf origBuffer, ComponentID comp);
 
 };// END CLASS DEFINITION EncSearch
 
