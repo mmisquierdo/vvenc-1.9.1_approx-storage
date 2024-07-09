@@ -217,8 +217,8 @@ private:
   template<typename T, size_t N, int M>
   void      xReduceHadCandList        ( static_vector<T, N>& candModeList, static_vector<double, N>& candCostList, SortedPelUnitBufs<M>& sortedPelBuffer, int& numModesForFullRD, const double thresholdHadCost, const double* mipHadCost, const CodingUnit& cu, const bool fastMip);
   
-  void      addIntraOrigApprox        (CPelBuf origBuffer, ComponentID comp);
-  void      removeIntraOrigApprox        (CPelBuf origBuffer, ComponentID comp);
+  Pel*      initIntraOrigSB        (CPelBuf origBuffer, ComponentID comp);
+  const Pel*      restoreIntraOrigSB        (ComponentID comp);
 
 };// END CLASS DEFINITION EncSearch
 

@@ -117,6 +117,20 @@ void IntraSearch::init(const VVEncCfg &encCfg, TrQuant *pTrQuant, RdCost *pRdCos
   approxIntraOrigBufferY = xMalloc(Pel, 128 * 128);
   approxIntraOrigBufferCb = xMalloc(Pel, 64 * 64);
   approxIntraOrigBufferCr = xMalloc(Pel, 64 * 64);
+
+  Pel* beginBufferY = approxIntraOrigBufferY;
+  Pel* endBufferY = beginBufferY + (128 * 128);
+
+  Pel* beginBufferCb = approxIntraOrigBufferCb;
+  Pel* endBufferCb = beginBufferCb + (64 * 64);
+
+  Pel* beginBufferCr = approxIntraOrigBufferCr;
+  Pel* endBufferCr = beginBufferCr + (64 * 64);
+
+  ApproxSS::add_approx((void *) beginBufferY, (void *) endBufferY, 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
+  ApproxSS::add_approx((void *) beginBufferCb, (void *) endBufferCb, 2, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
+  ApproxSS::add_approx((void *) beginBufferCr, (void *) endBufferCr, 3, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
+      
 }
 
 void IntraSearch::destroy()
@@ -143,6 +157,19 @@ void IntraSearch::destroy()
     m_pBestCS->destroy();
     delete m_pBestCS; m_pBestCS = nullptr;
   }
+
+  Pel* beginBufferY = approxIntraOrigBufferY;
+  Pel* endBufferY = beginBufferY + (128 * 128);
+
+  Pel* beginBufferCb = approxIntraOrigBufferCb;
+  Pel* endBufferCb = beginBufferCb + (64 * 64);
+
+  Pel* beginBufferCr = approxIntraOrigBufferCr;
+  Pel* endBufferCr = beginBufferCr + (64 * 64);
+
+  ApproxSS::remove_approx((void *) beginBufferY, (void *) endBufferY);
+  ApproxSS::remove_approx((void *) beginBufferCb, (void *) endBufferCb);
+  ApproxSS::remove_approx((void *) beginBufferCr, (void *) endBufferCr);
 }
 
 IntraSearch::~IntraSearch()
@@ -219,10 +246,12 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
   {
     piOrg = cu.cs->getRspOrgBuf();
   }
-  DistParam distParam    = m_pcRdCost->setDistParam( piOrg, piPred, sps.bitDepths[ CH_L ], DF_HAD_2SAD); // Use HAD (SATD) cost
 
-  addIntraOrigApprox(distParam.org, COMP_Y);
+  piOrg.buf = initIntraOrigSB(piOrg, COMP_Y);
   ApproxSS::start_level();
+
+  DistParam distParam    = m_pcRdCost->setDistParam( piOrg, piPred, sps.bitDepths[ CH_L ], DF_HAD_2SAD); // Use HAD (SATD) cost
+ 
 
   const int numHadCand = (testMip ? 2 : 1) * 3;
 
@@ -402,7 +431,7 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
   }
 
   ApproxSS::end_level();
-  removeIntraOrigApprox(distParam.org, COMP_Y);
+  piOrg.buf = restoreIntraOrigSB(COMP_Y);
 
   if( m_pcEncCfg->m_bFastUDIUseMPMEnabled )
   {
@@ -818,14 +847,15 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
     CPelBuf orgCr  = cs.getOrgBuf (COMP_Cr);
     PelBuf predCr  = cs.getPredBuf(COMP_Cr);
 
+    // Starting approximations at Cb and Cr OrigSBs 
+    orgCb.buf = initIntraOrigSB(orgCb, COMP_Cb);
+    orgCr.buf = initIntraOrigSB(orgCr, COMP_Cr);
+    ApproxSS::start_level();
+
     DistParam distParamSadCb  = m_pcRdCost->setDistParam( orgCb, predCb, cu.cs->sps->bitDepths[ CH_C ], DF_SAD);
     DistParam distParamSatdCb = m_pcRdCost->setDistParam( orgCb, predCb, cu.cs->sps->bitDepths[ CH_C ], DF_HAD);
     DistParam distParamSadCr  = m_pcRdCost->setDistParam( orgCr, predCr, cu.cs->sps->bitDepths[ CH_C ], DF_SAD);
     DistParam distParamSatdCr = m_pcRdCost->setDistParam( orgCr, predCr, cu.cs->sps->bitDepths[ CH_C ], DF_HAD);
-
-    addIntraOrigApprox(orgCb, COMP_Cb);
-    addIntraOrigApprox(orgCr, COMP_Cr);
-    ApproxSS::start_level();
 
     cu.intraDir[1] = MDLM_L_IDX; // temporary assigned, just to indicate this is a MDLM mode. for luma down-sampling operation.
 
@@ -878,8 +908,8 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
     }
 
     ApproxSS::end_level();
-    removeIntraOrigApprox(orgCb, COMP_Cb);
-    removeIntraOrigApprox(orgCr, COMP_Cr);    
+    orgCb.buf = restoreIntraOrigSB(COMP_Cb);
+    orgCr.buf = restoreIntraOrigSB(COMP_Cr);    
 
     // sort the mode based on the cost from small to large.
     for (int i = uiMinMode; i <= uiMaxMode - 1; i++)
@@ -3028,63 +3058,44 @@ void IntraSearch::xSpeedUpIntra(double bestcost, int& EndMode, int& speedIntra, 
   }
 }
 
-void IntraSearch::addIntraOrigApprox(CPelBuf origBuffer, ComponentID comp) {
-    //const Pel *beginOrigBuffer, *endOrigBuffer;
-
+Pel* IntraSearch::initIntraOrigSB(CPelBuf origBuffer, ComponentID comp) {
     int bufferStride = origBuffer.stride * origBuffer.height;
-
-    //beginOrigBuffer = origBuffer.buf;
-    //endOrigBuffer = beginOrigBuffer + bufferStride;
 
     if(comp == COMP_Y) {
       bkpOrigBufferY = origBuffer.buf;
-      ApproxSS::add_approx((void *) approxIntraOrigBufferY, (void *) (approxIntraOrigBufferY + (128*128)), comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
       for (size_t i = 0; i < bufferStride; i++) {
         approxIntraOrigBufferY[i]  = origBuffer.buf[i];
       }
-      origBuffer.buf = approxIntraOrigBufferY;
+      return approxIntraOrigBufferY;
     }
+
     else if(comp == COMP_Cb) {
       bkpOrigBufferCb = origBuffer.buf;
-      ApproxSS::add_approx((void *) approxIntraOrigBufferCb, (void *) (approxIntraOrigBufferCb + (64*64)), comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
       for (size_t i = 0; i < bufferStride; i++) {
         approxIntraOrigBufferCb[i] = origBuffer.buf[i];
       }
-      origBuffer.buf = approxIntraOrigBufferCb;
+      return approxIntraOrigBufferCb;
     }
+
     else { //comp == COMP_Cr
       bkpOrigBufferCr = origBuffer.buf;
-      ApproxSS::add_approx((void *) approxIntraOrigBufferCr, (void *) (approxIntraOrigBufferCr + (64*64)), comp + 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cb (3)
       for (size_t i = 0; i < bufferStride; i++) {
         approxIntraOrigBufferCr[i] = origBuffer.buf[i];
       }
-      origBuffer.buf = approxIntraOrigBufferCr;
+      return approxIntraOrigBufferCr;
     }    
 }
 
-void IntraSearch::removeIntraOrigApprox(CPelBuf origBuffer, ComponentID comp) {
-    //const Pel *beginOrigBuffer, *endOrigBuffer;
-
-    //int bufferStride = origBuffer.stride * origBuffer.height;
-    //int bufferStride = 128*128;
-
-    //beginOrigBuffer = origBuffer.buf;
-    //endOrigBuffer = beginOrigBuffer + bufferStride;
-
+const Pel* IntraSearch::restoreIntraOrigSB(ComponentID comp) {
     if(comp == COMP_Y) {
-      ApproxSS::remove_approx((void *) approxIntraOrigBufferY, (void *) (approxIntraOrigBufferY + (128*128)));
-      origBuffer.buf = bkpOrigBufferY;
+      return bkpOrigBufferY;
     }
     else if(comp == COMP_Cb) {
-      ApproxSS::remove_approx((void *) approxIntraOrigBufferCb, (void *) (approxIntraOrigBufferCb + (64*64)));
-      origBuffer.buf = bkpOrigBufferCb;
+      return bkpOrigBufferCb;
     }
     else { //comp == COMP_Cr
-      ApproxSS::remove_approx((void *) approxIntraOrigBufferCr, (void *) (approxIntraOrigBufferCr + (64*64)));
-      origBuffer.buf = bkpOrigBufferCr;
+      return bkpOrigBufferCr;
     }
-
-    
 }
 
 } // namespace vvenc
