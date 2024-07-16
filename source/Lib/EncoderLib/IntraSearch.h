@@ -92,6 +92,7 @@ private:
   std::vector<ModeInfo>
                       m_parentCandList;
 
+
 protected:
   // interface to option
   const VVEncCfg* m_pcEncCfg;
@@ -208,6 +209,7 @@ private:
 
   template<typename T, size_t N, int M>
   void      xReduceHadCandList        ( static_vector<T, N>& candModeList, static_vector<double, N>& candCostList, SortedPelUnitBufs<M>& sortedPelBuffer, int& numModesForFullRD, const double thresholdHadCost, const double* mipHadCost, const CodingUnit& cu, const bool fastMip);
+
 
 };// END CLASS DEFINITION EncSearch
 

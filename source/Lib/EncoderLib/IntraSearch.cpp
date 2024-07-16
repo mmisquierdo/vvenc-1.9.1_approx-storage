@@ -109,6 +109,12 @@ void IntraSearch::init(const VVEncCfg &encCfg, TrQuant *pTrQuant, RdCost *pRdCos
     m_orgResiCb[i].create( chromaArea );
     m_orgResiCr[i].create( chromaArea );
   }
+
+  int bufferStride = (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1;
+
+  bkpYNeighborBuffer = xMalloc(Pel, (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1);
+  bkpCbNeighborBuffer = xMalloc(Pel, (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1);
+  bkpCrNeighborBuffer = xMalloc(Pel, (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1);
 }
 
 void IntraSearch::destroy()
@@ -440,6 +446,8 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, d
   if (m_pcEncCfg->m_numIntraModesFullRD > 0)
     numModesForFullRD=m_pcEncCfg->m_numIntraModesFullRD;
 
+  backupLumaNeighBuffers();
+
 #if INTRA_FULL_SEARCH
   numModesForFullRD = numModesAvailable;
 #endif
@@ -717,6 +725,8 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, d
 
   csBest->releaseIntermediateData();
 
+  restoreLumaNeighBuffers();
+
   return validReturn;
 }
 
@@ -734,6 +744,8 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
   uint32_t   uiBestMode = 0;
   Distortion uiBestDist = 0;
   double     dBestCost  = MAX_DOUBLE;
+
+  backupChromaNeighBuffers();
 
   //----- init mode list ----
   {
@@ -982,6 +994,9 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
   {
     cu.ispMode = 0;
   }
+  
+  restoreChromaNeighBuffers();
+
 }
 
 void IntraSearch::saveCuAreaCostInSCIPU( Area area, double cost )

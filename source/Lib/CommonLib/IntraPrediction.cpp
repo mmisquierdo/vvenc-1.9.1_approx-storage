@@ -1817,6 +1817,44 @@ void IntraPrediction::setReferenceArrayLengths(const CompArea& area)
   m_topRefLength = (width << 1);
 }
 
+void IntraPrediction::backupLumaNeighBuffers() {
+  Pel *beginYNeighborBuffer = getPredictorPtr(COMP_Y);
+
+  int bufferStride = (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1;
+
+  memcpy(bkpYNeighborBuffer, beginYNeighborBuffer, bufferStride * sizeof(Pel));
+  
+}
+
+void IntraPrediction::backupChromaNeighBuffers() {
+  Pel *beginCbNeighborBuffer = getPredictorPtr(COMP_Cb);
+  Pel *beginCrNeighborBuffer = getPredictorPtr(COMP_Cr);
+
+  int bufferStride = (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1;
+
+  memcpy(bkpCbNeighborBuffer, beginCbNeighborBuffer, bufferStride * sizeof(Pel));
+  memcpy(bkpCrNeighborBuffer, beginCrNeighborBuffer, bufferStride * sizeof(Pel));  
+  
+}
+
+void IntraPrediction::restoreLumaNeighBuffers() {
+  Pel *beginYNeighborBuffer = getPredictorPtr(COMP_Y);
+
+  int bufferStride = (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1;
+
+  memcpy(beginYNeighborBuffer, bkpYNeighborBuffer, bufferStride * sizeof(Pel));
+}
+
+void IntraPrediction::restoreChromaNeighBuffers() {
+  Pel *beginCbNeighborBuffer = getPredictorPtr(COMP_Cb);
+  Pel *beginCrNeighborBuffer = getPredictorPtr(COMP_Cr);
+
+  int bufferStride = (MAX_CU_SIZE * 2 + 1 + MAX_REF_LINE_IDX) * 2 - 1;
+
+  memcpy(beginCbNeighborBuffer, bkpCbNeighborBuffer, bufferStride * sizeof(Pel));
+  memcpy(beginCrNeighborBuffer, bkpCrNeighborBuffer, bufferStride * sizeof(Pel));  
+}
+
 void IntraPrediction::addIntraApprox() {
   Pel *beginYNeighborBuffer, *endYNeighborBuffer;
   Pel *beginCbNeighborBuffer, *endCbNeighborBuffer;

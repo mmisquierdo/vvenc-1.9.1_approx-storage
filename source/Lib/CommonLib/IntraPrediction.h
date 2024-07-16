@@ -108,12 +108,19 @@ private:
   Pel*                  m_pMdlmTemp; // for MDLM mode
   MatrixIntraPrediction m_matrixIntraPred;
 
+
+
 protected:
   ChromaFormat          m_currChromaFormat;
 
   int                   m_topRefLength;
   int                   m_leftRefLength;
   void setReferenceArrayLengths(const CompArea& area);
+
+
+  Pel* bkpYNeighborBuffer;
+  Pel* bkpCbNeighborBuffer;
+  Pel* bkpCrNeighborBuffer;
 
 private:
   static bool isIntegerSlope      ( const int absAng) { return (0 == (absAng & 0x1F)); }
@@ -183,6 +190,12 @@ public:
   
   void addIntraApprox();
   void removeIntraApprox();
+  
+  void backupLumaNeighBuffers();
+  void restoreLumaNeighBuffers();
+
+  void backupChromaNeighBuffers();
+  void restoreChromaNeighBuffers();
 
 };
 
