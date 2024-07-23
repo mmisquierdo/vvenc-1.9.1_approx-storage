@@ -6,10 +6,11 @@
 	#include <set>
 	#include "approx.h"
 
-
 	#define MATHEUS_INSTRUMENTATION 			true
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
+	#define MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION false
+	#define MATHEUS_xPatternSearchIntRefine_ITERATED_POS 9 /*up to 9: default*/
 
 	#define APPROX_RECO_BUFFER_INTER 			false //ativa instrumentação em toda a ME (excluindo affine)
 
@@ -17,6 +18,7 @@
 	#define APPROX_RECO_BUFFER_INTER_PATTERN 	true 
 	#define APPROX_RECO_BUFFER_INTER_TZ 		true
 	#define APPROX_RECO_BUFFER_INTER_FAST 		true
+	#define APPROX_RECO_BUFFER_INTER_REFINEMENT false
 	#define APPROX_RECO_BUFFER_INTER_FRACTIONAL	false
 	#define APPROX_RECO_BUFFER_INTER_AFFINE 	false
 
@@ -48,21 +50,43 @@
 			extern AllocatedBuffersSet allocatedBuffers; //use methods to manipulate
 
 		//public:
-			constexpr int64_t RECO_MOTION_ESTIMATION_BID = 0;
-			constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION_BID = 1;
-			constexpr int64_t ORIG_MOTION_ESTIMATION_BID = 2;
-			constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION_BID = 11;
-			constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION_BID = 3;
-			constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION_BID = 13;
-			constexpr int64_t FILT_MOTION_ESTIMATION_TEMP_BID = 4;
-			constexpr int64_t FILT_MOTION_ESTIMATION_BID = 5;
-			constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION_BID = 6;
+			namespace BufferId {
+				constexpr int64_t RECO_MOTION_ESTIMATION 				= 0;
+				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 		= 1;
+				constexpr int64_t ORIG_MOTION_ESTIMATION 				= 2;
+				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 			= 11;
+				constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION 		= 3;
+				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION	= 13;
+				constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 			= 4;
+				constexpr int64_t FILT_MOTION_ESTIMATION 				= 5;
+				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 		= 6;
 
-			constexpr int64_t RECO_MOTION_ESTIMATION_MVP_BID = 12;
-			constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN_BID = 7;
-			constexpr int64_t RECO_MOTION_ESTIMATION_TZ_BID = 8;
-			constexpr int64_t RECO_MOTION_ESTIMATION_FAST_BID = 9;
-			constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL_BID = 10;
+				constexpr int64_t RECO_MOTION_ESTIMATION_MVP 			= 12;
+				constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 		= 7;
+				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 			= 8;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 			= 9;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 	= 10;
+				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 	= 14;
+			}
+
+			namespace ConfigurationId {
+				constexpr int64_t RECO_MOTION_ESTIMATION 				= 0;
+				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 		= 0;
+				constexpr int64_t ORIG_MOTION_ESTIMATION 				= 0;
+				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 			= 0;
+				constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION 		= 0;
+				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION	= 0;
+				constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 			= 0;
+				constexpr int64_t FILT_MOTION_ESTIMATION 				= 0;
+				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 		= 0;
+
+				constexpr int64_t RECO_MOTION_ESTIMATION_MVP 			= 1;
+				constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 		= 1;
+				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 			= 1;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 			= 1;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 	= 0;
+				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 	= 0;
+			}
 
 
 			#if PRINT_COST
@@ -79,8 +103,8 @@
 			void PrintMacrosStates();
 			void PrintMacroState(const std::string& macroName, const bool macroStatus, const std::string& tab = "\t");
 
-
-
+			void PrintBuffersInfo();
+			void PrintBufferInfo(const std::string& bufferName, const int64_t bufferId, const int64_t configurationId, const std::string& tab = "\t");
 
 		#if FELIPE_INSTRUMENTATION
 			#if APPROX_RECO_BUFFER_INTER

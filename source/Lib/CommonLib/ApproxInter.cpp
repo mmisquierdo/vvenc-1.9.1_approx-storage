@@ -59,6 +59,7 @@ void ApproxInter::PrintMacrosStates() {
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_PATTERN", 	APPROX_RECO_BUFFER_INTER_PATTERN);
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_TZ", 		APPROX_RECO_BUFFER_INTER_TZ);
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_FAST", 		APPROX_RECO_BUFFER_INTER_FAST);
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_REFINEMENT", APPROX_RECO_BUFFER_INTER_REFINEMENT);
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_FRACTIONAL",	APPROX_RECO_BUFFER_INTER_FRACTIONAL);
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_AFFINE", 	APPROX_RECO_BUFFER_INTER_AFFINE);
 
@@ -67,12 +68,41 @@ void ApproxInter::PrintMacrosStates() {
 	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V2", 				APPROX_FILT_BUFFER_V2);
 	ApproxInter::PrintMacroState("APPROX_PRED_BUFFER", 					APPROX_PRED_BUFFER);
 
+	ApproxInter::PrintMacroState("MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION", MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION);
+	std::cout << "\tMATHEUS_xPatternSearchIntRefine_ITERATED_POS" << ": " << MATHEUS_xPatternSearchIntRefine_ITERATED_POS << std::endl;
+
 	ApproxInter::PrintMacroState("PRINT_COST", 							PRINT_COST);
 
 	std::cout << std::endl;
 }
 
+void PrintBufferInfo(const std::string& bufferName, const int64_t bufferId, const int64_t configurationId, const std::string& tab/* = "\t"*/) {
+	std::cout << tab << bufferName << " = BufferId: " << bufferId << ", ConfigurationId: " << configurationId << std::endl;
+}
 
+void ApproxInter::PrintBuffersInfo() {
+	std::cout << "APPROX BUFFERS INFO" << std::endl;
+
+	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION", 				ApproxInter::BufferId::RECO_MOTION_ESTIMATION, 				ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION);
+	ApproxInter::PrintBufferInfo("RECO_AFFINE_MOTION_ESTIMATION", 		ApproxInter::BufferId::RECO_AFFINE_MOTION_ESTIMATION, 		ApproxInter::ConfigurationId::RECO_AFFINE_MOTION_ESTIMATION);
+	ApproxInter::PrintBufferInfo("ORIG_MOTION_ESTIMATION", 				ApproxInter::BufferId::ORIG_MOTION_ESTIMATION,				ApproxInter::ConfigurationId::ORIG_MOTION_ESTIMATION);
+
+	ApproxInter::PrintBufferInfo("TEMP_ORIG_MOTION_ESTIMATION", 		ApproxInter::BufferId::TEMP_ORIG_MOTION_ESTIMATION, 		ApproxInter::ConfigurationId::TEMP_ORIG_MOTION_ESTIMATION);
+	ApproxInter::PrintBufferInfo("ORIG_AFFINE_MOTION_ESTIMATION", 		ApproxInter::BufferId::ORIG_AFFINE_MOTION_ESTIMATION, 		ApproxInter::ConfigurationId::ORIG_AFFINE_MOTION_ESTIMATION);
+	ApproxInter::PrintBufferInfo("TEMP_ORIG_AFFINE_MOTION_ESTIMATION",	ApproxInter::BufferId::TEMP_ORIG_AFFINE_MOTION_ESTIMATION,	ApproxInter::ConfigurationId::TEMP_ORIG_AFFINE_MOTION_ESTIMATION);
+
+	ApproxInter::PrintBufferInfo("FILT_MOTION_ESTIMATION_TEMP", 		ApproxInter::BufferId::FILT_MOTION_ESTIMATION_TEMP, 		ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION_TEMP);
+	ApproxInter::PrintBufferInfo("FILT_MOTION_ESTIMATION", 				ApproxInter::BufferId::FILT_MOTION_ESTIMATION, 				ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION);
+	ApproxInter::PrintBufferInfo("PRED_AFFINE_MOTION_ESTIMATION", 		ApproxInter::BufferId::PRED_AFFINE_MOTION_ESTIMATION,		ApproxInter::ConfigurationId::PRED_AFFINE_MOTION_ESTIMATION);
+
+	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_MVP", 			ApproxInter::BufferId::RECO_MOTION_ESTIMATION_MVP, 			ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_MVP);
+	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_PATTERN", 		ApproxInter::BufferId::RECO_MOTION_ESTIMATION_PATTERN, 		ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_PATTERN);
+	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_TZ", 			ApproxInter::BufferId::RECO_MOTION_ESTIMATION_TZ,			ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_TZ);
+
+	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_FAST", 		ApproxInter::BufferId::RECO_MOTION_ESTIMATION_FAST, 		ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_FAST);
+	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_FRACTIONAL", 	ApproxInter::BufferId::RECO_MOTION_ESTIMATION_FRACTIONAL, 	ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_FRACTIONAL);
+	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_REFINEMENT", 	ApproxInter::BufferId::RECO_MOTION_ESTIMATION_REFINEMENT,	ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_REFINEMENT);
+}
 
 #if FELIPE_INSTRUMENTATION
 	#if APPROX_RECO_BUFFER_INTER
