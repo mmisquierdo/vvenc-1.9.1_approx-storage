@@ -53,6 +53,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "EncApp.h"
 #include "apputils/ParseArg.h"
 
+
+//<Felipe>
+#include "../../Lib/CommonLib/ApproxInter.h"
+// </Felipe>
+
 #include "vvenc/vvenc.h"
 
 //! \ingroup EncoderApp
@@ -65,6 +70,21 @@ POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[])
 {
+	//<Felipe>
+	#if FELIPE_INSTRUMENTATION 
+		#if APPROX_RECO_BUFFER_INTER
+			ApproxInter::RECO::init();
+		#endif
+		#if APPROX_ORIG_BUFFER
+			ApproxInter::ORIG::init();
+		#endif
+	#endif
+	//</Felipe>
+
+  //<Matheus>
+  ApproxInter::PrintMacrosStates();
+  //</Matheus>
+
   vvenc_set_logging_callback( nullptr, msgFnc ); // register global log callback ( deprecated, will be removed)
 
   std::string simdOpt;

@@ -491,6 +491,11 @@ void EncLib::encodePicture( bool flush, const vvencYUVBuffer* yuvInBuf, AccessUn
 
   // finally, ensure that the whole queue is empty
   isQueueEmpty &= m_AuList.empty();
+
+  //<Matheus>
+	//std::cout << "QUADRO FINALIZADO" << std::endl;
+	//ApproxSS::next_period();
+	//</Matheus>
 }
 
 void EncLib::printSummary()

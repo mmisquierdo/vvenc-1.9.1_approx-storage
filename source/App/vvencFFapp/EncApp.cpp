@@ -57,6 +57,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "vvenc/vvenc.h"
 #include "apputils/Stats.h"
 
+//<Matheus>
+#include "../../Lib/CommonLib/approx.h"
+//</Matheus>
+
 
 using namespace std;
 
@@ -384,6 +388,11 @@ int EncApp::encode()
 
 
       }
+
+		//<Matheus>
+		//std::cout << "QUADRO FINALIZADO" << std::endl;
+		//ApproxSS::next_period();
+		//</Matheus>
     }
 
     // close input YUV

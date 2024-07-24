@@ -1002,7 +1002,7 @@ private:
 
 struct CompStorage : public PelBuf
 {
-  ~CompStorage() { if( valid() ) delete[] m_memory; }
+  ~CompStorage() { if( valid() ) {xFree(m_memory);} /*delete[] m_memory;*/ } //<Matheus> </Matheus>
 
   void compactResize( const Size& size )
   {
@@ -1014,12 +1014,12 @@ struct CompStorage : public PelBuf
   {
     CHECK( m_memory, "Trying to re-create an already initialized buffer" );
     m_allocSize = size.area();
-    m_memory = new Pel[m_allocSize];
+    m_memory = xMalloc(Pel, m_allocSize); /*new Pel[m_allocSize];*/ //<Matheus> </Matheus>
     PelBuf::operator=( PelBuf( m_memory, size ) );
   }
   void destroy()
   {
-    if( valid() ) delete[] m_memory;
+    if( valid() ) {xFree(m_memory);} /*delete[] m_memory;*/ //<Matheus> </Matheus>
     m_memory    = nullptr;
     m_allocSize = 0;
   }
