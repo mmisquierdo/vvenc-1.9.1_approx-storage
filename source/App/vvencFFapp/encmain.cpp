@@ -83,6 +83,7 @@ int main(int argc, char* argv[])
 
   //<Matheus>
   ApproxInter::PrintMacrosStates();
+  ApproxInter::PrintBuffersInfo();
   //</Matheus>
 
   vvenc_set_logging_callback( nullptr, msgFnc ); // register global log callback ( deprecated, will be removed)

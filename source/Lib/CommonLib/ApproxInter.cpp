@@ -76,7 +76,7 @@ void ApproxInter::PrintMacrosStates() {
 	std::cout << std::endl;
 }
 
-void PrintBufferInfo(const std::string& bufferName, const int64_t bufferId, const int64_t configurationId, const std::string& tab/* = "\t"*/) {
+void ApproxInter::PrintBufferInfo(const std::string& bufferName, const int64_t bufferId, const int64_t configurationId, const std::string& tab/* = "\t"*/) {
 	std::cout << tab << bufferName << " = BufferId: " << bufferId << ", ConfigurationId: " << configurationId << std::endl;
 }
 
@@ -102,6 +102,8 @@ void ApproxInter::PrintBuffersInfo() {
 	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_FAST", 		ApproxInter::BufferId::RECO_MOTION_ESTIMATION_FAST, 		ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_FAST);
 	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_FRACTIONAL", 	ApproxInter::BufferId::RECO_MOTION_ESTIMATION_FRACTIONAL, 	ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_FRACTIONAL);
 	ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_REFINEMENT", 	ApproxInter::BufferId::RECO_MOTION_ESTIMATION_REFINEMENT,	ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_REFINEMENT);
+
+	std::cout << std::endl;
 }
 
 #if FELIPE_INSTRUMENTATION
