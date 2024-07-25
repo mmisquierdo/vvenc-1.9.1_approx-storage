@@ -2172,7 +2172,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
       ApproxSS::end_level();
     #endif
 
-	  #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_PATTERN
+	#if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_PATTERN
       Pel const * const approxRecoBufferPattern = buf.buf;
       ApproxInter::InstrumentIfMarked((void*) approxRecoBufferPattern, ApproxInter::BufferId::RECO_MOTION_ESTIMATION_PATTERN, ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_PATTERN, sizeof(Pel));
       ApproxSS::start_level();

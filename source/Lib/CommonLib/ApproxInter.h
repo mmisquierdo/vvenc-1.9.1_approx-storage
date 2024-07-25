@@ -4,6 +4,7 @@
 	#include <iostream>
 	#include <fstream>
 	#include <set>
+	#include <mutex>
 	#include "approx.h"
 
 	#define MATHEUS_INSTRUMENTATION 			true
@@ -48,6 +49,7 @@
 	namespace ApproxInter {
 		//private:
 			extern AllocatedBuffersSet allocatedBuffers; //use methods to manipulate
+			extern std::mutex allocatedBuffersMutex;
 
 		//public:
 			namespace BufferId {
