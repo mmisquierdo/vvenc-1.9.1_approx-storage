@@ -28,9 +28,6 @@
 	#define APPROX_ORIG_BUFFER_INTER_REFINEMENT			true
 	#define APPROX_ORIG_BUFFER_INTER_FRACTIONAL			true
 
-	#define FORCE_PRECISE_FRACTIONAL					true 	//gambiarra pra colher dados sobre acessos precisos nessas etapas, mesmo com LSB_DROPPING na Pintool
-
-
 	#define APPROX_RECO_BUFFER_INTER_AFFINE 			false
 	#define APPROX_ORIG_BUFFER_INTER_AFFINE 			false	//TODO!!!: check for temporary copies
 
@@ -102,11 +99,11 @@
 				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 				= 1;
 				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 				= 1;
 				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 		= 0;
-				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 		= 0;
+				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 		= 2;
 
 				constexpr int64_t ORIG_MOTION_ESTIMATION_IME 				= 1;
 				constexpr int64_t ORIG_MOTION_ESTIMATION_FRACTIONAL 		= 0;
-				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= 0;
+				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= 2;
 			}
 
 

@@ -2262,10 +2262,6 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
         ApproxInter::InstrumentIfMarked((void*) approxOrigBufferFrac, ApproxInter::BufferId::ORIG_MOTION_ESTIMATION_FRACTIONAL, ApproxInter::ConfigurationId::ORIG_MOTION_ESTIMATION_FRACTIONAL, sizeof(Pel));
         ApproxSS::start_level();
       #endif
-
-      #if FORCE_PRECISE_FRACTIONAL
-        ApproxSS::disable_global_injection();
-      #endif
     #endif
 
     if ( (m_pcEncCfg->m_fastSubPel != 2) && (!MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION))
@@ -2282,10 +2278,6 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     rcMv.changePrecision(MV_PRECISION_QUARTER, MV_PRECISION_INTERNAL);
 
     #if MATHEUS_INSTRUMENTATION
-      #if FORCE_PRECISE_FRACTIONAL
-        ApproxSS::enable_global_injection();
-      #endif
-
       #if APPROX_RECO_BUFFER_INTER_FRACTIONAL
         ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferFrac);
         ApproxSS::end_level();
