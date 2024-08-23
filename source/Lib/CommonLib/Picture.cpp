@@ -226,7 +226,7 @@ void Picture::create( ChromaFormat _chromaFormat, const Size& size, unsigned _ma
 		//</Felipe>
 	#endif
 	
-	#if APPROX_ORIG_BUFFER
+	#if APPROX_ORIG_BUFFER_INTER
 	  	//<Felipe>
 		if(ApproxInter::ORIG::collectBufferSize) {
 			ApproxInter::ORIG::tmpBool = true;

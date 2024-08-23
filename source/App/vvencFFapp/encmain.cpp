@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 		#if APPROX_RECO_BUFFER_INTER
 			ApproxInter::RECO::init();
 		#endif
-		#if APPROX_ORIG_BUFFER
+		#if APPROX_ORIG_BUFFER_INTER
 			ApproxInter::ORIG::init();
 		#endif
 	#endif

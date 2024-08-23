@@ -1022,7 +1022,7 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area )
 
 
 	#if FELIPE_INSTRUMENTATION
-		#if APPROX_ORIG_BUFFER
+		#if APPROX_ORIG_BUFFER_INTER
 			// <Arthur> e <Felipe>
     		// Atualiza nova variável com tamanho do buffer
 			if(ApproxInter::ORIG::tmpBool && compID == COMP_Y) {

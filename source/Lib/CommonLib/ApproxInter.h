@@ -11,25 +11,34 @@
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
 	#define MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION false
-	#define MATHEUS_xPatternSearchIntRefine_ITERATED_POS 9 /*up to 9: default*/
+	#define MATHEUS_xPatternSearchIntRefine_ITERATED_POS 1 /*up to 9: default*/
 
-	#define APPROX_RECO_BUFFER_INTER 			false //ativa instrumentação em toda a ME (excluindo affine)
+	#define APPROX_RECO_BUFFER_INTER 					false 	//ativa instrumentação em toda a ME (excluindo affine)
+	#define APPROX_ORIG_BUFFER_INTER 					false 	//ativa instrumentação em toda a ME (excluindo affine), para ORIG e TEMP_ORIG
 
-	#define APPROX_RECO_BUFFER_INTER_MVP 		true 
-	#define APPROX_RECO_BUFFER_INTER_PATTERN 	true 
-	#define APPROX_RECO_BUFFER_INTER_TZ 		true
-	#define APPROX_RECO_BUFFER_INTER_FAST 		true
-	#define APPROX_RECO_BUFFER_INTER_REFINEMENT false
-	#define APPROX_RECO_BUFFER_INTER_FRACTIONAL	false
-	#define APPROX_RECO_BUFFER_INTER_AFFINE 	false
+	//#define APPROX_RECO_BUFFER_INTER_MVP 		true 
+	//#define APPROX_RECO_BUFFER_INTER_PATTERN 	true
+	#define APPROX_RECO_BUFFER_INTER_MVP_AND_PATTERN 	true
+	#define APPROX_RECO_BUFFER_INTER_TZ 				true
+	#define APPROX_RECO_BUFFER_INTER_FAST 				true
+	#define APPROX_RECO_BUFFER_INTER_REFINEMENT 		true
+	#define APPROX_RECO_BUFFER_INTER_FRACTIONAL			true
+
+	#define APPROX_ORIG_BUFFER_INTER_IME 				true
+	#define APPROX_ORIG_BUFFER_INTER_REFINEMENT			true
+	#define APPROX_ORIG_BUFFER_INTER_FRACTIONAL			true
+
+	#define FORCE_PRECISE_FRACTIONAL					true 	//gambiarra pra colher dados sobre acessos precisos nessas etapas, mesmo com LSB_DROPPING na Pintool
 
 
-	#define APPROX_ORIG_BUFFER 					false
-	#define APPROX_FILT_BUFFER_V1 				false	//GENERALIST
-	#define APPROX_FILT_BUFFER_V2 				false	//SPECIFIC
-	#define APPROX_PRED_BUFFER 					false
+	#define APPROX_RECO_BUFFER_INTER_AFFINE 			false
+	#define APPROX_ORIG_BUFFER_INTER_AFFINE 			false	//TODO!!!: check for temporary copies
 
-	#define PRINT_COST 							false
+	#define APPROX_FILT_BUFFER_V1 						false	//GENERALIST
+	#define APPROX_FILT_BUFFER_V2 						false	//SPECIFIC
+	#define APPROX_PRED_BUFFER 							false
+
+	#define PRINT_COST 									false
 
 	class BufferRange {
 		public:
@@ -53,41 +62,51 @@
 
 		//public:
 			namespace BufferId {
-				constexpr int64_t RECO_MOTION_ESTIMATION 				= 0;
-				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 		= 1;
-				constexpr int64_t ORIG_MOTION_ESTIMATION 				= 2;
-				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 			= 11;
-				constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION 		= 3;
-				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION	= 13;
-				constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 			= 4;
-				constexpr int64_t FILT_MOTION_ESTIMATION 				= 5;
-				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 		= 6;
+				constexpr int64_t RECO_MOTION_ESTIMATION 					= 0;
+				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 			= 1;
+				constexpr int64_t ORIG_MOTION_ESTIMATION 					= 2;
+				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 				= 11;
+				constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION 			= 3;
+				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION		= 13;
+				constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 				= 4;
+				constexpr int64_t FILT_MOTION_ESTIMATION 					= 5;
+				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 			= 6;
 
-				constexpr int64_t RECO_MOTION_ESTIMATION_MVP 			= 12;
-				constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 		= 7;
-				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 			= 8;
-				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 			= 9;
-				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 	= 10;
-				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 	= 14;
+				//constexpr int64_t RECO_MOTION_ESTIMATION_MVP 				= 12;
+				//constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 			= 7;
+				constexpr int64_t RECO_MOTION_ESTIMATION_MVP_AND_PATTERN	= 7;
+				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 				= 8;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 				= 9;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 		= 10;
+				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 		= 14;
+
+				constexpr int64_t ORIG_MOTION_ESTIMATION_IME 				= 15;
+				constexpr int64_t ORIG_MOTION_ESTIMATION_FRACTIONAL 		= 16;
+				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= 17;
 			}
 
 			namespace ConfigurationId {
-				constexpr int64_t RECO_MOTION_ESTIMATION 				= 0;
-				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 		= 0;
-				constexpr int64_t ORIG_MOTION_ESTIMATION 				= 0;
-				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 			= 0;
-				constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION 		= 0;
-				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION	= 0;
-				constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 			= 0;
-				constexpr int64_t FILT_MOTION_ESTIMATION 				= 0;
-				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 		= 0;
+				constexpr int64_t RECO_MOTION_ESTIMATION 					= 0;
+				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 			= 0;
+				constexpr int64_t ORIG_MOTION_ESTIMATION 					= 0;
+				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 				= 0;
+				constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION 			= 0;
+				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION		= 0;
+				constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 				= 0;
+				constexpr int64_t FILT_MOTION_ESTIMATION 					= 0;
+				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 			= 0;
 
-				constexpr int64_t RECO_MOTION_ESTIMATION_MVP 			= 1;
-				constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 		= 1;
-				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 			= 1;
-				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 			= 1;
-				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 	= 0;
-				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 	= 0;
+				//constexpr int64_t RECO_MOTION_ESTIMATION_MVP 				= 0;
+				//constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 			= 0;
+				constexpr int64_t RECO_MOTION_ESTIMATION_MVP_AND_PATTERN	= 1;
+				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 				= 1;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 				= 1;
+				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 		= 0;
+				constexpr int64_t RECO_MOTION_ESTIMATION_REFINEMENT 		= 0;
+
+				constexpr int64_t ORIG_MOTION_ESTIMATION_IME 				= 1;
+				constexpr int64_t ORIG_MOTION_ESTIMATION_FRACTIONAL 		= 0;
+				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= 0;
 			}
 
 
@@ -125,7 +144,7 @@
 				}
 			#endif
 
-			#if APPROX_ORIG_BUFFER
+			#if APPROX_ORIG_BUFFER_INTER
 				namespace ORIG {
 					//public:
 					extern std::fstream fp;
