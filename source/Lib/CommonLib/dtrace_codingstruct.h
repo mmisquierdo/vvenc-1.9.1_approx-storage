@@ -106,6 +106,8 @@ inline void dtraceModeCost(CodingStructure &cs, double lambda)
   int intraModeC = isIntra ? cs.cus.front()->intraDir[1] : 0;
   if (isIntra && intraModeC == DM_CHROMA_IDX)
     intraModeC = 68;
+
+  /*
   int imvVal = 0;
   imvVal = cs.cus[0]->imv;
   DTRACE( g_trace_ctx, D_MODE_COST, "ModeCost: %6lld %3d @(%4d,%4d) [%2dx%2d] %d (qp%d,pm%d,skip%d,mrg%d,fruc%d,obmc%d,ic%d,imv%d,affn%d,%d,%d) tempCS = %lld (%d,%d)\n",
@@ -123,6 +125,16 @@ inline void dtraceModeCost(CodingStructure &cs, double lambda)
     0, 0,
           intraModeL, intraModeC,
           tempCost, tempBits, tempDist );
+  */
+
+  DTRACE( g_trace_ctx, D_MODE_COST, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n",
+    DTRACE_GET_COUNTER( g_trace_ctx, D_MODE_COST ),
+    cs.slice->poc,
+    cs.area.Y().x, cs.area.Y().y,
+    cs.area.Y().width, cs.area.Y().height,
+    cs.cus[0]->predMode,
+    intraModeL, intraModeC,
+    tempCost, tempBits, tempDist );
 }
 
 inline void dtraceBestMode(CodingStructure *&tempCS, CodingStructure *&bestCS, double lambda, bool useEDO)
