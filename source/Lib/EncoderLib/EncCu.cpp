@@ -3712,7 +3712,7 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
       numRDOTried  += mtsAllowed ? 2 : 1;
     }
 
-    DTRACE_MODE_COST( *tempCS, m_cRdCost.getLambda( true ) );
+    //DTRACE_MODE_COST( *tempCS, m_cRdCost.getLambda( true ) );
     xCheckBestMode( tempCS, bestCS, partitioner, encTestMode );
 
     STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_RD_TESTS][0][!tempCS->slice->isIntra() + tempCS->slice->depth] );
@@ -3848,7 +3848,7 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
         sbtModeIdx = numSbtRdo;
       }
 
-      DTRACE_MODE_COST( *tempCS, m_cRdCost.getLambda( true ) );
+      //DTRACE_MODE_COST( *tempCS, m_cRdCost.getLambda( true ) );
       xCheckBestMode( tempCS, bestCS, partitioner, encTestMode );
       STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_RD_TESTS][0][!tempCS->slice->isIntra() + tempCS->slice->depth] );
       STAT_COUNT_CU_MODES( partitioner.chType == CH_L && !tempCS->slice->isIntra(), g_cuCounters2D[CU_RD_TESTS][Log2( tempCS->area.lheight() )][Log2( tempCS->area.lwidth() )] );
