@@ -585,10 +585,20 @@ inline std::string prnt( const char* fmt, ...)
 
 namespace ApproxSignaling {
   template <typename T> 
-  static T* alligned_malloc(void* (*allocFunction)(const size_t, const size_t), const size_t len, const size_t alignment) {
-    T * const bufferStart = (T*) allocFunction(sizeof(T)*(len), alignment);
+  static T* aligned_malloc(void* (*allocFunction)(const size_t, const size_t), const size_t len, const size_t alignment, const bool alignmentMultiple = true) {
+	//ALLOCATION
+    
+	size_t size = sizeof(T)*(len);
+	T * const bufferStart = (T*) allocFunction(size, alignment);
 
-    T const * const bufferEnd = bufferStart + len;
+	//LOGGING BUFFER (calculating end)
+	if (alignmentMultiple) {
+		size = (size + alignment - 1) & ~(alignment - 1); //rounds up to next multiple of alignment  //note: must be power of 2 (it "always" is)
+	}
+
+	const size_t elementCount = size / sizeof(T);
+
+    T const * const bufferEnd = bufferStart + elementCount;
     ApproxInter::MarkBuffer(BufferRange((uint8_t*) bufferStart, (uint8_t*) bufferEnd));
     
     return bufferStart;
@@ -614,12 +624,12 @@ namespace ApproxSignaling {
 
 #if ALIGNED_MALLOC
   #if ( _WIN32 && ( _MSC_VER > 1300 ) ) || defined (__MINGW64_VERSION_MAJOR)
-    #define xMalloc( type, len )        ApproxSignaling::alligned_malloc<type>(&_aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)          //_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
-    #define xMalloc2( type, len, alg )  ApproxSignaling::alligned_malloc<type>(&_aligned_malloc, len, alg)                            //_aligned_malloc( sizeof(type)*(len), alg )
+    #define xMalloc( type, len )        ApproxSignaling::aligned_malloc<type>(&_aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)          //_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
+    #define xMalloc2( type, len, alg )  ApproxSignaling::aligned_malloc<type>(&_aligned_malloc, len, alg)                            //_aligned_malloc( sizeof(type)*(len), alg )
     #define xFree( ptr )                ApproxSignaling::free(&_aligned_free, ptr)                                                    //_aligned_free  ( ptr )
   #elif defined (__MINGW32__)
-    #define xMalloc( type, len )        ApproxSignaling::alligned_malloc<type>(&__mingw_aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)   //__mingw_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
-    #define xMalloc2( type, len, alg )  ApproxSignaling::alligned_malloc<type>(&__mingw_aligned_malloc, len, alg)                     //__mingw_aligned_malloc( sizeof(type)*(len), alg )
+    #define xMalloc( type, len )        ApproxSignaling::aligned_malloc<type>(&__mingw_aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)   //__mingw_aligned_malloc( sizeof(type)*(len), MEMORY_ALIGN_DEF_SIZE )
+    #define xMalloc2( type, len, alg )  ApproxSignaling::aligned_malloc<type>(&__mingw_aligned_malloc, len, alg)                     //__mingw_aligned_malloc( sizeof(type)*(len), alg )
     #define xFree( ptr )                ApproxSignaling::free(&__mingw_aligned_free, ptr)                                             //__mingw_aligned_free( ptr )
   #else
     namespace detail {
@@ -634,8 +644,8 @@ namespace ApproxSignaling {
         }                                                                   //}
     }
     
-    #define xMalloc( type, len )        ApproxSignaling::alligned_malloc<type>(&detail::aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)   //detail::aligned_malloc<type>( len, MEMORY_ALIGN_DEF_SIZE )
-    #define xMalloc2( type, len, alg )  ApproxSignaling::alligned_malloc<type>(&detail::aligned_malloc, len, alg)                     //detail::aligned_malloc<type>( len, alg )
+    #define xMalloc( type, len )        ApproxSignaling::aligned_malloc<type>(&detail::aligned_malloc, len, MEMORY_ALIGN_DEF_SIZE)   //detail::aligned_malloc<type>( len, MEMORY_ALIGN_DEF_SIZE )
+    #define xMalloc2( type, len, alg )  ApproxSignaling::aligned_malloc<type>(&detail::aligned_malloc, len, alg)                     //detail::aligned_malloc<type>( len, alg )
     #define xFree( ptr )                ApproxSignaling::free(&free, ptr)                                                             //free( ptr )
   #endif
 
