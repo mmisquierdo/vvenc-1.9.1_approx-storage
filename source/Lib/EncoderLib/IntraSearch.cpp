@@ -127,9 +127,9 @@ void IntraSearch::init(const VVEncCfg &encCfg, TrQuant *pTrQuant, RdCost *pRdCos
   Pel* beginBufferCr = approxIntraOrigBufferCr;
   Pel* endBufferCr = beginBufferCr + (64 * 64);
 
-  ApproxSS::add_approx((void *) beginBufferY, (void *) endBufferY, 1, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
-  ApproxSS::add_approx((void *) beginBufferCb, (void *) endBufferCb, 2, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
-  ApproxSS::add_approx((void *) beginBufferCr, (void *) endBufferCr, 3, 0, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
+  ApproxSS::add_approx((void *) beginBufferY, (void *) endBufferY, 1, 1, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
+  ApproxSS::add_approx((void *) beginBufferCb, (void *) endBufferCb, 2, 1, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
+  ApproxSS::add_approx((void *) beginBufferCr, (void *) endBufferCr, 3, 1, sizeof(const Pel)); //Luma (1); Cb (2); Cr (3)
       
 }
 
