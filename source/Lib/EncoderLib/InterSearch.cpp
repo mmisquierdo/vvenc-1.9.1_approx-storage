@@ -856,6 +856,7 @@ Distortion InterSearch::xPatternRefinement( const CPelBuf* pcPatternKey,
         }
       }
     }
+
     Mv cMvTest = pcMvRefine[ i ];
     cMvTest += baseRefMv;
 
@@ -869,13 +870,13 @@ Distortion InterSearch::xPatternRefinement( const CPelBuf* pcPatternKey,
     }
     if ( ( horVal & 1 ) == 0 && verVal == 2 )
     {
-      piRefPos += iRefStride;
+      piRefPos += iRefStride; //MATHEUS NOTE: iRefStride é constante entre iterações
     }
     cMvTest = pcMvRefine[i];
     cMvTest += rcMvFrac;
 
 
-    m_cDistParam.cur.buf   = piRefPos;
+    m_cDistParam.cur.buf   = piRefPos; //MATHEUS NOTE: o unico membro de m_cDistParam que muda entre iterações
     uiDist = m_cDistParam.distFunc( m_cDistParam );
     uiDist += m_pcRdCost->getCostOfVectorWithPredictor( cMvTest.hor, cMvTest.ver, 0 );
 
@@ -2944,13 +2945,13 @@ void InterSearch::xPatternSearchFracDIF(
 
   //  Reference pattern initialization (integer scale)
   int         iOffset    = rcMvInt.hor + rcMvInt.ver * cStruct.iRefStride;
-  CPelBuf cPatternRoi(cStruct.piRefY + iOffset, cStruct.iRefStride, *cStruct.pcPatternKey);
+  CPelBuf cPatternRoi(cStruct.piRefY + iOffset, cStruct.iRefStride, *cStruct.pcPatternKey); //MATHEUS NOTE: parece!!! apenas pegar os ponteiros deles, não achei essa definição em especifico
 
   //  Half-pel refinement
   m_pcRdCost->setCostScale(1);
   if( 0 == m_pcEncCfg->m_fastSubPel )
   {
-    xExtDIFUpSamplingH( &cPatternRoi, cStruct.useAltHpelIf ); //MATHEUS NOTE: APARENTEMENTE SO FILTRA, SEM CALCULOS DE DISTORCAO
+    xExtDIFUpSamplingH( &cPatternRoi, cStruct.useAltHpelIf ); //MATHEUS NOTE: APARENTEMENTE SO FILTRA, SEM CALCULOS DE DISTORCAO, APROXIMAVEIS: cPatternRoi, m_filteredBlockTmp e m_filteredBlock
   }
 
   rcMvHalf = rcMvInt;   rcMvHalf <<= 1;    // for mv-cost
@@ -2966,7 +2967,7 @@ void InterSearch::xPatternSearchFracDIF(
   {
     PROFILER_SCOPE_AND_STAGE( 0, _TPROF, P_QPEL );
     m_pcRdCost->setCostScale( 0 );
-    xExtDIFUpSamplingQ( &cPatternRoi, rcMvHalf, patternId ); //MATHEUS NOTE: APARENTEMENTE SO FILTRA, SEM CALCULOS DE DISTORCAO
+    xExtDIFUpSamplingQ( &cPatternRoi, rcMvHalf, patternId ); //MATHEUS NOTE: APARENTEMENTE SO FILTRA, SEM CALCULOS DE DISTORCAO, APROXIMAVEIS: cPatternRoi, m_filteredBlockTmp e m_filteredBlock
     baseRefMv = rcMvHalf;
     baseRefMv <<= 1;
 
@@ -3174,7 +3175,7 @@ void InterSearch::xExtDIFUpSamplingH(CPelBuf* pattern, bool useAltHpelIf)
 
   int intStride = width + 1;
   int dstStride = width + 1;
-  Pel* intPtr;
+  Pel* intPtr; 		//MATHEUS NOTE: approximar m_filteredBlockTmp e m_filteredBlock!!!
   Pel* dstPtr;
   int filterSize = NTAPS_LUMA;
   int halfFilterSize = (filterSize>>1);
