@@ -5,6 +5,9 @@ BufferRange::BufferRange(uint8_t * const initialAddress, uint8_t const * const f
 AllocatedBuffersSet ApproxInter::allocatedBuffers{};
 std::mutex ApproxInter::allocatedBuffersMutex;
 
+//FME_BEST_MV_COST_RECALC
+uint32_t ApproxInter::fme_uiDirecBest = 0;
+
 #if PRINT_COST
 	double ApproxInter::bestTempCost = 666;
 #endif
@@ -70,18 +73,20 @@ void ApproxInter::PrintMacrosStates() {
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_TZ", 				APPROX_RECO_BUFFER_INTER_TZ);
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_FAST", 				APPROX_RECO_BUFFER_INTER_FAST);
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_REFINEMENT", 		APPROX_RECO_BUFFER_INTER_REFINEMENT);
-	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_FRACTIONAL",			APPROX_RECO_BUFFER_INTER_FRACTIONAL);
+	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_FRACTIONAL_WHOLE",	APPROX_RECO_BUFFER_INTER_FRACTIONAL_WHOLE);
 	ApproxInter::PrintMacroState("APPROX_RECO_BUFFER_INTER_AFFINE", 			APPROX_RECO_BUFFER_INTER_AFFINE);
 
 	ApproxInter::PrintMacroState("APPROX_ORIG_BUFFER_INTER_IME", 				APPROX_ORIG_BUFFER_INTER_IME);
 	ApproxInter::PrintMacroState("APPROX_ORIG_BUFFER_INTER_REFINEMENT", 		APPROX_ORIG_BUFFER_INTER_REFINEMENT);
-	ApproxInter::PrintMacroState("APPROX_ORIG_BUFFER_INTER_FRACTIONAL", 		APPROX_ORIG_BUFFER_INTER_FRACTIONAL);
+	ApproxInter::PrintMacroState("APPROX_ORIG_BUFFER_INTER_FRACTIONAL_WHOLE", 	APPROX_ORIG_BUFFER_INTER_FRACTIONAL_WHOLE);
 	
 	ApproxInter::PrintMacroState("APPROX_ORIG_BUFFER_INTER", 					APPROX_ORIG_BUFFER_INTER);
 	ApproxInter::PrintMacroState("APPROX_ORIG_BUFFER_INTER_AFFINE", 			APPROX_ORIG_BUFFER_INTER_AFFINE);
 	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V1", 						APPROX_FILT_BUFFER_V1);
 	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V2", 						APPROX_FILT_BUFFER_V2);
 	ApproxInter::PrintMacroState("APPROX_PRED_BUFFER", 							APPROX_PRED_BUFFER);
+
+	ApproxInter::PrintMacroState("APPROX_FME_BEST_MV_COST_RECALC", 						APPROX_FME_BEST_MV_COST_RECALC);
 
 	ApproxInter::PrintMacroState("MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION", MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION);
 	std::cout << "\tMATHEUS_xPatternSearchIntRefine_ITERATED_POS" << ": " << MATHEUS_xPatternSearchIntRefine_ITERATED_POS << std::endl;

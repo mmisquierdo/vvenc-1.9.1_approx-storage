@@ -889,6 +889,9 @@ Distortion InterSearch::xPatternRefinement( const CPelBuf* pcPatternKey,
     }
   }
 
+  //FME_BEST_MV_COST_RECALC
+  ApproxInter::fme_uiDirecBest = uiDirecBest;
+
   rcMvFrac = pcMvRefine[uiDirecBest];
 
   if( m_pcEncCfg->m_fastSubPel == 1 && iFrac == 2 ) //MATHEUS NOTE: apenas durante o half-pel refinement (primeira passagem) sendo FAST
@@ -2252,13 +2255,13 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   if ( cu.imv == 0 || cu.imv == IMV_HPEL )
   {
     #if MATHEUS_INSTRUMENTATION
-      #if APPROX_RECO_BUFFER_INTER_FRACTIONAL
+      #if APPROX_RECO_BUFFER_INTER_FRACTIONAL_WHOLE
         Pel const * const approxRecoBufferFrac = cStruct.piRefY;
         ApproxInter::InstrumentIfMarked((void*) approxRecoBufferFrac, ApproxInter::BufferId::RECO_MOTION_ESTIMATION_FRACTIONAL, ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_FRACTIONAL, sizeof(Pel));
         ApproxSS::start_level();
       #endif
 
-      #if APPROX_ORIG_BUFFER_INTER_FRACTIONAL
+      #if APPROX_ORIG_BUFFER_INTER_FRACTIONAL_WHOLE
         Pel const * const approxOrigBufferFrac = cStruct.pcPatternKey->buf;
         ApproxInter::InstrumentIfMarked((void*) approxOrigBufferFrac, ApproxInter::BufferId::ORIG_MOTION_ESTIMATION_FRACTIONAL, ApproxInter::ConfigurationId::ORIG_MOTION_ESTIMATION_FRACTIONAL, sizeof(Pel));
         ApproxSS::start_level();
@@ -2279,12 +2282,12 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     rcMv.changePrecision(MV_PRECISION_QUARTER, MV_PRECISION_INTERNAL);
 
     #if MATHEUS_INSTRUMENTATION
-      #if APPROX_RECO_BUFFER_INTER_FRACTIONAL
+      #if APPROX_RECO_BUFFER_INTER_FRACTIONAL_WHOLE
         ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferFrac);
         ApproxSS::end_level();
       #endif
 
-      #if APPROX_ORIG_BUFFER_INTER_FRACTIONAL
+      #if APPROX_ORIG_BUFFER_INTER_FRACTIONAL_WHOLE
         ApproxInter::UninstrumentIfMarked((void*) approxOrigBufferFrac);
         ApproxSS::end_level();
       #endif
@@ -2315,7 +2318,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
         ApproxSS::end_level();
       #endif
 
-      #if APPROX_ORIG_BUFFER_INTER_FRACTIONAL
+      #if APPROX_ORIG_BUFFER_INTER_FRACTIONAL_WHOLE
         ApproxInter::UninstrumentIfMarked((void*) approxOrigBufferRefine);
         ApproxSS::end_level();
       #endif
@@ -2958,6 +2961,11 @@ void InterSearch::xPatternSearchFracDIF(
   Mv baseRefMv(0, 0);
   Distortion  uiDistBest = MAX_DISTORTION; //MATHEUS NOTE: ATENÇÃO NISSO
   int patternId = 41;
+  
+  //FME_BEST_MV_COST_RECALC
+  int iFrac = 2;
+  Mv recalcMv = rcMvHalf;
+
   ruiCost = xPatternRefinement( cStruct.pcPatternKey, baseRefMv, 2, rcMvHalf, uiDistBest, patternId, &cPatternRoi, cStruct.useAltHpelIf );
   patternId -= ( m_pcEncCfg->m_fastSubPel == 1 ? 41 : 0 );
 
@@ -2973,44 +2981,54 @@ void InterSearch::xPatternSearchFracDIF(
 
     rcMvQter = rcMvInt;    rcMvQter <<= 1;    // for mv-cost
     rcMvQter += rcMvHalf;  rcMvQter <<= 1;
+
+    //FME_BEST_MV_COST_RECALC
+    iFrac = 1;
+    recalcMv = rcMvQter;
+
     ruiCost = xPatternRefinement( cStruct.pcPatternKey, baseRefMv, 1, rcMvQter, uiDistBest, patternId, &cPatternRoi, cStruct.useAltHpelIf );
   }
 
   //FME_BEST_MV_COST_RECALC
 
-  /*Mv cMvTest = pcMvRefine[ i ];
+  //std::cout << "COST BEFORE: " << ruiCost << std::endl;
+
+  const Mv* pcMvRefine = (iFrac == 2 ? s_acMvRefineH : s_acMvRefineQ); //if quarter or half
+  const int iRefStride = cStruct.pcPatternKey->width + 1;
+
+  Mv cMvTest = pcMvRefine[ApproxInter::fme_uiDirecBest];
   cMvTest += baseRefMv; //baseRefMv se mantém inalterado dentro do xPatternRefinement
 
-  int horVal = cMvTest.hor * iFrac;
-  int verVal = cMvTest.ver * iFrac;
-  piRefPos = m_filteredBlock[verVal & 3][horVal & 3][0];
+  const int horVal = cMvTest.hor * iFrac;
+  const int verVal = cMvTest.ver * iFrac;
+  Pel* piRefPos = m_filteredBlock[verVal & 3][horVal & 3][0];
 
-  if ( horVal == 2 && ( verVal & 1 ) == 0 )
-  {
+  if ( horVal == 2 && ( verVal & 1 ) == 0 ) {
     piRefPos += 1;
   }
-  if ( ( horVal & 1 ) == 0 && verVal == 2 )
-  {
+
+  if ( ( horVal & 1 ) == 0 && verVal == 2 ) {
     piRefPos += iRefStride; //MATHEUS NOTE: iRefStride é constante entre iterações
   }
-  cMvTest = pcMvRefine[i];
-  cMvTest += rcMvFrac;
 
+  cMvTest = pcMvRefine[ApproxInter::fme_uiDirecBest];
+  cMvTest += recalcMv;
+
+  //std::cout << "Chega aqui" << std::endl;
 
   m_cDistParam.cur.buf   = piRefPos; //MATHEUS NOTE: o unico membro de m_cDistParam que muda entre iterações
-  uiDist = m_cDistParam.distFunc( m_cDistParam );
+  Distortion uiDist = m_cDistParam.distFunc( m_cDistParam );
   uiDist += m_pcRdCost->getCostOfVectorWithPredictor( cMvTest.hor, cMvTest.ver, 0 );
 
-  //distH[ i ] = uiDist;
-  if ( uiDist < uiDistBest )
-  {
-    //uiDistBest  = uiDist;
-    //uiDirecBest = i;
-    m_cDistParam.maximumDistortionForEarlyExit = uiDist; //TODO: estudar melhor isso
-  }*/
+  //std::cout << "Passa dele" << std::endl;
+  //std::cout << "RECALC COST: " << uiDist << std::endl;
+
+  if ( uiDist < ruiCost ) {
+    ruiCost  = uiDist;
+    m_cDistParam.maximumDistortionForEarlyExit = uiDist;
+  }
 
   //rcMvFrac = pcMvRefine[uiDirecBest];
-
 }
 
 Distortion InterSearch::xGetSymCost( const CodingUnit& cu, CPelUnitBuf& origBuf, RefPicList eCurRefPicList, const MvField& cCurMvField, MvField& cTarMvField, int BcwIdx )
