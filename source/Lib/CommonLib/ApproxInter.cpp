@@ -86,7 +86,7 @@ void ApproxInter::PrintMacrosStates() {
 	ApproxInter::PrintMacroState("APPROX_FILT_BUFFER_V2", 						APPROX_FILT_BUFFER_V2);
 	ApproxInter::PrintMacroState("APPROX_PRED_BUFFER", 							APPROX_PRED_BUFFER);
 
-	ApproxInter::PrintMacroState("APPROX_FME_BEST_MV_COST_RECALC", 						APPROX_FME_BEST_MV_COST_RECALC);
+	ApproxInter::PrintMacroState("APPROX_FME_BEST_MV_COST_RECALC", 				APPROX_FME_BEST_MV_COST_RECALC);
 
 	ApproxInter::PrintMacroState("MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION", MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION);
 	std::cout << "\tMATHEUS_xPatternSearchIntRefine_ITERATED_POS" << ": " << MATHEUS_xPatternSearchIntRefine_ITERATED_POS << std::endl;

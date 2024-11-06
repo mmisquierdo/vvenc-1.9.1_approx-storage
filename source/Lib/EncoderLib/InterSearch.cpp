@@ -2950,6 +2950,9 @@ void InterSearch::xPatternSearchFracDIF(
   int         iOffset    = rcMvInt.hor + rcMvInt.ver * cStruct.iRefStride;
   CPelBuf cPatternRoi(cStruct.piRefY + iOffset, cStruct.iRefStride, *cStruct.pcPatternKey); //MATHEUS NOTE: parece!!! apenas pegar os ponteiros deles, não achei essa definição em especifico
 
+  ApproxInter::InstrumentIfMarked(cPatternRoi.buf, ApproxInter::)
+
+
   //  Half-pel refinement
   m_pcRdCost->setCostScale(1);
   if( 0 == m_pcEncCfg->m_fastSubPel )
@@ -2962,9 +2965,10 @@ void InterSearch::xPatternSearchFracDIF(
   Distortion  uiDistBest = MAX_DISTORTION; //MATHEUS NOTE: ATENÇÃO NISSO
   int patternId = 41;
   
-  //FME_BEST_MV_COST_RECALC
-  int iFrac = 2;
-  Mv recalcMv = rcMvHalf;
+  #if APPROX_FME_BEST_MV_COST_RECALC
+    int iFrac = 2;
+    Mv recalcMv = rcMvHalf;
+  #endif
 
   ruiCost = xPatternRefinement( cStruct.pcPatternKey, baseRefMv, 2, rcMvHalf, uiDistBest, patternId, &cPatternRoi, cStruct.useAltHpelIf );
   patternId -= ( m_pcEncCfg->m_fastSubPel == 1 ? 41 : 0 );
@@ -2982,53 +2986,54 @@ void InterSearch::xPatternSearchFracDIF(
     rcMvQter = rcMvInt;    rcMvQter <<= 1;    // for mv-cost
     rcMvQter += rcMvHalf;  rcMvQter <<= 1;
 
-    //FME_BEST_MV_COST_RECALC
-    iFrac = 1;
-    recalcMv = rcMvQter;
+    #if APPROX_FME_BEST_MV_COST_RECALC
+      iFrac = 1;
+      recalcMv = rcMvQter;
+    #endif
 
     ruiCost = xPatternRefinement( cStruct.pcPatternKey, baseRefMv, 1, rcMvQter, uiDistBest, patternId, &cPatternRoi, cStruct.useAltHpelIf );
   }
 
-  //FME_BEST_MV_COST_RECALC
+  #if APPROX_FME_BEST_MV_COST_RECALC
+    //std::cout << "COST BEFORE: " << ruiCost << std::endl;
 
-  //std::cout << "COST BEFORE: " << ruiCost << std::endl;
+    const Mv* pcMvRefine = (iFrac == 2 ? s_acMvRefineH : s_acMvRefineQ); //if quarter or half
+    const int iRefStride = cStruct.pcPatternKey->width + 1;
 
-  const Mv* pcMvRefine = (iFrac == 2 ? s_acMvRefineH : s_acMvRefineQ); //if quarter or half
-  const int iRefStride = cStruct.pcPatternKey->width + 1;
+    Mv cMvTest = pcMvRefine[ApproxInter::fme_uiDirecBest];
+    cMvTest += baseRefMv; //baseRefMv se mantém inalterado dentro do xPatternRefinement
 
-  Mv cMvTest = pcMvRefine[ApproxInter::fme_uiDirecBest];
-  cMvTest += baseRefMv; //baseRefMv se mantém inalterado dentro do xPatternRefinement
+    const int horVal = cMvTest.hor * iFrac;
+    const int verVal = cMvTest.ver * iFrac;
+    Pel* piRefPos = m_filteredBlock[verVal & 3][horVal & 3][0];
 
-  const int horVal = cMvTest.hor * iFrac;
-  const int verVal = cMvTest.ver * iFrac;
-  Pel* piRefPos = m_filteredBlock[verVal & 3][horVal & 3][0];
+    if ( horVal == 2 && ( verVal & 1 ) == 0 ) {
+      piRefPos += 1;
+    }
 
-  if ( horVal == 2 && ( verVal & 1 ) == 0 ) {
-    piRefPos += 1;
-  }
+    if ( ( horVal & 1 ) == 0 && verVal == 2 ) {
+      piRefPos += iRefStride; //MATHEUS NOTE: iRefStride é constante entre iterações
+    }
 
-  if ( ( horVal & 1 ) == 0 && verVal == 2 ) {
-    piRefPos += iRefStride; //MATHEUS NOTE: iRefStride é constante entre iterações
-  }
+    cMvTest = pcMvRefine[ApproxInter::fme_uiDirecBest];
+    cMvTest += recalcMv;
 
-  cMvTest = pcMvRefine[ApproxInter::fme_uiDirecBest];
-  cMvTest += recalcMv;
+    //std::cout << "Chega aqui" << std::endl;
 
-  //std::cout << "Chega aqui" << std::endl;
+    m_cDistParam.cur.buf   = piRefPos; //MATHEUS NOTE: o unico membro de m_cDistParam que muda entre iterações
+    Distortion uiDist = m_cDistParam.distFunc( m_cDistParam );
+    uiDist += m_pcRdCost->getCostOfVectorWithPredictor( cMvTest.hor, cMvTest.ver, 0 );
 
-  m_cDistParam.cur.buf   = piRefPos; //MATHEUS NOTE: o unico membro de m_cDistParam que muda entre iterações
-  Distortion uiDist = m_cDistParam.distFunc( m_cDistParam );
-  uiDist += m_pcRdCost->getCostOfVectorWithPredictor( cMvTest.hor, cMvTest.ver, 0 );
+    //std::cout << "Passa dele" << std::endl;
+    //std::cout << "RECALC COST: " << uiDist << std::endl;
 
-  //std::cout << "Passa dele" << std::endl;
-  //std::cout << "RECALC COST: " << uiDist << std::endl;
+    if ( uiDist < ruiCost ) {
+      ruiCost  = uiDist;
+      m_cDistParam.maximumDistortionForEarlyExit = uiDist;
+    }
 
-  if ( uiDist < ruiCost ) {
-    ruiCost  = uiDist;
-    m_cDistParam.maximumDistortionForEarlyExit = uiDist;
-  }
-
-  //rcMvFrac = pcMvRefine[uiDirecBest];
+    //rcMvFrac = pcMvRefine[uiDirecBest];
+  #endif
 }
 
 Distortion InterSearch::xGetSymCost( const CodingUnit& cu, CPelUnitBuf& origBuf, RefPicList eCurRefPicList, const MvField& cCurMvField, MvField& cTarMvField, int BcwIdx )
