@@ -6,6 +6,7 @@
 	#include <set>
 	#include <mutex>
 	#include "approx.h"
+	#include "CommonDef.h"
 
 	#define MATHEUS_INSTRUMENTATION 			true
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
@@ -37,6 +38,13 @@
 
 
 	#define APPROX_FME_BEST_MV_COST_RECALC 				true
+	#define APPROX_FME_RECO 							true
+	#define APPROX_FME_ORIG 							true
+	#define APPROX_FME_FILT								true
+	/*#define APPROX_FME_HP_RECO							true
+	#define APPROX_FME_HP_ORIG							true
+	#define APPROX_FME_QP_RECO							true
+	#define APPROX_FME_QP_ORIG							true*/
 
 	#define PRINT_COST 									false
 
@@ -89,12 +97,20 @@
 				constexpr int64_t ORIG_MOTION_ESTIMATION_FRACTIONAL 		= 16;
 				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= 17;
 
-				constexpr int64_t FME_RECO_HR								= 20;
+				constexpr int64_t FME_RECO 									= RECO_MOTION_ESTIMATION_FRACTIONAL;
+				constexpr int64_t FME_ORIG 									= ORIG_MOTION_ESTIMATION_FRACTIONAL;
+
+				/*constexpr int64_t FME_RECO_HR								= 20;
 				constexpr int64_t FME_RECO_QR								= 21;
 				constexpr int64_t FME_ORIG_HR								= 22;
-				constexpr int64_t FME_ORIG_QR								= 23;
+				constexpr int64_t FME_ORIG_QR								= 23;*/
 
-				//constexpr auto FME_FILT = {{0000}, {0000}};	
+				static constexpr auto FME_FILT_OFFSET						= "1";
+				static constexpr auto FME_FILT_TEMP_OFFSET					= "20";
+
+
+				extern int64_t FME_FILT			[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];
+				extern int64_t FME_FILT_TEMP	[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];
 			}
 
 			namespace ConfigurationId {
@@ -127,10 +143,16 @@
 				constexpr int64_t ORIG_MOTION_ESTIMATION_FRACTIONAL 		= JUST_TRACKING;
 				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= JUST_TRACKING;
 
-				constexpr int64_t FME_RECO_HR								= JUST_TRACKING;
+				constexpr int64_t FME_RECO 									= RECO_MOTION_ESTIMATION_FRACTIONAL;
+				constexpr int64_t FME_ORIG 									= ORIG_MOTION_ESTIMATION_FRACTIONAL;
+
+				/*constexpr int64_t FME_RECO_HR								= JUST_TRACKING;
 				constexpr int64_t FME_RECO_QR								= JUST_TRACKING;
 				constexpr int64_t FME_ORIG_HR								= JUST_TRACKING;
-				constexpr int64_t FME_ORIG_QR								= JUST_TRACKING;	
+				constexpr int64_t FME_ORIG_QR								= JUST_TRACKING;*/
+
+				constexpr int64_t FME_FILT									= JUST_TRACKING;	
+				constexpr int64_t FME_FILT_TEMP								= JUST_TRACKING;	
 			}
 
 

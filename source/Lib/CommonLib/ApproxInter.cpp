@@ -8,6 +8,9 @@ std::mutex ApproxInter::allocatedBuffersMutex;
 //FME_BEST_MV_COST_RECALC
 uint32_t ApproxInter::fme_uiDirecBest = 0;
 
+int64_t ApproxInter::BufferId::FME_FILT			[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];
+int64_t ApproxInter::BufferId::FME_FILT_TEMP	[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];
+
 #if PRINT_COST
 	double ApproxInter::bestTempCost = 666;
 #endif
@@ -111,8 +114,8 @@ void ApproxInter::PrintBuffersInfo() {
 	ApproxInter::PrintBufferInfo("ORIG_AFFINE_MOTION_ESTIMATION", 			ApproxInter::BufferId::ORIG_AFFINE_MOTION_ESTIMATION, 			ApproxInter::ConfigurationId::ORIG_AFFINE_MOTION_ESTIMATION);
 	ApproxInter::PrintBufferInfo("TEMP_ORIG_AFFINE_MOTION_ESTIMATION",		ApproxInter::BufferId::TEMP_ORIG_AFFINE_MOTION_ESTIMATION,		ApproxInter::ConfigurationId::TEMP_ORIG_AFFINE_MOTION_ESTIMATION);
 
-	ApproxInter::PrintBufferInfo("FILT_MOTION_ESTIMATION_TEMP", 			ApproxInter::BufferId::FILT_MOTION_ESTIMATION_TEMP, 			ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION_TEMP);
-	ApproxInter::PrintBufferInfo("FILT_MOTION_ESTIMATION", 					ApproxInter::BufferId::FILT_MOTION_ESTIMATION, 					ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION);
+	//ApproxInter::PrintBufferInfo("FILT_MOTION_ESTIMATION_TEMP", 			ApproxInter::BufferId::FILT_MOTION_ESTIMATION_TEMP, 			ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION_TEMP);
+	//ApproxInter::PrintBufferInfo("FILT_MOTION_ESTIMATION", 					ApproxInter::BufferId::FILT_MOTION_ESTIMATION, 					ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION);
 	ApproxInter::PrintBufferInfo("PRED_AFFINE_MOTION_ESTIMATION", 			ApproxInter::BufferId::PRED_AFFINE_MOTION_ESTIMATION,			ApproxInter::ConfigurationId::PRED_AFFINE_MOTION_ESTIMATION);
 
 	//ApproxInter::PrintBufferInfo("RECO_MOTION_ESTIMATION_MVP", 			ApproxInter::BufferId::RECO_MOTION_ESTIMATION_MVP, 				ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_MVP);
@@ -127,6 +130,64 @@ void ApproxInter::PrintBuffersInfo() {
 	ApproxInter::PrintBufferInfo("ORIG_MOTION_ESTIMATION_IME", 				ApproxInter::BufferId::ORIG_MOTION_ESTIMATION_IME, 				ApproxInter::ConfigurationId::ORIG_MOTION_ESTIMATION_IME);
 	ApproxInter::PrintBufferInfo("ORIG_MOTION_ESTIMATION_FRACTIONAL", 		ApproxInter::BufferId::ORIG_MOTION_ESTIMATION_FRACTIONAL, 		ApproxInter::ConfigurationId::ORIG_MOTION_ESTIMATION_FRACTIONAL);
 	ApproxInter::PrintBufferInfo("ORIG_MOTION_ESTIMATION_REFINEMENT", 		ApproxInter::BufferId::ORIG_MOTION_ESTIMATION_REFINEMENT,		ApproxInter::ConfigurationId::ORIG_MOTION_ESTIMATION_REFINEMENT);
+
+
+	//tinha jeito mais elegante de fazer isso
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	std::cout << "\tFME_FILT = BufferId: {";
+	for (auto i = 0; i < vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; ++i) {
+		std::cout << "{";
+		const std::string i_string = ApproxInter::BufferId::FME_FILT_OFFSET + std::to_string(i);
+
+		for (auto j = 0; j < vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; ++j) {
+			std::cout << "{";
+			const std::string j_string = std::to_string(j);
+			const std::string ij_string = i_string + j_string;
+
+			for (auto k = 0; k < vvenc::ComponentID::MAX_NUM_COMP; ++k) {
+				const std::string k_string = std::to_string(k);
+				const std::string ijk_string = ij_string + k_string;
+
+				const int64_t ijk = std::stol(ijk_string);
+				ApproxInter::BufferId::FME_FILT[i][j][k] = ijk;
+
+				std::cout << ijk_string;
+				if (k + 1 != vvenc::ComponentID::MAX_NUM_COMP) {std::cout << ',';}
+			}
+
+			std::cout << "}";
+			if (j + 1 != vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL) {std::cout << ',';}
+		}
+
+		std::cout << "}";
+		if (i + 1 != vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL) {std::cout << ',';}
+	}
+	std::cout << "}, ConfigurationId: " << ApproxInter::ConfigurationId::FME_FILT << std::endl;
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////	
+	std::cout << "\tFME_FILT_TEMP = BufferId: {";
+	for (auto j = 0; j < vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; ++j) {
+		std::cout << "{";
+		const std::string j_string = ApproxInter::BufferId::FME_FILT_TEMP_OFFSET + std::to_string(j);
+
+		for (auto k = 0; k < vvenc::ComponentID::MAX_NUM_COMP; ++k) {
+			const std::string k_string = std::to_string(k);
+			const std::string jk_string = j_string + k_string;
+
+			const int64_t ijk = std::stol(jk_string);
+			ApproxInter::BufferId::FME_FILT_TEMP[j][k] = ijk;
+
+			std::cout << jk_string;
+			if (k + 1 != vvenc::ComponentID::MAX_NUM_COMP) {std::cout << ',';}
+		}
+
+		std::cout << "}";
+		if (j + 1 != vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL) {std::cout << ',';}
+	}
+	std::cout << "}, ConfigurationId: " << ApproxInter::ConfigurationId::FME_FILT_TEMP << std::endl;
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 	std::cout << std::endl;
 }

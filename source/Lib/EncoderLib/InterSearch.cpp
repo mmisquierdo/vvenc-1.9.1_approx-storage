@@ -2950,8 +2950,14 @@ void InterSearch::xPatternSearchFracDIF(
   int         iOffset    = rcMvInt.hor + rcMvInt.ver * cStruct.iRefStride;
   CPelBuf cPatternRoi(cStruct.piRefY + iOffset, cStruct.iRefStride, *cStruct.pcPatternKey); //MATHEUS NOTE: parece!!! apenas pegar os ponteiros deles, não achei essa definição em especifico
 
-  ApproxInter::InstrumentIfMarked(cPatternRoi.buf, ApproxInter::)
 
+  #if APPROX_FME_RECO
+    ApproxInter::InstrumentIfMarked((void*) cPatternRoi.buf, ApproxInter::BufferId::FME_RECO, ApproxInter::ConfigurationId::FME_RECO, sizeof(Pel));
+  #endif
+
+  #if APPROX_FME_ORIG
+    ApproxInter::InstrumentIfMarked((void*) cStruct.pcPatternKey->buf, ApproxInter::BufferId::FME_ORIG, ApproxInter::ConfigurationId::FME_ORIG, sizeof(Pel));
+  #endif
 
   //  Half-pel refinement
   m_pcRdCost->setCostScale(1);
@@ -2994,8 +3000,24 @@ void InterSearch::xPatternSearchFracDIF(
     ruiCost = xPatternRefinement( cStruct.pcPatternKey, baseRefMv, 1, rcMvQter, uiDistBest, patternId, &cPatternRoi, cStruct.useAltHpelIf );
   }
 
+  #if APPROX_FME_RECO
+    ApproxInter::UninstrumentIfMarked((void*) cPatternRoi.buf);
+  #endif
+
+  #if APPROX_FME_ORIG
+    ApproxInter::UninstrumentIfMarked((void*) cStruct.pcPatternKey->buf);
+  #endif
+
+
+
   #if APPROX_FME_BEST_MV_COST_RECALC
-    //std::cout << "COST BEFORE: " << ruiCost << std::endl;
+    #if APPROX_FME_RECO
+      ApproxInter::InstrumentIfMarked((void*) cPatternRoi.buf, ApproxInter::BufferId::FME_RECO, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+    #endif
+
+    #if APPROX_FME_ORIG
+      ApproxInter::InstrumentIfMarked((void*) cStruct.pcPatternKey->buf, ApproxInter::BufferId::FME_ORIG, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+    #endif
 
     const Mv* pcMvRefine = (iFrac == 2 ? s_acMvRefineH : s_acMvRefineQ); //if quarter or half
     const int iRefStride = cStruct.pcPatternKey->width + 1;
@@ -3033,6 +3055,14 @@ void InterSearch::xPatternSearchFracDIF(
     }
 
     //rcMvFrac = pcMvRefine[uiDirecBest];
+
+      #if APPROX_FME_RECO
+        ApproxInter::UninstrumentIfMarked((void*) cPatternRoi.buf);
+      #endif
+
+      #if APPROX_FME_ORIG
+        ApproxInter::UninstrumentIfMarked((void*) cStruct.pcPatternKey->buf);
+      #endif
   #endif
 }
 
@@ -7246,7 +7276,7 @@ bool InterSearch::searchBvIBC(const CodingUnit& cu, int xPos, int yPos, int widt
 
 //<Matheus>
 #if MATHEUS_INSTRUMENTATION
-  #if APPROX_FILT_BUFFER_V2
+  #if APPROX_FILT_BUFFER_V2 || APPROX_FME_FILT
     void InterSearch::removeApproxFiltBuffer() {
       for( uint32_t c = 0; c <  MAX_NUM_COMP; c++ ) {
         for( uint32_t i = 0; i < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; i++ ) {
@@ -7259,13 +7289,13 @@ bool InterSearch::searchBvIBC(const CodingUnit& cu, int xPos, int yPos, int widt
       }
     }
 
-    void InterSearch::addApproxFiltBuffer() {
+    void InterSearch::addApproxFiltBuffer(const int64_t filt_configurationId, const int64_t filt_temp_configurationId) {
       for( uint32_t c = 0; c < MAX_NUM_COMP; c++ ) {
         for( uint32_t i = 0; i < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; i++ ) {
-          ApproxInter::InstrumentIfMarked((void*) m_filteredBlockTmp[i][c], ApproxInter::BufferId::FILT_MOTION_ESTIMATION_TEMP, ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION_TEMP, sizeof(Pel));
+          ApproxInter::InstrumentIfMarked((void*) m_filteredBlockTmp[i][c], ApproxInter::BufferId::FME_FILT_TEMP[i][c], filt_temp_configurationId, sizeof(Pel));
 
           for( uint32_t j = 0; j < LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL; j++ ) {
-            ApproxInter::InstrumentIfMarked((void*) m_filteredBlock[i][j][c], ApproxInter::BufferId::FILT_MOTION_ESTIMATION, ApproxInter::ConfigurationId::FILT_MOTION_ESTIMATION, sizeof(Pel));
+            ApproxInter::InstrumentIfMarked((void*) m_filteredBlock[i][j][c], ApproxInter::BufferId::FME_FILT[i][j][c], filt_configurationId, sizeof(Pel));
           }
         }
       }
