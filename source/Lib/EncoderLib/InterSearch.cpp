@@ -2959,6 +2959,10 @@ void InterSearch::xPatternSearchFracDIF(
     ApproxInter::InstrumentIfMarked((void*) cStruct.pcPatternKey->buf, ApproxInter::BufferId::FME_ORIG, ApproxInter::ConfigurationId::FME_ORIG, sizeof(Pel));
   #endif
 
+  #if APPROX_FME_FILT
+    addApproxFiltBuffer(ApproxInter::ConfigurationId::FME_FILT, ApproxInter::ConfigurationId::FME_FILT_TEMP);
+  #endif
+
   //  Half-pel refinement
   m_pcRdCost->setCostScale(1);
   if( 0 == m_pcEncCfg->m_fastSubPel )
