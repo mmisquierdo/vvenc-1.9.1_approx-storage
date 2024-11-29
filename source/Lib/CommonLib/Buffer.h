@@ -1015,6 +1015,7 @@ struct CompStorage : public PelBuf
     CHECK( m_memory, "Trying to re-create an already initialized buffer" );
     m_allocSize = size.area();
     m_memory = xMalloc(Pel, m_allocSize); /*new Pel[m_allocSize];*/ //<Matheus> </Matheus>
+	//JICS: instrumentar genericamente
     PelBuf::operator=( PelBuf( m_memory, size ) );
   }
   void destroy()

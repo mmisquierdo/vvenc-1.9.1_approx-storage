@@ -128,6 +128,7 @@ public:
 
     const int padding = useFilter ? MCTF_PADDING : 0;
     m_origBuf.create( chromaFormat, Area( Position(), size ), 0, padding );
+	//JICS: instrument ORIG buffer here
   }
 
   void reuse( int poc, const vvencYUVBuffer* yuvInBuf )

@@ -405,6 +405,7 @@ void Picture::finalInit( const VPS& _vps, const SPS& sps, const PPS& pps, PicHea
   if( !m_picBufs[PIC_RECONSTRUCTION].valid() )
   {
     m_picBufs[ PIC_RECONSTRUCTION ].create( chromaFormat, Area( lumaPos(), lumaSize() ), sps.CTUSize, margin, MEMORY_ALIGN_DEF_SIZE );
+	//JICS: instrumentar RECO aqui!!!
   }
   if( !m_tileColsDone )
   {

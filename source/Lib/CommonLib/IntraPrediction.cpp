@@ -278,6 +278,7 @@ void IntraPrediction::init(ChromaFormat chromaFormatIDC, const unsigned bitDepth
   if (m_pMdlmTemp == nullptr)
   {
     m_pMdlmTemp = xMalloc(Pel, (2 * MAX_TB_SIZEY + 1)*(2 * MAX_TB_SIZEY + 1)); //new Pel[(2 * MAX_TB_SIZEY + 1)*(2 * MAX_TB_SIZEY + 1)];//MDLM will use top-above and left-below samples.
+	//JICS: intrumentar como MDLMTemp
   }
 #if ENABLE_SIMD_OPT_INTRAPRED && defined( TARGET_SIMD_X86 )
   initIntraPredictionX86();

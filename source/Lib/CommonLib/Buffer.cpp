@@ -1008,6 +1008,7 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area )
 
   //allocate one buffer
   m_origin[0] = ( Pel* ) xMalloc( Pel, bufSize );
+  //JICS: instrumentar genericamente
 
   Pel* topLeft = m_origin[0];
   for( uint32_t i = 0; i < numComp; i++ )
@@ -1103,6 +1104,7 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area, c
 	#endif
 
     m_origin[i] = ( Pel* ) xMalloc( Pel, area );
+	//JICS: instrumentar genericamente
     Pel* topLeft = m_origin[i] + totalWidth * ymargin + xmargin;
     bufs.push_back( PelBuf( topLeft, totalWidth, _area.width >> scaleX, _area.height >> scaleY ) );
   }

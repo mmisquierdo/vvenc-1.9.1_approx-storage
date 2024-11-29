@@ -73,6 +73,7 @@ MatrixIntraPrediction::MatrixIntraPrediction()
 {
   m_reducedBoundary       = (Pel*)xMalloc( Pel, MIP_MAX_INPUT_SIZE ); 
   m_reducedBoundaryTransp = (Pel*)xMalloc( Pel, MIP_MAX_INPUT_SIZE );
+  //JICS: instrumenar como MIP_Bound e MIB_BoundTrans
 }
 
 MatrixIntraPrediction::~MatrixIntraPrediction()
