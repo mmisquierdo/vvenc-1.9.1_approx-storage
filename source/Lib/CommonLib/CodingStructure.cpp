@@ -578,6 +578,11 @@ void CodingStructure::createTempBuffers( const bool isTopLayer )
   for( unsigned i = 0; i < NUM_EDGE_DIR; i++ )
   {
     m_lfParam[i] = ( isTopLayer && m_mapSize[0].area() > 0 ) ? ( LoopFilterParam* ) xMalloc( LoopFilterParam, m_mapSize[0].area() ) : nullptr;
+	//<MATHEUS
+	if (m_lfParam[i]) {
+		ApproxInter::UninstrumentIfMarked(m_lfParam[i], false);
+	}
+	//MATHEUS>
   }
 
   unsigned _maxNumDmvrMvs = ( area.lwidth() >> 3 ) * ( area.lheight() >> 3 );
@@ -648,6 +653,11 @@ void CodingStructure::createCoeffs()
   {
     unsigned _area = area.blocks[i].area();
     m_coeffs[i] = _area > 0 ? ( TCoeffSig* ) xMalloc( TCoeffSig, _area ) : nullptr;
+	//<MATHEUS
+	if (m_coeffs[i]) {
+		ApproxInter::UninstrumentIfMarked(m_coeffs[i], false);
+	}
+	//MATHEUS>
   }
 
   for( unsigned i = 0; i < numComp; i++ )

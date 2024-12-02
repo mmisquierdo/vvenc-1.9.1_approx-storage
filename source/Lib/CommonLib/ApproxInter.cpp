@@ -19,6 +19,8 @@ void ApproxInter::MarkBuffer(const BufferRange& toMark) {
 	const std::lock_guard<std::mutex> lock(ApproxInter::allocatedBuffersMutex);
 
 	ApproxInter::allocatedBuffers.insert(toMark);
+
+
 }
 
 void ApproxInter::UnmarkBuffer(const BufferRange& toUnmark) {
@@ -33,6 +35,22 @@ void ApproxInter::UnmarkBuffer(void const * const address) {
 
 void ApproxInter::InstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes) {
 	const BufferRange accessBuffer = BufferRange((uint8_t*) address, ((uint8_t*) address) + 1); //zero-sized access would be ignore in the case of a pointer to the buffer's first element
+
+	const std::lock_guard<std::mutex> lock(ApproxInter::allocatedBuffersMutex);
+
+	const AllocatedBuffersSet::const_iterator it = ApproxInter::allocatedBuffers.find(accessBuffer);
+
+	if (it != ApproxInter::allocatedBuffers.cend()) {
+		ApproxSS::add_approx(it->m_initialAddress, it->m_finalAddress, bufferId, configurationId, dataSizeInBytes);
+	} else {
+		std::cout << "ApproxInter WARNING: buffer not marked for add_approx." << std::endl;
+	}
+}
+
+void ApproxInter::ReinstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes) {
+	const BufferRange accessBuffer = BufferRange((uint8_t*) address, ((uint8_t*) address) + 1); //zero-sized access would be ignore in the case of a pointer to the buffer's first element
+
+	ApproxInter::UninstrumentIfMarked(address, false);
 
 	const std::lock_guard<std::mutex> lock(ApproxInter::allocatedBuffersMutex);
 

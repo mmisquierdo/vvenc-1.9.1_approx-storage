@@ -8,11 +8,11 @@
 	#include "approx.h"
 	#include "CommonDef.h"
 
-	#define MATHEUS_INSTRUMENTATION 			true
+	#define MATHEUS_INSTRUMENTATION 			false
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
 
 	#define MATHEUS_SKIP_FRACTIONAL_MOTION_ESTIMATION false
-	#define MATHEUS_xPatternSearchIntRefine_ITERATED_POS 1 /*up to 9: default*/
+	#define MATHEUS_xPatternSearchIntRefine_ITERATED_POS 9 /*up to 9: default*/
 
 	#define APPROX_RECO_BUFFER_INTER 					false 	//ativa instrumentação em toda a ME (excluindo affine)
 	#define APPROX_ORIG_BUFFER_INTER 					false 	//ativa instrumentação em toda a ME (excluindo affine), para ORIG e TEMP_ORIG
@@ -37,10 +37,10 @@
 	#define APPROX_PRED_BUFFER 							false
 
 
-	#define APPROX_FME_BEST_MV_COST_RECALC 				true
-	#define APPROX_FME_RECO 							true
-	#define APPROX_FME_ORIG 							true
-	#define APPROX_FME_FILT								true
+	#define APPROX_FME_BEST_MV_COST_RECALC 				false
+	#define APPROX_FME_RECO 							false
+	#define APPROX_FME_ORIG 							false
+	#define APPROX_FME_FILT								false
 	/*#define APPROX_FME_HP_RECO							true
 	#define APPROX_FME_HP_ORIG							true
 	#define APPROX_FME_QP_RECO							true
@@ -75,7 +75,11 @@
 
 		//public:
 			namespace BufferId {
-				constexpr int64_t RECO_MOTION_ESTIMATION 					= 0;
+				constexpr int64_t OTHERS = 0;
+
+
+
+				/*constexpr int64_t RECO_MOTION_ESTIMATION 					= 0;
 				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 			= 1;
 				constexpr int64_t ORIG_MOTION_ESTIMATION 					= 2;
 				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 				= 11;
@@ -105,12 +109,12 @@
 				constexpr int64_t FME_ORIG_HR								= 22;
 				constexpr int64_t FME_ORIG_QR								= 23;*/
 
-				static constexpr auto FME_FILT_OFFSET						= "1";
+				/*static constexpr auto FME_FILT_OFFSET						= "1";
 				static constexpr auto FME_FILT_TEMP_OFFSET					= "20";
 
 
 				extern int64_t FME_FILT			[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];
-				extern int64_t FME_FILT_TEMP	[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];
+				extern int64_t FME_FILT_TEMP	[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];*/
 			}
 
 			namespace ConfigurationId {
@@ -118,10 +122,12 @@
 				static constexpr int64_t PRECISE_KNOB						= 2;
 				static constexpr int64_t APPROXIMATE_KNOB					= 1;
 
+				constexpr int64_t OTHER = JUST_TRACKING
 
 
 
-				constexpr int64_t RECO_MOTION_ESTIMATION 					= JUST_TRACKING;
+
+				/*constexpr int64_t RECO_MOTION_ESTIMATION 					= JUST_TRACKING;
 				constexpr int64_t RECO_AFFINE_MOTION_ESTIMATION 			= JUST_TRACKING;
 				constexpr int64_t ORIG_MOTION_ESTIMATION 					= JUST_TRACKING;
 				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 				= JUST_TRACKING;
@@ -151,8 +157,8 @@
 				constexpr int64_t FME_ORIG_HR								= JUST_TRACKING;
 				constexpr int64_t FME_ORIG_QR								= JUST_TRACKING;*/
 
-				constexpr int64_t FME_FILT									= JUST_TRACKING;	
-				constexpr int64_t FME_FILT_TEMP								= JUST_TRACKING;	
+				/*constexpr int64_t FME_FILT									= JUST_TRACKING;	
+				constexpr int64_t FME_FILT_TEMP								= JUST_TRACKING;*/
 			}
 
 
@@ -165,6 +171,7 @@
 			void UnmarkBuffer(const BufferRange& toUnmark);
 			void UnmarkBuffer(void const * const address);
 			void InstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes);
+			void ReinstrumentIfMarked(void * const address, const int64_t bufferId, const int64_t configurationId, const uint32_t dataSizeInBytes);
 			void UninstrumentIfMarked(void * const address, const bool giveAwayRecords = true);
 
 			void PrintMacrosStates();
