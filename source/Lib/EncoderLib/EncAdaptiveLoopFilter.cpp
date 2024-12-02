@@ -3213,6 +3213,7 @@ void EncAdaptiveLoopFilter::getPreBlkStats(AlfCovariance* alfCovariance, const A
       }
 
       Pel yLocal[4][4];
+	  //JICS: getPredBlkStats_yLocal
       for( int ii = 0; ii < 4; ii++ ) for( int jj = 0; jj < 4; jj++ )
       {
         yLocal[ii][jj] = org[j + jj + ii * orgStride] - rec[j + jj + ii * recStride];
@@ -3220,6 +3221,8 @@ void EncAdaptiveLoopFilter::getPreBlkStats(AlfCovariance* alfCovariance, const A
 
 
       Pel ELocal[MaxAlfNumClippingValues * ( MAX_NUM_ALF_LUMA_COEFF << 4 )];
+	  //JICS: getPredBlkStats_ELocal
+
 
       if( isLuma( channel ) ? !m_encCfg->m_useNonLinearAlfLuma : !m_encCfg->m_useNonLinearAlfChroma )
       {
@@ -6167,7 +6170,10 @@ void EncAdaptiveLoopFilter::getBlkStatsCcAlf(AlfCovariance &alfCovariance, const
 #endif
 
   Pel ELocal[MAX_NUM_CC_ALF_CHROMA_COEFF][16];
+  //JICS: getBlkStatsCcAlf_ELocal
   Pel yLocal[4][4];
+  //JICS: getBlkStatsCcAlf_yLocal
+
   alf_float_t weight[4][4];
 
   for (int i = 0; i < compArea.height; i += 4)

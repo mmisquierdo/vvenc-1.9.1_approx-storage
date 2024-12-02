@@ -361,6 +361,7 @@ void InterpolationFilter::filter(const ClpRng& clpRng, Pel const *src, int srcSt
   int row, col;
 
   Pel c[8];
+  //JICS: instrumnetar como filterC
   c[0] = coeff[0];
   c[1] = coeff[1];
   if ( N >= 4 )
@@ -676,6 +677,7 @@ void InterpolationFilter::filterN2_2D( const ComponentID compID, const Pel* src,
 void InterpolationFilter::scalarFilterN2_2D( const ClpRng& clpRng, Pel const *src, int srcStride, Pel* dst, int dstStride, int width, int height, TFilterCoeff const *ch, TFilterCoeff const *cv )
 {
   Pel *tmp = ( Pel* ) alloca( width * ( height + 1 ) * sizeof( Pel ) );
+  //JICS: instrumentar como scalarFilterN2_2D
 
   filter<2, false, true,  false>( clpRng, src, srcStride, tmp, width,     width, height + 1, ch );
   filter<2, true , false, false>( clpRng, tmp, width,     dst, dstStride, width, height,     cv );
@@ -771,7 +773,9 @@ void InterpolationFilter::filterXxY_N2( const ClpRng& clpRng, Pel const *src, in
 
   Pel cH[2];
   cH[0] = coeffH[0]; cH[1] = coeffH[1];
+  //JICS: instrumnetar como filterXxY_N2_cH
   Pel cV[2];
+  //JICS: instrumnetar como filterXxY_N2_cV
   cV[0] = coeffV[0]; cV[1] = coeffV[1];
 
   int offset1st, offset2nd;
@@ -796,6 +800,7 @@ void InterpolationFilter::filterXxY_N2( const ClpRng& clpRng, Pel const *src, in
   }
 
   int *tmp = ( int * ) alloca( w * h * sizeof( int ) );
+  //JICS: instrumentar como filterXxY_N2
   memset( tmp, 0, w * h * sizeof( int ) );
 
   int** dst = ( int ** ) alloca( h * sizeof( int * ) );
@@ -837,9 +842,12 @@ void InterpolationFilter::filterXxY_N4( const ClpRng& clpRng, const Pel* src, in
   int row, col;
 
   Pel cH[4];
+  //JICS: instrumentar como filterXxY_N4_cH
   cH[0] = coeffH[0]; cH[1] = coeffH[1];
   cH[2] = coeffH[2]; cH[3] = coeffH[3];
   Pel cV[4];
+  //JICS: instrumentar como filterXxY_N4_cV
+
   cV[0] = coeffV[0]; cV[1] = coeffV[1];
   cV[2] = coeffV[2]; cV[3] = coeffV[3];
 
@@ -867,6 +875,7 @@ void InterpolationFilter::filterXxY_N4( const ClpRng& clpRng, const Pel* src, in
   src -= 1 + srcStride;
 
   int *tmp = ( int * ) alloca( w * height * sizeof( int ) );
+  //JICS: instrumentar como filterXxY_N4
   memset( tmp, 0, w * height * sizeof( int ) );
 
   int** dst = ( int ** ) alloca( height * sizeof( int * ) );
@@ -913,11 +922,15 @@ void InterpolationFilter::filterXxY_N8( const ClpRng& clpRng, const Pel* src, in
   int row, col;
 
   Pel cH[8];
+  //JICS: instrumentar como filterXxY_N8_cH
+
   cH[0] = coeffH[0]; cH[1] = coeffH[1];
   cH[2] = coeffH[2]; cH[3] = coeffH[3];
   cH[4] = coeffH[4]; cH[5] = coeffH[5];
   cH[6] = coeffH[6]; cH[7] = coeffH[7];
   Pel cV[8];
+  //JICS: instrumentar como filterXxY_N8_cV
+
   cV[0] = coeffV[0]; cV[1] = coeffV[1];
   cV[2] = coeffV[2]; cV[3] = coeffV[3];
   cV[4] = coeffV[4]; cV[5] = coeffV[5];
@@ -947,6 +960,7 @@ void InterpolationFilter::filterXxY_N8( const ClpRng& clpRng, const Pel* src, in
   src -= 3 * ( 1 + srcStride );
 
   int *tmp = ( int * ) alloca( w * h * sizeof( int ) );
+  //JICS: instrumentar filterXxY_N8
   memset( tmp, 0, w * h * sizeof( int ) );
 
   int** dst = ( int ** ) alloca( h * sizeof( int * ) );

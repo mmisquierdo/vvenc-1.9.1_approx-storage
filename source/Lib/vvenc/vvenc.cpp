@@ -112,6 +112,7 @@ VVENC_DECL void vvenc_YUVBuffer_alloc_buffer( vvencYUVBuffer *yuvBuffer, const v
     yuvPlane.stride = yuvPlane.width;
     const int size  = yuvPlane.stride * yuvPlane.height;
     yuvPlane.ptr    = ( size > 0 ) ? new int16_t[ size ] : nullptr;
+	//JICS: yuvPlane_i
   }
 }
 

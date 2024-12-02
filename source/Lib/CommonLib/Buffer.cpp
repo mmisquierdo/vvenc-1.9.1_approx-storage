@@ -88,6 +88,7 @@ template< unsigned inputSize, unsigned outputSize >
 void mipMatrixMulCore( Pel* res, const Pel* input, const uint8_t* weight, const int maxVal, const int inputOffset, bool transpose )
 {
   Pel buffer[ outputSize*outputSize];
+  //JICS: instrumentar como mipMatrixMulCore
 
   int sum = 0;
   for( int i = 0; i < inputSize; i++ )

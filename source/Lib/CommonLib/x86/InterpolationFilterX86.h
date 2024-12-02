@@ -1460,6 +1460,7 @@ static void simdFilter( const ClpRng& clpRng, Pel const *src, int srcStride, Pel
   int row, col;
 
   Pel c[8];
+  //JICS: simdFilter_c8
   c[0] = coeff[0];
   c[1] = coeff[1];
   if( N >= 4 )
@@ -2464,6 +2465,7 @@ void simdFilter16xX_N8( const ClpRng& clpRng, Pel const *src, int srcStride, Pel
     }
 #else
     Pel* tmp = ( Pel* ) alloca( 16 * extHeight * sizeof( Pel ) );
+	//JICS: instrumentar como simdFilter16xX_N8
     VALGRIND_MEMCLEAR( tmp, 16 * extHeight * sizeof( Pel ) );
 
     simdInterpolateHorM8<vext, 8, false >( src, srcStride, tmp, 16, 16, extHeight, shift1st, offset1st, clpRng, coeffH );
@@ -2503,6 +2505,7 @@ void simdFilter16xX_N4( const ClpRng& clpRng, Pel const *src, int srcStride, Pel
   const int extHeight = height + 3;
 
   Pel* tmp = ( Pel* ) alloca( 16 * extHeight * sizeof( Pel ) );
+  //JICS: instrumentar como simdFilter16xX_N8
   VALGRIND_MEMCLEAR( tmp, 16 * extHeight * sizeof( Pel ) );
 
 #if USE_AVX2
@@ -2748,6 +2751,7 @@ void simdFilter8xX_N8( const ClpRng& clpRng, Pel const *src, int srcStride, Pel*
     }
 #else
     Pel* tmp = ( Pel* ) alloca( 8 * extHeight * sizeof( Pel ) );
+	//JICS: instrumentar como simdFilter8xX_N8
     VALGRIND_MEMCLEAR( tmp, 8 * extHeight * sizeof( Pel ) );
 
     simdInterpolateHorM8<vext, 8, false >( src, srcStride, tmp, 8, 8, extHeight, shift1st, offset1st, clpRng, coeffH );
@@ -2999,6 +3003,7 @@ void simdFilter8xX_N4( const ClpRng& clpRng, Pel const *src, int srcStride, Pel*
     }
 #else
     Pel* tmp = ( Pel* ) alloca( 8 * extHeight * sizeof( Pel ) );
+	//JICS: instrumentar como simdFilter8xX_N4
     VALGRIND_MEMCLEAR( tmp, 8 * extHeight * sizeof( Pel ) );
 
     simdInterpolateHorM8<vext, 4, false >( src, srcStride, tmp, 8, 8, extHeight, shift1st, offset1st, clpRng, coeffH );

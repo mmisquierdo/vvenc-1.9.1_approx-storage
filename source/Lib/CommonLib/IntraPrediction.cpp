@@ -199,6 +199,8 @@ void IntraPredAngleLuma_Core(Pel* pDstBuf,const ptrdiff_t dstStride,Pel* refMain
     const TFilterCoeff *f = useCubicFilter ? InterpolationFilter::getChromaFilterTable(deltaFract) : intraSmoothingFilter;
 
     Pel p[4];
+	//JICS: instrumentar como fntraPredAngleLuma_Core_p
+
 
     int refMainIndex = deltaInt + 1;
 
@@ -522,7 +524,10 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
   Pel* refSide;
 
   Pel  refAbove[2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX];
+  //JICS: instrumentar como xPredIntraAng_refAbove
   Pel  refLeft [2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX];
+  //JICS: instrumentar como xPredIntraAng_refLeft
+
 
   // Initialize the Main and Left reference array.
   if (intraPredAngle < 0)
@@ -571,6 +576,8 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
     std::swap(width, height);
   }
   Pel tempArray[MAX_CU_SIZE*MAX_CU_SIZE];
+  //JICS: instrumentar como xPredIntraAng_tempArray
+
   const int dstStride = bIsModeVer ? pDst.stride : MAX_CU_SIZE;
   Pel* pDstBuf = bIsModeVer ? pDst.buf : tempArray;
 
@@ -626,6 +633,8 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
               for( int x = 0; x < width; x++ )
               {
                 Pel p[4];
+				//JICS: instrumentar como xPredIntraAng_p4
+				
 
                 p[0] = refMain[deltaInt + x + 0];
                 p[1] = refMain[deltaInt + x + 1];
@@ -1504,7 +1513,10 @@ void IntraPrediction::xGetLMParameters(const CodingUnit& cu, const ComponentID c
   pickStep[1] = std::max(1, actualLeftTemplateSampNum >> (1 + leftIs4));
 
   Pel selectLumaPix[4] = { 0, 0, 0, 0 };
+  //JICS: instrumentar como xPredIntraAng_selectLumaPix
   Pel selectChromaPix[4] = { 0, 0, 0, 0 };
+  //JICS: instrumentar como xPredIntraAng_selectChromaPix
+
 
   int cntT, cntL;
   cntT = cntL = 0;

@@ -127,6 +127,7 @@ void MatrixIntraPrediction::prepareInputForPred(const CPelBuf &pSrc, const Area&
 void MatrixIntraPrediction::predBlock(Pel* const result, const int modeIdx, const bool transpose, const int bitDepth)
 {
   ALIGN_DATA( MEMORY_ALIGN_DEF_SIZE, Pel bufReducedPred[MIP_MAX_REDUCED_OUTPUT_SAMPLES] );
+  //JICS: instrumentar como predBlock_bufReducedPred
 
   const bool       needUpsampling  = ( m_upsmpFactorHor > 1 ) || ( m_upsmpFactorVer > 1 );
   Pel* const       reducedPred     = needUpsampling ? bufReducedPred : result;
