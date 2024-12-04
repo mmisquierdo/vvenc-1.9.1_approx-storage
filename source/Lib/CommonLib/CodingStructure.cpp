@@ -521,9 +521,18 @@ void CodingStructure::createForSearch( const ChromaFormat _chromaFormat, const A
   createInternals( UnitArea( _chromaFormat, _area ), false );
 
   m_reco.create( area );
+  m_reco.ReinstrumentBuffers(ApproxInter::BufferId::PIC_RECONSTRUCTION_Y);
+
   m_pred.create( area );
+  m_pred.ReinstrumentBuffers(ApproxInter::BufferId::PIC_PREDICTION_Y);
+
   m_resi.create( area );
+  m_resi.ReinstrumentBuffers(ApproxInter::BufferId::PIC_RESIDUAL_Y);
+
   m_rspreco.create( CHROMA_400, area.Y() );
+  m_rspreco.ReinstrumentBuffers(ApproxInter::BufferId::PIC_ORIGINAL_RSP_REC_Y);
+  
+  //JICS: instrumentar aqui
 }
 
 void CodingStructure::createPicLevel( const UnitArea& _unit, const PreCalcValues* _pcv )

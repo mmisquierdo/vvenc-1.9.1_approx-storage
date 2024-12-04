@@ -263,12 +263,14 @@ void InterPrediction::init( RdCost* pcRdCost, ChromaFormat chFormat, const int c
     for( uint32_t i = 0; i < NUM_REF_PIC_LIST_01; i++ )
     {
       m_yuvPred[i].create( chFormat, Area{ 0, 0, (int)MAX_CU_SIZE, (int)MAX_CU_SIZE }, 0, 0, 32 );
+	  //JICS: instrumentar aqui
     }
 
     InterPredInterpolation::init();
     DMVR::init( pcRdCost, chFormat );
     m_geoPartBuf[0].create(UnitArea(chFormat, Area(0, 0, MAX_CU_SIZE, MAX_CU_SIZE)));
     m_geoPartBuf[1].create(UnitArea(chFormat, Area(0, 0, MAX_CU_SIZE, MAX_CU_SIZE)));
+	//JICS: instrumentar aqui
   }
   if (m_IBCBufferWidth != g_IBCBufferSize / ctuSize)
   {
@@ -278,6 +280,7 @@ void InterPrediction::init( RdCost* pcRdCost, ChromaFormat chFormat, const int c
   {
     m_IBCBufferWidth = g_IBCBufferSize / ctuSize;
     m_IBCBuffer.create(UnitArea(chFormat, Area(0, 0, m_IBCBufferWidth, ctuSize)));
+	//JICS: instrumentar aqui
   }
   InterPredInterpolation::m_ifpLines = ifpLines;
 }
@@ -1147,8 +1150,11 @@ void DMVR::init( RdCost* pcRdCost, const ChromaFormat chFormat )
     for( int i = 0; i < NUM_REF_PIC_LIST_01; i++ )
     {
       m_yuvPred[i].create( chFormat, predArea );
+	  //JICS: instrumentar aqui
       m_yuvTmp[i].create( CHROMA_400, refArea, 0, DMVR_NUM_ITERATION );
+	  //JICS: instrumentar aqui
       m_yuvPad[i].create( chFormat, predArea, 0, DMVR_NUM_ITERATION + (NTAPS_LUMA>>1), 32 );
+	  //JICS: instrumentar aqui
       // the buffer m_yuvPad[i].bufs[0].buf is aligned to 32
       // the actual begin of the written to buffer is m_yuvPad[i].bufs[0].buf - 3 * stride - 3 = m_yuvPad[i].bufs[0].buf - 99,
       // which is not aligned with int. Since the margin on the left side is 1 sample too big, moving the buffer within the

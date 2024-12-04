@@ -2251,6 +2251,7 @@ void EncGOP::xInitLMCS( Picture& pic )
       else
       {
         pic.getFilteredOrigBuffer().create( pic.cs->pcv->chrFormat, Area( 0, 0, origBuf.get( COMP_Y ).width, origBuf.get( COMP_Y ).height) );
+		//JICS: instrumentar aqui
         PelUnitBuf rspOrigBuf = pic.getRspOrigBuf();
         rspOrigBuf.get(COMP_Y).rspSignal( origBuf.get(COMP_Y), m_Reshaper.getFwdLUT() );
         if( CHROMA_400 != pic.cs->pcv->chrFormat )

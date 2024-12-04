@@ -88,6 +88,7 @@ template< unsigned inputSize, unsigned outputSize >
 void mipMatrixMulCore( Pel* res, const Pel* input, const uint8_t* weight, const int maxVal, const int inputOffset, bool transpose )
 {
   Pel buffer[ outputSize*outputSize];
+  ApproxSS::add_approx((void*) &buffer[0], (void*) &buffer[outputSize*outputSize], ApproxInter::BufferId::mipMatrixMulCore_buffer, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como mipMatrixMulCore
 
   int sum = 0;
@@ -128,6 +129,8 @@ void mipMatrixMulCore( Pel* res, const Pel* input, const uint8_t* weight, const 
       }
     }
   }
+
+  ApproxSS::remove_approx((void*) &buffer[0], (void*) &buffer[outputSize*outputSize]);
 }
 
 template< typename T >
@@ -1009,7 +1012,7 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area )
 
   //allocate one buffer
   m_origin[0] = ( Pel* ) xMalloc( Pel, bufSize );
-  //JICS: instrumentar genericamente
+  //JICS: instrumentar genericamente NÃO!
 
   Pel* topLeft = m_origin[0];
   for( uint32_t i = 0; i < numComp; i++ )
@@ -1105,12 +1108,18 @@ void PelStorage::create( const ChromaFormat &_chromaFormat, const Area& _area, c
 	#endif
 
     m_origin[i] = ( Pel* ) xMalloc( Pel, area );
-	//JICS: instrumentar genericamente
+	//JICS: instrumentar genericamente NÃO!
     Pel* topLeft = m_origin[i] + totalWidth * ymargin + xmargin;
     bufs.push_back( PelBuf( topLeft, totalWidth, _area.width >> scaleX, _area.height >> scaleY ) );
   }
 
   m_maxArea = UnitArea( _chromaFormat, _area );
+}
+
+void PelStorage::ReinstrumentBuffers(const int64_t baseBufferId) const{
+	if(m_origin[0]) {ApproxInter::ReinstrumentIfMarked((void*) m_origin[0],	baseBufferId+0,	ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));}
+	if(m_origin[1])	{ApproxInter::ReinstrumentIfMarked((void*) m_origin[1],	baseBufferId+1, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));}
+	if(m_origin[2])	{ApproxInter::ReinstrumentIfMarked((void*) m_origin[2],	baseBufferId+2, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));}
 }
 
 void PelStorage::createFromBuf( PelUnitBuf buf )

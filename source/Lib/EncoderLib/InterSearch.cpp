@@ -264,10 +264,13 @@ void InterSearch::init( const VVEncCfg& encCfg, TrQuant* pTrQuant, RdCost* pRdCo
   for( uint32_t i = 0; i < NUM_REF_PIC_LIST_01; i++ )
   {
     m_tmpPredStorage[i].create( UnitArea( cform, Area( 0, 0, MAX_CU_SIZE, MAX_CU_SIZE ) ) );
+	//JICS: instrumentar aqui
   }
   m_tmpStorageLCU.create( UnitArea( cform, Area( 0, 0, MAX_CU_SIZE, MAX_CU_SIZE ) ) );
+  //JICS: instrumentar aqui
   m_pTempPel = xMalloc(Pel, encCfg.m_CTUSize * encCfg.m_CTUSize); //new Pel[ encCfg.m_CTUSize * encCfg.m_CTUSize ];
   m_tmpAffiStorage.create(UnitArea(cform, Area(0, 0, MAX_CU_SIZE, MAX_CU_SIZE + 2)));  // allow overread by 2 samples
+  //JICS: instrumentar aqui
   m_tmpAffiError = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
   m_tmpAffiDeri[0] = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
   m_tmpAffiDeri[1] = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];

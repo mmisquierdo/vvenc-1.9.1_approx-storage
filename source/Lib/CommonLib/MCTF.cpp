@@ -862,6 +862,7 @@ void MCTF::filter( const std::deque<Picture*>& picFifo, int filterIdx )
     if( pic->useMCTF )
     {
       fltrBuf.create( m_encCfg->m_internChromaFormat, m_area, 0, m_padding );
+	  //JICS: instrumentar aqui
       bilateralFilter( origBuf, srcFrameInfo, fltrBuf, overallStrength );
     }
 
@@ -962,6 +963,7 @@ void MCTF::filter( const std::deque<Picture*>& picFifo, int filterIdx )
           if( doFilter )
           {
             fltrBuf.create( m_encCfg->m_internChromaFormat, m_area, 0, m_padding );
+			//JICS: instrumentar aqui
             bilateralFilter( origBuf, srcFrameInfo, fltrBuf, overallStrength );
           }
         }
@@ -1073,6 +1075,7 @@ void MCTF::subsampleLuma(const PelStorage &input, PelStorage &output, const int 
   const int newWidth = input.Y().width / factor;
   const int newHeight = input.Y().height / factor;
   output.create(CHROMA_400, Area(0, 0, newWidth, newHeight), 0, m_padding);
+  //JICS: instrumentar aqui
 
   const Pel* srcRow = input.Y().buf;
   const int srcStride = input.Y().stride;

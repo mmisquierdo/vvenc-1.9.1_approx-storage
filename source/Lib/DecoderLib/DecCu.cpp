@@ -81,8 +81,10 @@ void DecCu::init( TrQuant* pcTrQuant, IntraPrediction* pcIntra, InterPrediction*
   m_pcInterPred     = pcInter;
   m_TmpBuffer.destroy();
   m_TmpBuffer.create( chrFormat, Area( 0,0, MAX_TB_SIZEY, MAX_TB_SIZEY ));
+   //JICS: instrumentar aqui
   m_PredBuffer.destroy();
   m_PredBuffer.create( chrFormat, Area( 0,0, MAX_CU_SIZE, MAX_CU_SIZE ));
+  //JICS: instrumentar aqui
 }
 
 // ====================================================================================================================

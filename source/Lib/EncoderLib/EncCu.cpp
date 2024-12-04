@@ -206,7 +206,9 @@ void EncCu::init( const VVEncCfg& encCfg, const SPS& sps, std::vector<int>* cons
     m_pBestCS[i]->createForSearch( chromaFormat, area );
 
     m_pOrgBuffer[i].create( chromaFormat, area );
+	//JICS: instrumentar aqui
     m_pRspBuffer[i].create( CHROMA_400, area );
+	//JICS: instrumentar aqui
   }
 
   m_pTempCS2 = new CodingStructure( m_unitCache, nullptr );
@@ -224,10 +226,12 @@ void EncCu::init( const VVEncCfg& encCfg, const SPS& sps, std::vector<int>* cons
   for( uint8_t i = 0; i < MAX_TMP_BUFS; i++)
   {
     m_aTmpStorageLCU[i].create(chromaFormat, Area(0, 0, uiMaxSize, uiMaxSize));
+	//JICS: instrumentar aqui
   }
   for (unsigned ui = 0; ui < MRG_MAX_NUM_CANDS; ui++)
   {
     m_acMergeTmpBuffer[ui].create(chromaFormat, Area(0, 0, uiMaxSize, uiMaxSize));
+	//JICS: instrumentar aqui
   }
 
 
@@ -236,6 +240,7 @@ void EncCu::init( const VVEncCfg& encCfg, const SPS& sps, std::vector<int>* cons
   m_CurrCtx = 0;
   if( encCfg.m_EDO )
     m_dbBuffer.create( chromaFormat, Area( 0, 0, uiMaxSize, uiMaxSize ), 0, 8 );
+	//JICS: instrumentar aqui
 
   m_MergeSimpleFlag = 0;
   m_tileIdx = 0;

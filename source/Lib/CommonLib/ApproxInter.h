@@ -76,6 +76,57 @@
 		//public:
 			namespace BufferId {
 				constexpr int64_t OTHERS = 0;
+				constexpr int64_t PIC_RECONSTRUCTION_Y = 10;
+				constexpr int64_t PIC_RECONSTRUCTION_Cb = 11;
+				constexpr int64_t PIC_RECONSTRUCTION_Cr = 12;
+				constexpr int64_t PIC_ORIGINAL_Y = 20;
+				constexpr int64_t PIC_ORIGINAL_Cb = 21;
+				constexpr int64_t PIC_ORIGINAL_Cr = 22;
+
+				constexpr int64_t PIC_RESIDUAL_Y = 50;
+				constexpr int64_t PIC_RESIDUAL_Cb = 51;
+				constexpr int64_t PIC_RESIDUAL_Cr = 52;
+
+				constexpr int64_t PIC_PREDICTION_Y = 40;
+				constexpr int64_t PIC_PREDICTION_Cb = 41;
+				constexpr int64_t PIC_PREDICTION_Cr = 42;
+
+				constexpr int64_t PIC_SAO_TEMP_Y = 70;
+				constexpr int64_t PIC_SAO_TEMP_Cb = 71;
+				constexpr int64_t PIC_SAO_TEMP_Cr = 72;
+
+				constexpr int64_t PIC_ORIGINAL_RSP_REC_Y = 90;
+				constexpr int64_t PIC_ORIGINAL_RSP_REC_Cb = 91;
+				constexpr int64_t PIC_ORIGINAL_RSP_REC_Cr = 92;
+
+				constexpr int64_t ALF_tempBuf_Y = 100;
+
+				constexpr int64_t ALF_tempBuf2_Y = 110;
+
+				constexpr int64_t mipMatrixMulCore_buffer = 120;
+
+				constexpr int64_t CompStorage_mMemory = 130;
+
+				constexpr int64_t filterC = 140;
+
+				constexpr int64_t scalarFilterN2_2D_tmp = 150; 
+
+				constexpr int64_t filterXxY_N2_cH = 160; 
+				constexpr int64_t filterXxY_N2_cV = 170; 
+				constexpr int64_t filterXxY_N2_temp = 180; 
+
+				constexpr int64_t filterXxY_N4_cH = 190; 
+				constexpr int64_t filterXxY_N4_cV = 200; 
+				constexpr int64_t filterXxY_N4_temp = 210; 
+
+
+
+				
+
+
+				
+
+
 
 
 
