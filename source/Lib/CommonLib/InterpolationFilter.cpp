@@ -946,13 +946,16 @@ void InterpolationFilter::filterXxY_N8( const ClpRng& clpRng, const Pel* src, in
   int row, col;
 
   Pel cH[8];
+  ApproxSS::add_approx((void*) &cH[0], (void*) &cH[8], ApproxInter::BufferId::filterXxY_N8_cH, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como filterXxY_N8_cH
 
   cH[0] = coeffH[0]; cH[1] = coeffH[1];
   cH[2] = coeffH[2]; cH[3] = coeffH[3];
   cH[4] = coeffH[4]; cH[5] = coeffH[5];
   cH[6] = coeffH[6]; cH[7] = coeffH[7];
+
   Pel cV[8];
+  ApproxSS::add_approx((void*) &cV[0], (void*) &cV[8], ApproxInter::BufferId::filterXxY_N8_cV, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como filterXxY_N8_cV
 
   cV[0] = coeffV[0]; cV[1] = coeffV[1];
@@ -984,6 +987,7 @@ void InterpolationFilter::filterXxY_N8( const ClpRng& clpRng, const Pel* src, in
   src -= 3 * ( 1 + srcStride );
 
   int *tmp = ( int * ) alloca( w * h * sizeof( int ) );
+  ApproxSS::add_approx((void*) &tmp[0], (void*) &tmp[w * h], ApproxInter::BufferId::filterXxY_N8_temp, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(int));
   //JICS: instrumentar filterXxY_N8
   memset( tmp, 0, w * h * sizeof( int ) );
 
@@ -1030,6 +1034,10 @@ void InterpolationFilter::filterXxY_N8( const ClpRng& clpRng, const Pel* src, in
     src += srcStride;
     if( row >= 7 ) _dst += dstStride;
   }
+
+  ApproxSS::remove_approx((void*) &cH[0], (void*) &cH[8]);
+  ApproxSS::remove_approx((void*) &cV[0], (void*) &cV[8]);
+  ApproxSS::remove_approx((void*) &tmp[0], (void*) &tmp[w * h]);
 }
 
 void InterpolationFilter::weightedGeoBlk(const ClpRngs &clpRngs, const CodingUnit& cu, const uint32_t width,

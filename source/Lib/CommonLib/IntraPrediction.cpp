@@ -199,6 +199,7 @@ void IntraPredAngleLuma_Core(Pel* pDstBuf,const ptrdiff_t dstStride,Pel* refMain
     const TFilterCoeff *f = useCubicFilter ? InterpolationFilter::getChromaFilterTable(deltaFract) : intraSmoothingFilter;
 
     Pel p[4];
+	ApproxSS::add_approx((void*) &p[0], (void*) &p[4], ApproxInter::BufferId::IntraPredAngleLuma_Core_p, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
 	//JICS: instrumentar como fntraPredAngleLuma_Core_p
 
 
@@ -221,6 +222,8 @@ void IntraPredAngleLuma_Core(Pel* pDstBuf,const ptrdiff_t dstStride,Pel* refMain
       }
     }
     deltaPos += intraPredAngle;
+
+	ApproxSS::remove_approx((void*) &p[0], (void*) &p[4]);
   }
 }
 
@@ -280,6 +283,7 @@ void IntraPrediction::init(ChromaFormat chromaFormatIDC, const unsigned bitDepth
   if (m_pMdlmTemp == nullptr)
   {
     m_pMdlmTemp = xMalloc(Pel, (2 * MAX_TB_SIZEY + 1)*(2 * MAX_TB_SIZEY + 1)); //new Pel[(2 * MAX_TB_SIZEY + 1)*(2 * MAX_TB_SIZEY + 1)];//MDLM will use top-above and left-below samples.
+	ApproxInter::ReinstrumentIfMarked((void*) m_pMdlmTemp, ApproxInter::BufferId::IntraPrediction_m_pMdlmTemp, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
 	//JICS: intrumentar como MDLMTemp
   }
 #if ENABLE_SIMD_OPT_INTRAPRED && defined( TARGET_SIMD_X86 )
@@ -524,8 +528,11 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
   Pel* refSide;
 
   Pel  refAbove[2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX];
+  ApproxSS::add_approx((void*) &refAbove[0], (void*) &refAbove[2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX], ApproxInter::BufferId::IntraPrediction_xPredIntraAng_refAbove, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como xPredIntraAng_refAbove
+
   Pel  refLeft [2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX];
+  ApproxSS::add_approx((void*) &refLeft[0], (void*) &refLeft[2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX], ApproxInter::BufferId::IntraPrediction_xPredIntraAng_refLeft, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como xPredIntraAng_refLeft
 
 
@@ -575,7 +582,10 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
   {
     std::swap(width, height);
   }
+
   Pel tempArray[MAX_CU_SIZE*MAX_CU_SIZE];
+  ApproxSS::add_approx((void*) &tempArray[0], (void*) &tempArray[MAX_CU_SIZE*MAX_CU_SIZE], ApproxInter::BufferId::IntraPrediction_xPredIntraAng_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+
   //JICS: instrumentar como xPredIntraAng_tempArray
 
   const int dstStride = bIsModeVer ? pDst.stride : MAX_CU_SIZE;
@@ -633,6 +643,8 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
               for( int x = 0; x < width; x++ )
               {
                 Pel p[4];
+				ApproxSS::add_approx((void*) &p[0], (void*) &p[4], ApproxInter::BufferId::IntraPrediction_xPredIntraAng_p, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+
 				//JICS: instrumentar como xPredIntraAng_p4
 				
 
@@ -644,6 +656,8 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
                 Pel val = ( f[0] * p[0] + f[1] * p[1] + f[2] * p[2] + f[3] * p[3] + 32 ) >> 6;
 
                 pDsty[x] = ClipPel( val, clpRng );   // always clip even though not always needed
+
+				ApproxSS::remove_approx((void*) &p[0], (void*) &p[4]);
               }
             }
           }
@@ -680,6 +694,10 @@ void IntraPrediction::xPredIntraAng( PelBuf& pDst, const CPelBuf& pSrc, const Ch
   {
     pDst.transposedFrom( CPelBuf( pDstBuf, dstStride, width, height) );
   }
+  
+  ApproxSS::remove_approx((void*) &refAbove[0], (void*) &refAbove[2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX]);  
+  ApproxSS::remove_approx((void*) &refLeft[0], (void*) &refLeft[2 * MAX_CU_SIZE + 3 + 33 * MAX_REF_LINE_IDX]);
+  ApproxSS::remove_approx((void*) &tempArray[0], (void*) &tempArray[MAX_CU_SIZE*MAX_CU_SIZE]);
 }
 
 void IntraPrediction::xPredIntraBDPCM(PelBuf& pDst, const CPelBuf& pSrc, const uint32_t dirMode, const ClpRng& clpRng)
@@ -1513,8 +1531,11 @@ void IntraPrediction::xGetLMParameters(const CodingUnit& cu, const ComponentID c
   pickStep[1] = std::max(1, actualLeftTemplateSampNum >> (1 + leftIs4));
 
   Pel selectLumaPix[4] = { 0, 0, 0, 0 };
+  ApproxSS::add_approx((void*) &selectLumaPix[0], (void*) &selectLumaPix[4], ApproxInter::BufferId::IntraPrediction_xGetLMParameters_selectLumaPix, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como xPredIntraAng_selectLumaPix
+
   Pel selectChromaPix[4] = { 0, 0, 0, 0 };
+  ApproxSS::add_approx((void*) &selectChromaPix[0], (void*) &selectChromaPix[4], ApproxInter::BufferId::IntraPrediction_xGetLMParameters_selectChromaPix, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como xPredIntraAng_selectChromaPix
 
 
@@ -1607,6 +1628,9 @@ void IntraPrediction::xGetLMParameters(const CodingUnit& cu, const ComponentID c
     b = 1 << (internalBitDepth - 1);
     iShift = 0;
   }
+
+  ApproxSS::remove_approx((void*) &selectLumaPix[0], (void*) &selectLumaPix[4]);
+  ApproxSS::remove_approx((void*) &selectChromaPix[0], (void*) &selectChromaPix[4]);
 }
 
 void IntraPrediction::initIntraMip( const CodingUnit& cu )

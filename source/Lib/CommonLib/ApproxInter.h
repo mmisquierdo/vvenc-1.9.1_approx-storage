@@ -119,9 +119,52 @@
 				constexpr int64_t filterXxY_N4_cV = 200; 
 				constexpr int64_t filterXxY_N4_temp = 210; 
 
+				constexpr int64_t filterXxY_N8_cH = 220; 
+				constexpr int64_t filterXxY_N8_cV = 230; 
+				constexpr int64_t filterXxY_N8_temp = 240; 
 
-
+				constexpr int64_t InterPrediction_m_yuvPred = 250;
 				
+				constexpr int64_t InterPrediction_m_geoPartBuf_0 = 260;
+
+				constexpr int64_t InterPrediction_m_geoPartBuf_1 = 270;
+
+				constexpr int64_t InterPrediction_m_IBCBuffer = 280;
+
+				constexpr int64_t InterPredInterpolation_m_filteredBlockTmp = 290;
+
+				constexpr int64_t InterPredInterpolation_m_filteredBlock = 300;
+
+				constexpr int64_t InterPredInterpolation_m_gradX0 = 310;
+				constexpr int64_t InterPredInterpolation_m_gradY0 = 320;
+				constexpr int64_t InterPredInterpolation_m_gradX1 = 330;
+				constexpr int64_t InterPredInterpolation_m_gradY1 = 340;
+
+				constexpr int64_t DMVR_m_yuvPred = 350;
+				constexpr int64_t DMVR_m_yuvTmp = 360;
+				constexpr int64_t DMVR_m_yuvPad = 370;
+
+				constexpr int64_t IntraPredAngleLuma_Core_p = 380;
+
+				constexpr int64_t IntraPrediction_m_pMdlmTemp = 390;
+
+				constexpr int64_t IntraPrediction_xPredIntraAng_refAbove = 400;
+				constexpr int64_t IntraPrediction_xPredIntraAng_refLeft = 410;
+
+				constexpr int64_t IntraPrediction_xPredIntraAng_tempArray = 420;
+				constexpr int64_t IntraPrediction_xPredIntraAng_p = 430;
+
+
+				constexpr int64_t IntraPrediction_xGetLMParameters_selectLumaPix = 440;
+				constexpr int64_t IntraPrediction_xGetLMParameters_selectChromaPix = 450;
+
+				constexpr int64_t MatrixIntraPrediction_m_reducedBoundary = 460;
+				constexpr int64_t MatrixIntraPrediction_m_reducedBoundaryTransp = 470;
+
+				constexpr int64_t MatrixIntraPrediction_predBlock_bufReducedPred = 480;
+
+
+
 
 
 				
