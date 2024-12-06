@@ -345,9 +345,7 @@ void Picture::createTempBuffers( unsigned _maxCUSize )
 
   // SAO reads/writes +-1 sample, especially SIMD
   m_picBufs[PIC_SAO_TEMP].create( chromaFormat, Y(), cs->pcv->maxCUSize, 2, MEMORY_ALIGN_DEF_SIZE );
-
-   m_picBufs[PIC_SAO_TEMP].ReinstrumentBuffers(ApproxInter::BufferId::PIC_SAO_TEMP_Y);
-
+  m_picBufs[PIC_SAO_TEMP].ReinstrumentBuffers(ApproxInter::BufferId::PIC_SAO_TEMP_Y);
   //JICS: instrumentar aqui
 
   if( cs ) cs->rebindPicBufs();
@@ -414,8 +412,8 @@ void Picture::finalInit( const VPS& _vps, const SPS& sps, const PPS& pps, PicHea
   if( !m_picBufs[PIC_RECONSTRUCTION].valid() )
   {
     m_picBufs[ PIC_RECONSTRUCTION ].create( chromaFormat, Area( lumaPos(), lumaSize() ), sps.CTUSize, margin, MEMORY_ALIGN_DEF_SIZE );
-	//JICS: instrumentar RECO aqui!!!
 	m_picBufs[ PIC_RECONSTRUCTION ].ReinstrumentBuffers(ApproxInter::BufferId::PIC_RECONSTRUCTION_Y);
+	//JICS: instrumentar RECO aqui!!!
   }
   if( !m_tileColsDone )
   {

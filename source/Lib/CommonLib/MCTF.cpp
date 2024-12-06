@@ -148,7 +148,9 @@ int motionErrorLumaFrac6( const Pel *org, const ptrdiff_t origStride, const Pel 
 {
   int error = 0;
   Pel tempArray[64 + 8][64];
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8][64], ApproxInter::BufferId::MCTF_motionErrorLumaFrac6_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como motionErrorLumaFrac6_tempArray
+
   int sum, base;
   const Pel maxSampleValue = ( 1 << bitDepth ) - 1;
 
@@ -196,10 +198,12 @@ int motionErrorLumaFrac6( const Pel *org, const ptrdiff_t origStride, const Pel 
     }
     if( error > besterror )
     {
+	  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8][64]);
       return error;
     }
   }
-
+  
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8][64]);
   return error;
 }
 
@@ -207,7 +211,9 @@ int motionErrorLumaFrac4( const Pel* org, const ptrdiff_t origStride, const Pel*
 {
   int error = 0;
   Pel tempArray[64 + 4][64];
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4][64], ApproxInter::BufferId::MCTF_motionErrorLumaFrac4_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como motionErrorLumaFrac4_tempArray
+  
   int sum, base;
   const Pel maxSampleValue = ( 1 << bitDepth ) - 1;
 
@@ -251,10 +257,12 @@ int motionErrorLumaFrac4( const Pel* org, const ptrdiff_t origStride, const Pel*
     }
     if( error > besterror )
     {
+	  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4][64]);
       return error;
     }
   }
 
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4][64]);
   return error;
 }
 
@@ -265,6 +273,7 @@ void applyFrac8Core_6Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
   const int maxValue        = ( 1 << bitDepth ) - 1;
 
   Pel tempArray[64 + numFilterTaps][64];
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64], ApproxInter::BufferId::MCTF_applyFrac8Core_6Tap_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como applyFrac8Core_6Tap_tempArray
 
   for( int by = 1; by < h + numFilterTaps - 1; by++ )
@@ -309,6 +318,8 @@ void applyFrac8Core_6Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
       *dstPel = sum;
     }
   }
+  
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64]);
 }
 
 void applyFrac8Core_4Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, const ptrdiff_t dstStride, const int w, const int h, const int16_t* xFilter, const int16_t* yFilter, const int bitDepth )
@@ -318,6 +329,7 @@ void applyFrac8Core_4Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
   const int maxValue        = ( 1 << bitDepth ) - 1;
 
   Pel tempArray[64 + numFilterTaps][64];
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64], ApproxInter::BufferId::MCTF_applyFrac8Core_6Tap_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como applyFrac8Core_4Tap_tempArray
 
 
@@ -359,6 +371,8 @@ void applyFrac8Core_4Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
       *dstPel = sum;
     }
   }
+  
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64]);
 }
 
 inline static float fastExp( float n, float d )
@@ -862,6 +876,7 @@ void MCTF::filter( const std::deque<Picture*>& picFifo, int filterIdx )
     if( pic->useMCTF )
     {
       fltrBuf.create( m_encCfg->m_internChromaFormat, m_area, 0, m_padding );
+	  fltrBuf.ReinstrumentBuffers(ApproxInter::BufferId::MCTF_filter_fltrBuf1);
 	  //JICS: instrumentar aqui
       bilateralFilter( origBuf, srcFrameInfo, fltrBuf, overallStrength );
     }
@@ -963,6 +978,7 @@ void MCTF::filter( const std::deque<Picture*>& picFifo, int filterIdx )
           if( doFilter )
           {
             fltrBuf.create( m_encCfg->m_internChromaFormat, m_area, 0, m_padding );
+			fltrBuf.ReinstrumentBuffers(ApproxInter::BufferId::MCTF_filter_fltrBuf2);
 			//JICS: instrumentar aqui
             bilateralFilter( origBuf, srcFrameInfo, fltrBuf, overallStrength );
           }
@@ -1075,6 +1091,7 @@ void MCTF::subsampleLuma(const PelStorage &input, PelStorage &output, const int 
   const int newWidth = input.Y().width / factor;
   const int newHeight = input.Y().height / factor;
   output.create(CHROMA_400, Area(0, 0, newWidth, newHeight), 0, m_padding);
+  output.ReinstrumentBuffers(ApproxInter::BufferId::MCTF_subsampleLuma_output);
   //JICS: instrumentar aqui
 
   const Pel* srcRow = input.Y().buf;
@@ -1407,6 +1424,7 @@ void MCTF::xFinalizeBlkLine( const PelStorage &orgPic, std::deque<TemporalFilter
 
   // max 64*64*8*2 = 2^(6+6+3+1)=2^16=64kbps, usually 16*16*8*2=2^(4+4+3+1)=4kbps, and allow for overread of one line
   Pel* dstBufs = ( Pel* ) alloca( sizeof( Pel ) * ( numRefs * m_mctfUnitSize * m_mctfUnitSize + m_mctfUnitSize ) );
+  ApproxSS::add_approx((void*) &dstBufs[0], (void*) &dstBufs[numRefs * m_mctfUnitSize * m_mctfUnitSize + m_mctfUnitSize], ApproxInter::BufferId::MCTF_xFinalizeBlkLine_dstBufs, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar xFinalizeBlkLine
 
   for( int c = 0; c < getNumberValidComponents( m_encCfg->m_internChromaFormat ); c++ )
@@ -1486,6 +1504,8 @@ void MCTF::xFinalizeBlkLine( const PelStorage &orgPic, std::deque<TemporalFilter
       }
     }
   }
+  
+  ApproxSS::remove_approx((void*) &dstBufs[0], (void*) &dstBufs[numRefs * m_mctfUnitSize * m_mctfUnitSize + m_mctfUnitSize]);
 }
 
 void MCTF::bilateralFilter(const PelStorage& orgPic, std::deque<TemporalFilterSourcePicInfo>& srcFrameInfo, PelStorage& newOrgPic, double overallStrength) const

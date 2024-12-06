@@ -1019,7 +1019,7 @@ struct CompStorage : public PelBuf
     CHECK( m_memory, "Trying to re-create an already initialized buffer" );
     m_allocSize = size.area();
     m_memory = xMalloc(Pel, m_allocSize); /*new Pel[m_allocSize];*/ //<Matheus> </Matheus>
-	ApproxInter::InstrumentIfMarked((void*) m_memory, ApproxInter::BufferId::CompStorage_mMemory, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+	ApproxInter::ReinstrumentIfMarked((void*) m_memory, ApproxInter::BufferId::CompStorage_mMemory, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
 	//JICS: instrumentar genericamente
     PelBuf::operator=( PelBuf( m_memory, size ) );
   }

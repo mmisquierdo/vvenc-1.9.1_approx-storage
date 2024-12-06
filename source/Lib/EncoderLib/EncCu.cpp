@@ -206,8 +206,10 @@ void EncCu::init( const VVEncCfg& encCfg, const SPS& sps, std::vector<int>* cons
     m_pBestCS[i]->createForSearch( chromaFormat, area );
 
     m_pOrgBuffer[i].create( chromaFormat, area );
+	m_pOrgBuffer[i].ReinstrumentBuffers(ApproxInter::BufferId::EncCu_m_pOrgBuffer);
 	//JICS: instrumentar aqui
     m_pRspBuffer[i].create( CHROMA_400, area );
+	m_pOrgBuffer[i].ReinstrumentBuffers(ApproxInter::BufferId::EncCu_m_pRspBuffer);
 	//JICS: instrumentar aqui
   }
 
@@ -226,11 +228,13 @@ void EncCu::init( const VVEncCfg& encCfg, const SPS& sps, std::vector<int>* cons
   for( uint8_t i = 0; i < MAX_TMP_BUFS; i++)
   {
     m_aTmpStorageLCU[i].create(chromaFormat, Area(0, 0, uiMaxSize, uiMaxSize));
+	m_aTmpStorageLCU[i].ReinstrumentBuffers(ApproxInter::BufferId::EncCu_m_aTmpStorageLCU);
 	//JICS: instrumentar aqui
   }
   for (unsigned ui = 0; ui < MRG_MAX_NUM_CANDS; ui++)
   {
     m_acMergeTmpBuffer[ui].create(chromaFormat, Area(0, 0, uiMaxSize, uiMaxSize));
+	m_acMergeTmpBuffer[ui].ReinstrumentBuffers(ApproxInter::BufferId::EncCu_m_acMergeTmpBuffer);
 	//JICS: instrumentar aqui
   }
 
@@ -238,9 +242,11 @@ void EncCu::init( const VVEncCfg& encCfg, const SPS& sps, std::vector<int>* cons
   const unsigned maxDepth = 2 * MAX_CU_SIZE_IDX;
   m_CtxBuffer.resize( maxDepth );
   m_CurrCtx = 0;
-  if( encCfg.m_EDO )
+  if( encCfg.m_EDO ) {
     m_dbBuffer.create( chromaFormat, Area( 0, 0, uiMaxSize, uiMaxSize ), 0, 8 );
+	m_dbBuffer.ReinstrumentBuffers(ApproxInter::BufferId::EncCu_m_dbBuffer);
 	//JICS: instrumentar aqui
+  }
 
   m_MergeSimpleFlag = 0;
   m_tileIdx = 0;

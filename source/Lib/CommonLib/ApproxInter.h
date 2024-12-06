@@ -99,9 +99,9 @@
 				constexpr int64_t PIC_ORIGINAL_RSP_REC_Cb = 91;
 				constexpr int64_t PIC_ORIGINAL_RSP_REC_Cr = 92;
 
-				constexpr int64_t ALF_tempBuf_Y = 100;
+				constexpr int64_t AdaptiveLoopFilter_tempBuf_Y = 100;
 
-				constexpr int64_t ALF_tempBuf2_Y = 110;
+				constexpr int64_t AdaptiveLoopFilter_tempBuf2_Y = 110;
 
 				constexpr int64_t mipMatrixMulCore_buffer = 120;
 
@@ -164,10 +164,55 @@
 				constexpr int64_t MatrixIntraPrediction_predBlock_bufReducedPred = 480;
 
 
+				constexpr int64_t MCTF_motionErrorLumaFrac6_tempArray = 490;
+				constexpr int64_t MCTF_motionErrorLumaFrac4_tempArray = 500;
+				constexpr int64_t MCTF_applyFrac8Core_6Tap_tempArray = 510;
+				constexpr int64_t MCTF_applyFrac8Core_4Tap_tempArray = 520;
+				constexpr int64_t MCTF_filter_fltrBuf1 = 530;
+				constexpr int64_t MCTF_filter_fltrBuf2 = 540;
+				constexpr int64_t MCTF_subsampleLuma_output = 550;
+				constexpr int64_t MCTF_xFinalizeBlkLine_dstBufs = 560;
+
+				constexpr int64_t InterpolationFilterX86_simdFilter_c = 570;
+
+				constexpr int64_t InterpolationFilterX86_simdFilter16xX_N8_tmp = 580;
+				constexpr int64_t InterpolationFilterX86_simdFilter16xX_N4_tmp = 590;
+				constexpr int64_t InterpolationFilterX86_simdFilter8xX_N8_tmp = 600;
+				constexpr int64_t InterpolationFilterX86_simdFilter8xX_N4_tmp = 610;
+
+				constexpr int64_t DecCu_m_TmpBuffer = 620;
+				constexpr int64_t DecCu_m_PredBuffer = 630;
+
+				constexpr int64_t EncAdaptiveLoopFilter_m_bufOrigin = 640;
+
+				constexpr int64_t EncAdaptiveLoopFilter_getPredBlkStats_yLocal = 650;
+				constexpr int64_t EncAdaptiveLoopFilter_getPredBlkStats_ELocal = 660;
+
+				constexpr int64_t EncAdaptiveLoopFilter_getBlkStatsCcAlf_yLocal = 670;
+				constexpr int64_t EncAdaptiveLoopFilter_getBlkStatsCcAlf_ELocal = 680;
+
+				constexpr int64_t EncCu_m_pOrgBuffer = 690;
+				constexpr int64_t EncCu_m_pRspBuffer = 700;
+				constexpr int64_t EncCu_m_aTmpStorageLCU = 710;
+				constexpr int64_t EncCu_m_acMergeTmpBuffer = 720; 
+				constexpr int64_t EncCu_m_dbBuffer = 730; 
+
+				constexpr int64_t EncGOP_xInitLMCS_getFilteredOrigBuffer = 740;
+
+				constexpr int64_t EncSlice_m_alfTempCtuBuf = 750;
+
+				constexpr int64_t InterSearch_m_tmpPredStorage = 760;
+				constexpr int64_t InterSearch_m_tmpStorageLCU = 770;
+				constexpr int64_t InterSearch_m_pTempPel = 780;
+				constexpr int64_t InterSearch_m_tmpAffiStorage = 790;
+				constexpr int64_t InterSearch_m_tmpAffiError = 800; 
+				constexpr int64_t InterSearch_m_tmpAffiDeri0 = 810; 
+				constexpr int64_t InterSearch_m_tmpAffiDeri1 = 820;  
+				constexpr int64_t vvenc_YUVBuffer_alloc_buffer_yuvPlane = 830;
 
 
 
-				
+
 
 
 

@@ -264,16 +264,27 @@ void InterSearch::init( const VVEncCfg& encCfg, TrQuant* pTrQuant, RdCost* pRdCo
   for( uint32_t i = 0; i < NUM_REF_PIC_LIST_01; i++ )
   {
     m_tmpPredStorage[i].create( UnitArea( cform, Area( 0, 0, MAX_CU_SIZE, MAX_CU_SIZE ) ) );
+	m_tmpPredStorage[i].ReinstrumentBuffers(ApproxInter::BufferId::InterSearch_m_tmpPredStorage);
 	//JICS: instrumentar aqui
   }
   m_tmpStorageLCU.create( UnitArea( cform, Area( 0, 0, MAX_CU_SIZE, MAX_CU_SIZE ) ) );
+  m_tmpStorageLCU.ReinstrumentBuffers(ApproxInter::BufferId::InterSearch_m_tmpStorageLCU);
   //JICS: instrumentar aqui
   m_pTempPel = xMalloc(Pel, encCfg.m_CTUSize * encCfg.m_CTUSize); //new Pel[ encCfg.m_CTUSize * encCfg.m_CTUSize ];
+  ApproxInter::ReinstrumentIfMarked((void*) m_pTempPel, ApproxInter::BufferId::InterSearch_m_pTempPel, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+
   m_tmpAffiStorage.create(UnitArea(cform, Area(0, 0, MAX_CU_SIZE, MAX_CU_SIZE + 2)));  // allow overread by 2 samples
+  m_tmpAffiStorage.ReinstrumentBuffers(ApproxInter::BufferId::InterSearch_m_tmpAffiStorage);
   //JICS: instrumentar aqui
+  
   m_tmpAffiError = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
+  ApproxInter::ReinstrumentIfMarked((void*) m_tmpAffiError, ApproxInter::BufferId::InterSearch_m_tmpAffiError, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+
   m_tmpAffiDeri[0] = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
+  ApproxInter::ReinstrumentIfMarked((void*) m_tmpAffiDeri[0], ApproxInter::BufferId::InterSearch_m_tmpAffiDeri0, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+
   m_tmpAffiDeri[1] = xMalloc(Pel, MAX_CU_SIZE * MAX_CU_SIZE); //new Pel[MAX_CU_SIZE * MAX_CU_SIZE];
+  ApproxInter::ReinstrumentIfMarked((void*) m_tmpAffiDeri[1], ApproxInter::BufferId::InterSearch_m_tmpAffiDeri1, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: intrumentar como Affine...
 
   CompArea chromaArea( COMP_Cb, cform, Area( 0, 0, encCfg.m_CTUSize, encCfg.m_CTUSize ), true );
