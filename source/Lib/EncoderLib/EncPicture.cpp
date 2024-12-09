@@ -115,6 +115,11 @@ void EncPicture::compressPicture( Picture& pic, EncGOP& gopEncoder )
   // compress current slice
   pic.cs->slice = pic.slices[0];
   std::fill( pic.ctuSlice.begin(), pic.ctuSlice.end(), pic.slices[0] );
+
+  //<MATHEUS
+  std::cout << "Current POC: " << pic.getPOC() << " or " << pic.cs->slice->poc << std::endl;
+  //MATHEUS>
+
   m_SliceEncoder.compressSlice( &pic );
 
   ITT_TASKEND( itt_domain_picEncoder, itt_handle_start );

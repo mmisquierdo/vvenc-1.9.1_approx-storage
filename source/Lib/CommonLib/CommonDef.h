@@ -585,7 +585,7 @@ inline std::string prnt( const char* fmt, ...)
 
 namespace ApproxSignaling {
   template <typename T> 
-  static T* aligned_malloc(void* (*allocFunction)(const size_t, const size_t), const size_t len, const size_t alignment, const bool alignmentMultiple = true) {
+  static T* aligned_malloc(void* (*allocFunction)(const size_t, const size_t), const size_t len, const size_t alignment, const bool alignmentMultiple = false) {
 	//ALLOCATION
     
 	size_t size = sizeof(T)*(len);

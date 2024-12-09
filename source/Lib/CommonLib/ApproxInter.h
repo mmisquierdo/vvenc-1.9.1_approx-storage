@@ -223,14 +223,14 @@
 				constexpr int64_t ORIG_MOTION_ESTIMATION 					= 2;
 				constexpr int64_t TEMP_ORIG_MOTION_ESTIMATION 				= 11;
 				constexpr int64_t ORIG_AFFINE_MOTION_ESTIMATION 			= 3;
-				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION		= 13;
+				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION		= 13;*/
 				//constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 			= 4;
 				//constexpr int64_t FILT_MOTION_ESTIMATION 					= 5;
-				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 			= 6;
+				/*constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 			= 6;*/
 
 				//constexpr int64_t RECO_MOTION_ESTIMATION_MVP 				= 12;
 				//constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 			= 7;
-				constexpr int64_t RECO_MOTION_ESTIMATION_MVP_AND_PATTERN	= 7;
+				/*constexpr int64_t RECO_MOTION_ESTIMATION_MVP_AND_PATTERN	= 7;
 				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 				= 8;
 				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 				= 9;
 				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 		= 10;
@@ -241,7 +241,7 @@
 				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= 17;
 
 				constexpr int64_t FME_RECO 									= RECO_MOTION_ESTIMATION_FRACTIONAL;
-				constexpr int64_t FME_ORIG 									= ORIG_MOTION_ESTIMATION_FRACTIONAL;
+				constexpr int64_t FME_ORIG 									= ORIG_MOTION_ESTIMATION_FRACTIONAL;*/
 
 				/*constexpr int64_t FME_RECO_HR								= 20;
 				constexpr int64_t FME_RECO_QR								= 21;
@@ -261,7 +261,7 @@
 				static constexpr int64_t PRECISE_KNOB						= 2;
 				static constexpr int64_t APPROXIMATE_KNOB					= 1;
 
-				constexpr int64_t OTHER = JUST_TRACKING
+				constexpr int64_t OTHER = JUST_TRACKING;
 
 
 
@@ -274,11 +274,11 @@
 				constexpr int64_t TEMP_ORIG_AFFINE_MOTION_ESTIMATION		= JUST_TRACKING;
 				constexpr int64_t FILT_MOTION_ESTIMATION_TEMP 				= JUST_TRACKING;
 				constexpr int64_t FILT_MOTION_ESTIMATION 					= JUST_TRACKING;
-				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 			= JUST_TRACKING;
+				constexpr int64_t PRED_AFFINE_MOTION_ESTIMATION 			= JUST_TRACKING;*/
 
 				//constexpr int64_t RECO_MOTION_ESTIMATION_MVP 				= 0;
 				//constexpr int64_t RECO_MOTION_ESTIMATION_PATTERN 			= 0;
-				constexpr int64_t RECO_MOTION_ESTIMATION_MVP_AND_PATTERN	= JUST_TRACKING;
+				/*constexpr int64_t RECO_MOTION_ESTIMATION_MVP_AND_PATTERN	= JUST_TRACKING;
 				constexpr int64_t RECO_MOTION_ESTIMATION_TZ 				= JUST_TRACKING;
 				constexpr int64_t RECO_MOTION_ESTIMATION_FAST 				= JUST_TRACKING;
 				constexpr int64_t RECO_MOTION_ESTIMATION_FRACTIONAL 		= JUST_TRACKING;
@@ -289,7 +289,7 @@
 				constexpr int64_t ORIG_MOTION_ESTIMATION_REFINEMENT 		= JUST_TRACKING;
 
 				constexpr int64_t FME_RECO 									= RECO_MOTION_ESTIMATION_FRACTIONAL;
-				constexpr int64_t FME_ORIG 									= ORIG_MOTION_ESTIMATION_FRACTIONAL;
+				constexpr int64_t FME_ORIG 									= ORIG_MOTION_ESTIMATION_FRACTIONAL;*/
 
 				/*constexpr int64_t FME_RECO_HR								= JUST_TRACKING;
 				constexpr int64_t FME_RECO_QR								= JUST_TRACKING;
