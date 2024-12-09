@@ -494,7 +494,7 @@ void EncLib::encodePicture( bool flush, const vvencYUVBuffer* yuvInBuf, AccessUn
 
   //<Matheus>
 	//std::cout << "QUADRO FINALIZADO" << std::endl;
-	ApproxSS::next_period();
+	//ApproxSS::next_period();
 	//</Matheus>
 }
 

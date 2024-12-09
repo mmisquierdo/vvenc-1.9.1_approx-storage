@@ -6,7 +6,6 @@
 	#include <set>
 	#include <mutex>
 	#include "approx.h"
-	#include "CommonDef.h"
 
 	#define MATHEUS_INSTRUMENTATION 			false
 	#define FELIPE_INSTRUMENTATION (!MATHEUS_INSTRUMENTATION && false)
@@ -254,6 +253,26 @@
 
 				extern int64_t FME_FILT			[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];
 				extern int64_t FME_FILT_TEMP	[vvenc::LUMA_INTERPOLATION_FILTER_SUB_SAMPLE_POSITIONS_SIGNAL][vvenc::ComponentID::MAX_NUM_COMP];*/
+			}
+
+			namespace LevelId {
+				constexpr int64_t OTHER = 0;
+				constexpr int64_t xCheckRDCostMerge = 1;
+				constexpr int64_t xCheckRDCostMergeGeo = 2;
+				constexpr int64_t xCheckRDCostInterIMV = 4;
+				constexpr int64_t xCheckRDCostIBCModeMerge2Nx2N = 5;
+				constexpr int64_t xCheckRDCostIBCMode = 6;
+				constexpr int64_t xCheckRDCostIntra = 7;
+
+				constexpr int64_t xCheckRDCostInter = 3;
+					constexpr int64_t xMotionEstimation = 1;
+						constexpr int64_t Full_Search_MPV = 1;
+						constexpr int64_t xPatternSearch = 2;
+						constexpr int64_t xTZSearch = 3;
+							constexpr int64_t xTZSearch_MVP = 1;
+							constexpr int64_t xTZSearch_Start_Search = 2;
+							constexpr int64_t xTZSearch_Raster = 3;
+							constexpr int64_t xTZSearch_Refinement = 4;
 			}
 
 			namespace ConfigurationId {

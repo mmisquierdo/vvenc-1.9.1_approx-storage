@@ -1,6 +1,6 @@
 #include "approx.h"
 
-int __attribute__((optimize("O0"))) ApproxSS::start_level(int level/* = 0*/){ // 1 parametro
+int __attribute__((optimize("O0"))) ApproxSS::start_level(int64_t level/* = 0*/){ // 1 parametro
 	return 0;
 }
 

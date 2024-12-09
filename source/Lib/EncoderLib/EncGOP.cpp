@@ -376,6 +376,10 @@ void EncGOP::xProcessPictures( AccessUnitList& auList, PicList& doneList )
         }
 
         pic = *picItr;
+		//<MATHEUS
+		ApproxSS::next_period(pic->getPOC());
+		//std::cout << "Current POC: " << pic->getPOC() << std::endl;
+		//MATHEUS>
         picEncoder = m_freePicEncoderList.front();
 
         // rate-control with look-ahead: init next chunk

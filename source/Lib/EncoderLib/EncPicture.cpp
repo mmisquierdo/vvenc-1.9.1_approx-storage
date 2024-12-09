@@ -117,7 +117,7 @@ void EncPicture::compressPicture( Picture& pic, EncGOP& gopEncoder )
   std::fill( pic.ctuSlice.begin(), pic.ctuSlice.end(), pic.slices[0] );
 
   //<MATHEUS
-  std::cout << "Current POC: " << pic.getPOC() << " or " << pic.cs->slice->poc << std::endl;
+  //std::cout << "Current POC: " << pic.getPOC() << " or " << pic.cs->slice->poc << std::endl;
   //MATHEUS>
 
   m_SliceEncoder.compressSlice( &pic );

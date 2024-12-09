@@ -2012,6 +2012,7 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
   {
     return;
   }
+  ApproxSS::start_level(ApproxInter::LevelId::xMotionEstimation);
 
   #if MATHEUS_INSTRUMENTATION && APPROX_ORIG_BUFFER_INTER
     Pel const * const approxOrigBuffer = origBuf.Y().buf;
@@ -2149,6 +2150,8 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
       ApproxInter::InstrumentIfMarked((void*) approxRecoBufferMVPAndPattern, ApproxInter::BufferId::RECO_MOTION_ESTIMATION_MVP_AND_PATTERN, ApproxInter::ConfigurationId::RECO_MOTION_ESTIMATION_MVP_AND_PATTERN, sizeof(Pel));
       ApproxSS::start_level();
   	#endif
+	ApproxSS::start_level(ApproxInter::LevelId::Full_Search_MPV);
+
 
     cStruct.subShiftMode = m_pcEncCfg->m_fastInterSearchMode == VVENC_FASTINTERSEARCH_MODE1 || m_pcEncCfg->m_fastInterSearchMode == VVENC_FASTINTERSEARCH_MODE3 ? 1 : 0;
     m_pcRdCost->setDistParam( m_cDistParam, *cStruct.pcPatternKey, cStruct.piRefY, cStruct.iRefStride, m_lumaClpRng.bd, COMP_Y, cStruct.subShiftMode );
@@ -2194,8 +2197,14 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
       }
     }
 
+	ApproxSS::end_level();
+
+	ApproxSS::start_level(ApproxInter::LevelId::xPatternSearch);
+
     xSetSearchRange( cu, bestInitMv, iSrchRng, cStruct.searchRange );
     xPatternSearch ( cStruct, rcMv, ruiCost);
+
+	ApproxSS::end_level();
 
     #if MATHEUS_INSTRUMENTATION && APPROX_RECO_BUFFER_INTER_MVP_AND_PATTERN
       ApproxInter::UninstrumentIfMarked((void*) approxRecoBufferMVPAndPattern);
@@ -2390,6 +2399,8 @@ void InterSearch::xMotionEstimation(CodingUnit& cu, CPelUnitBuf& origBuf, RefPic
     #endif
   #endif
   //</Matheus>
+
+  ApproxSS::end_level();
 }
 
 void InterSearch::xClipMvSearch( Mv& rcMv, const Position& pos, const struct Size& size, const PreCalcValues& pcv, const int ifpLines )
@@ -2576,6 +2587,8 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
                              const bool            bExtendedSettings,
                              const bool            bFastSettings)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch);
+
   const bool bUseRasterInFastMode                    = true; //toggle this to further reduce runtime
   const bool bUseAdaptiveRaster                      = bExtendedSettings;
   const int  iRaster                                 = (bFastSettings && bUseRasterInFastMode) ? 8 : 5;
@@ -2606,6 +2619,8 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
   //
   m_cDistParam.maximumDistortionForEarlyExit = cStruct.uiBestSad;
   m_pcRdCost->setDistParam( m_cDistParam, *cStruct.pcPatternKey, cStruct.piRefY, cStruct.iRefStride, m_lumaClpRng.bd, COMP_Y, cStruct.subShiftMode );
+
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_MVP);
 
   // set rcMv (Median predictor) as start point and as best point
   xTZSearchHelp( cStruct, rcMv.hor, rcMv.ver, 0, 0 );
@@ -2669,6 +2684,8 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
           // write out best match
           rcMv.set( cStruct.iBestX, cStruct.iBestY );
           ruiSAD = cStruct.uiBestSad - m_pcRdCost->getCostOfVectorWithPredictor( cStruct.iBestX, cStruct.iBestY, cStruct.imvShift );
+		  ApproxSS::end_level();
+		  ApproxSS::end_level();
           return;
         }
       }
@@ -2677,10 +2694,17 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
         // write out best match
         rcMv.set( cStruct.iBestX, cStruct.iBestY );
         ruiSAD = cStruct.uiBestSad - m_pcRdCost->getCostOfVectorWithPredictor( cStruct.iBestX, cStruct.iBestY, cStruct.imvShift );
+		ApproxSS::end_level();
+		ApproxSS::end_level();
         return;
       }
     }
   }
+  
+  ApproxSS::end_level();
+  
+  
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_MVP);
 
   // start search
   iDist = 0;
@@ -2770,6 +2794,10 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
       }
     }
   }
+  
+  ApproxSS::end_level();
+  
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_Raster);
 
   // raster refinement
 
@@ -2803,6 +2831,10 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
       }
     }
   }
+
+  ApproxSS::end_level();
+  
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_Refinement);
 
   // star refinement
   if ( bStarRefinementEnable && cStruct.uiBestDistance > 0 )
@@ -2841,9 +2873,13 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
     }
   }
 
+  ApproxSS::end_level();
+
   // write out best match
   rcMv.set( cStruct.iBestX, cStruct.iBestY );
   ruiSAD = cStruct.uiBestSad - m_pcRdCost->getCostOfVectorWithPredictor( cStruct.iBestX, cStruct.iBestY, cStruct.imvShift );
+
+   ApproxSS::end_level();
 }
 
 void InterSearch::xPatternSearchIntRefine(CodingUnit& cu, TZSearchStruct&  cStruct, Mv& rcMv, Mv& rcMvPred, int& riMVPIdx, uint32_t& ruiBits, Distortion& ruiCost, const AMVPInfo& amvpInfo, double fWeight)

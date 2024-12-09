@@ -755,7 +755,9 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           EncTestMode encTestModeSkip = { ETM_MERGE_SKIP, ETO_STANDARD, qp, lossless };
           if (m_modeCtrl.tryMode(encTestModeSkip, cs, partitioner))
           {
+			ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostMerge);
             xCheckRDCostMerge(tempCS, bestCS, partitioner, encTestModeSkip);
+			ApproxSS::end_level();
 
             CodingUnit* cu = bestCS->getCU(partitioner.chType, partitioner.treeType);
             if (cu)
@@ -767,14 +769,18 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
             EncTestMode encTestModeGeo = { ETM_MERGE_GEO, ETO_STANDARD, qp, lossless };
             if (m_modeCtrl.tryMode(encTestModeGeo, cs, partitioner))
             {
+			  ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostMergeGeo);
               xCheckRDCostMergeGeo(tempCS, bestCS, partitioner, encTestModeGeo);
+			  ApproxSS::end_level();
             }
           }
 
           EncTestMode encTestMode = { ETM_INTER_ME, ETO_STANDARD, qp, lossless };
           if (m_modeCtrl.tryMode(encTestMode, cs, partitioner))
           {
+			ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostInter);
             xCheckRDCostInter(tempCS, bestCS, partitioner, encTestMode); //MATHEUS NOTE: important
+			ApproxSS::end_level();
           }
 
           if (m_pcEncCfg->m_AMVRspeed)
@@ -787,7 +793,9 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
               const bool skipAltHpelIF = ( int( ( encTestMode.opts & ETO_IMV ) >> ETO_IMV_SHIFT ) == 4 ) && ( bestIntPelCost > 1.25 * bestCS->cost );
               if (!skipAltHpelIF)
               {
+				ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostInterIMV);
                 xCheckRDCostInterIMV(tempCS, bestCS, partitioner, encTestMode ); //MATHEUS NOTE: important
+				ApproxSS::end_level();
               }
             }
           }
@@ -798,13 +806,17 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           EncTestMode encTestModeIBCMerge = { ETM_IBC_MERGE, ETO_STANDARD, qp, lossless };
           if ((m_pcEncCfg->m_IBCFastMethod < 4) && (partitioner.chType == CH_L) && m_modeCtrl.tryMode(encTestModeIBCMerge, cs, partitioner))
           {
+			ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostIBCModeMerge2Nx2N);
             xCheckRDCostIBCModeMerge2Nx2N(tempCS, bestCS, partitioner, encTestModeIBCMerge);
+			ApproxSS::end_level();
           }
 
           EncTestMode encTestModeIBC = { ETM_IBC, ETO_STANDARD, qp, lossless };
           if (m_modeCtrl.tryMode(encTestModeIBC, cs, partitioner))
           {
+			ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostIBCMode);
             xCheckRDCostIBCMode(tempCS, bestCS, partitioner, encTestModeIBC);
+			ApproxSS::end_level();
           }
         }
         if( m_EDO && bestCS->cost != MAX_DOUBLE )
@@ -816,7 +828,9 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         EncTestMode encTestMode( {ETM_INTRA, ETO_STANDARD, qp, lossless} );
         if( !partitioner.isConsInter() && m_modeCtrl.tryMode( encTestMode, cs, partitioner ) )
         {
+		  ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostIntra);
           xCheckRDCostIntra( tempCS, bestCS, partitioner, encTestMode ); //MATHEUS NOTE: important
+		  ApproxSS::end_level();
         }
       } // reusing cu
 
