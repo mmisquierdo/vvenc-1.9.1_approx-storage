@@ -3728,6 +3728,8 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
   if( ! checkValidMvs(*cu))
     return;
 
+  ApproxSS::start_level(ApproxInter::LevelId::xEncodeInterResidual);
+
   double  currBestCost = MAX_DOUBLE;
 
   // For SBT
@@ -3781,6 +3783,7 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
       {
         tempCS->cost = MAX_DOUBLE;
         tempCS->costDbOffset = 0;
+		ApproxSS::end_level();
         return;
       }
     }
@@ -3989,6 +3992,8 @@ void EncCu::xEncodeInterResidual( CodingStructure *&tempCS, CodingStructure *&be
   #if PRINT_COST
     ApproxInter::bestTempCost = currBestCost;
   #endif
+
+  ApproxSS::end_level();
 
   //MATHEUS NOTE: PRINT AQUI? PARECE O FINAL PARA O INTER
 }

@@ -1000,6 +1000,8 @@ Distortion InterSearch::xPatternRefinement( const CPelBuf* pcPatternKey,
 //! search of the best candidate for inter prediction
 bool InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner, double& bestCostInter)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::predInterSearch);
+
   PROFILER_SCOPE_AND_STAGE_EXT( 1, _TPROF, P_INTER_MVD_SEARCH, cu.cs, partitioner.chType );
   CodingStructure& cs = *cu.cs;
 
@@ -1200,6 +1202,7 @@ bool InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner, doub
       {
         m_skipPROF = false;
         m_encOnly = false;
+		ApproxSS::end_level();
         return true;
       }
     }
@@ -1827,7 +1830,8 @@ bool InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner, doub
     motionCompensation( cu, predBuf, REF_PIC_LIST_X );
     puIdx++;
   }
-
+  
+  ApproxSS::end_level();
   return false;
 }
 
@@ -2884,6 +2888,7 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
 
 void InterSearch::xPatternSearchIntRefine(CodingUnit& cu, TZSearchStruct&  cStruct, Mv& rcMv, Mv& rcMvPred, int& riMVPIdx, uint32_t& ruiBits, Distortion& ruiCost, const AMVPInfo& amvpInfo, double fWeight)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xPatternSearchIntRefine);
 
   CHECK( cu.imv == 0 || cu.imv == IMV_HPEL , "xPatternSearchIntRefine(): Sub-pel MV used.");
   CHECK( amvpInfo.mvCand[riMVPIdx] != rcMvPred, "xPatternSearchIntRefine(): MvPred issue.");
@@ -2964,6 +2969,7 @@ void InterSearch::xPatternSearchIntRefine(CodingUnit& cu, TZSearchStruct&  cStru
   if( uiBestDist == MAX_DISTORTION )
   {
     ruiCost = MAX_DISTORTION;
+	ApproxSS::end_level();
     return;
   }
 
@@ -2981,6 +2987,7 @@ void InterSearch::xPatternSearchIntRefine(CodingUnit& cu, TZSearchStruct&  cStru
   // taken from JEM 5.0
   // verify since it makes no sense to add rate for MVDs twicce
 
+  ApproxSS::end_level();
   return;
 }
 
@@ -2995,6 +3002,7 @@ void InterSearch::xPatternSearchFracDIF(
   Distortion&           ruiCost
 )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xPatternSearchFracDIF);
   PROFILER_SCOPE_AND_STAGE( 0, _TPROF, P_FRAC_PEL );
 
   //  Reference pattern initialization (integer scale)
@@ -3014,6 +3022,7 @@ void InterSearch::xPatternSearchFracDIF(
     addApproxFiltBuffer(ApproxInter::ConfigurationId::FME_FILT, ApproxInter::ConfigurationId::FME_FILT_TEMP);
   #endif
 
+  ApproxSS::start_level(ApproxInter::LevelId::xPatternSearchFracDIF_HalfPixel);
   //  Half-pel refinement
   m_pcRdCost->setCostScale(1);
   if( 0 == m_pcEncCfg->m_fastSubPel )
@@ -3034,6 +3043,9 @@ void InterSearch::xPatternSearchFracDIF(
   ruiCost = xPatternRefinement( cStruct.pcPatternKey, baseRefMv, 2, rcMvHalf, uiDistBest, patternId, &cPatternRoi, cStruct.useAltHpelIf );
   patternId -= ( m_pcEncCfg->m_fastSubPel == 1 ? 41 : 0 );
 
+  ApproxSS::end_level();
+
+  ApproxSS::start_level(ApproxInter::LevelId::xPatternSearchFracDIF_QuarterPixel);
 
   //  quarter-pel refinement
   if( cStruct.imvShift == IMV_OFF && 0 != patternId ) //MATHEUS NOTE: provavelmente nao tao raro ser diferente de 0 pelas modificacoes ao longo xPatternRefinement
@@ -3055,6 +3067,8 @@ void InterSearch::xPatternSearchFracDIF(
     ruiCost = xPatternRefinement( cStruct.pcPatternKey, baseRefMv, 1, rcMvQter, uiDistBest, patternId, &cPatternRoi, cStruct.useAltHpelIf );
   }
 
+  ApproxSS::end_level();
+
   #if APPROX_FME_RECO
     ApproxInter::UninstrumentIfMarked((void*) cPatternRoi.buf);
   #endif
@@ -3062,8 +3076,6 @@ void InterSearch::xPatternSearchFracDIF(
   #if APPROX_FME_ORIG
     ApproxInter::UninstrumentIfMarked((void*) cStruct.pcPatternKey->buf);
   #endif
-
-
 
   #if APPROX_FME_BEST_MV_COST_RECALC
     #if APPROX_FME_RECO
@@ -3119,6 +3131,8 @@ void InterSearch::xPatternSearchFracDIF(
         ApproxInter::UninstrumentIfMarked((void*) cStruct.pcPatternKey->buf);
       #endif
   #endif
+
+  ApproxSS::end_level();
 }
 
 Distortion InterSearch::xGetSymCost( const CodingUnit& cu, CPelUnitBuf& origBuf, RefPicList eCurRefPicList, const MvField& cCurMvField, MvField& cTarMvField, int BcwIdx )
@@ -4971,6 +4985,7 @@ void InterSearch::xPredAffineInterSearch( CodingUnit& cu,
   //<Matheus>
   //std::cout << "TEST: xPredAffineInterSearch" << std::endl;
   //</Matheus>
+  ApproxSS::start_level(ApproxInter::LevelId::xPredAffineBlk);
 
   const Slice &slice = *cu.slice;
 
@@ -5056,8 +5071,10 @@ void InterSearch::xPredAffineInterSearch( CodingUnit& cu,
 
       // Do Affine AMVP
       bool foundPred = xEstimateAffineAMVP(cu, affiAMVPInfoTemp[refPicList], origBuf, refPicList, iRefIdxTemp, cMvPred[iRefList][iRefIdxTemp], biPDistTemp);
-      if( !foundPred )
+      if( !foundPred ) {
+		ApproxSS::end_level();
         return;
+	  }
 
       if (affineAmvrEnabled)
       {
@@ -5599,6 +5616,8 @@ void InterSearch::xPredAffineInterSearch( CodingUnit& cu,
   {
     cu.BcwIdx = BCW_DEFAULT;
   }
+
+  ApproxSS::end_level();
 }
 
 Distortion InterSearch::xGetAffineTemplateCost(CodingUnit& cu, CPelUnitBuf& origBuf, PelUnitBuf& predBuf, Mv acMvCand[3], int iMVPIdx, int iMVPNum, RefPicList refPicList, int iRefIdx)
@@ -5767,6 +5786,8 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
   {
     return;
   }
+
+  ApproxSS::start_level(ApproxInter::LevelId::xAffineMotionEstimation);
 
   int bestMvpIdx = mvpIdx;
   const int width = cu.Y().width;
@@ -6255,6 +6276,8 @@ void InterSearch::xAffineMotionEstimation(CodingUnit& cu,
       ApproxSS::end_level();
     #endif
   #endif
+
+  ApproxSS::end_level();
 }
 
 bool InterSearch::xEstimateAffineAMVP(CodingUnit& cu, AffineAMVPInfo& affineAMVPInfo, CPelUnitBuf& origBuf, RefPicList refPicList, int iRefIdx, Mv acMvPred[3], Distortion& distBiP)

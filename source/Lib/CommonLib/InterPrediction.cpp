@@ -329,6 +329,8 @@ bool InterPrediction::xCheckIdenticalMotion( const CodingUnit& cu ) const
 
 void InterPrediction::xSubPuBDOF( const CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList& refPicList /*= REF_PIC_LIST_X*/)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xSubPuBDOF);
+
   Position puPos = cu.lumaPos();
   Size puSize = cu.lumaSize();
 
@@ -360,9 +362,14 @@ void InterPrediction::xSubPuBDOF( const CodingUnit& cu, PelUnitBuf& predBuf, con
       motionCompensation(subCu, subPredBuf, refPicList);
     }
   }
+
+  ApproxSS::end_level();
 }
+
 void InterPrediction::xPredInterUni(const CodingUnit& cu, const RefPicList& refPicList, PelUnitBuf& pcYuvPred, const bool bi, const bool bdofApplied)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xPredInterUni);
+
   int iRefIdx = cu.refIdx[refPicList];
   Mv mv[3];
   bool isIBC = false;
@@ -411,10 +418,14 @@ void InterPrediction::xPredInterUni(const CodingUnit& cu, const RefPicList& refP
       }
     }
   }
+
+  ApproxSS::end_level();
 }
 
 void InterPrediction::xPredInterBi( const CodingUnit& cu, PelUnitBuf& yuvPred, const bool bdofApplied, PelUnitBuf *yuvPredTmp )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xPredInterBi);
+
   CHECK( !cu.affine && cu.refIdx[0] >= 0 && cu.refIdx[1] >= 0 && ( cu.lwidth() + cu.lheight() == 12 ), "invalid 4x8/8x4 bi-predicted blocks" );
 
   PelUnitBuf puBuf[NUM_REF_PIC_LIST_01];
@@ -444,10 +455,14 @@ void InterPrediction::xPredInterBi( const CodingUnit& cu, PelUnitBuf& yuvPred, c
   }
 
   xWeightedAverage( cu, puBuf[0], puBuf[1], yuvPred, bdofApplied, yuvPredTmp );
+
+  ApproxSS::end_level();
 }
 
 void InterPrediction::motionCompensationIBC( CodingUnit& cu, PelUnitBuf& predBuf )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::motionCompensationIBC);
+
   if (!true/*isEncoder*/ )
   {
     if (CU::isIBC(cu))
@@ -461,15 +476,20 @@ void InterPrediction::motionCompensationIBC( CodingUnit& cu, PelUnitBuf& predBuf
         xIntraBlockCopyIBC(cu, predBuf, COMP_Cb);
         xIntraBlockCopyIBC(cu, predBuf, COMP_Cr);
       }
+	  ApproxSS::end_level();
       return;
     }
   }
   // dual tree handling for IBC as the only ref
   xPredInterUni(cu, REF_PIC_LIST_0, predBuf, false, false );
+
+  ApproxSS::end_level();
 }
 
 bool InterPrediction::motionCompensation( CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList refPicList, PelUnitBuf* predBufDfltWght )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::motionCompensation);
+
   bool ret = false;
   if( refPicList != REF_PIC_LIST_X )
   {
@@ -538,6 +558,8 @@ bool InterPrediction::motionCompensation( CodingUnit& cu, PelUnitBuf& predBuf, c
     DTRACE_PEL_BUF( D_MOT_COMP, predBuf.Cb(), cu, cu.predMode, COMP_Cb );
     DTRACE_PEL_BUF( D_MOT_COMP, predBuf.Cr(), cu, cu.predMode, COMP_Cr );
   }
+
+  ApproxSS::end_level();
   return ret;
 }
 
@@ -780,6 +802,8 @@ void InterPredInterpolation::xPredInterBlk ( const ComponentID compID, const Cod
                                            , const int32_t srcPadStride
                                           )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xPredInterBlk);
+
   const ChromaFormat  chFmt = cu.chromaFormat;
   const bool          rndRes = !bi;
 
@@ -915,6 +939,8 @@ void InterPredInterpolation::xPredInterBlk ( const ComponentID compID, const Cod
     dstBuf.buf    = backupDstBufPtr;
     dstBuf.stride = backupDstBufStride;
   }
+
+  ApproxSS::end_level();
 }
 
 int InterPredInterpolation::xRightShiftMSB( int numer, int denom )
@@ -1023,6 +1049,8 @@ void InterPredInterpolation::xApplyBDOF( PelBuf& yuvDst, const ClpRng& clpRng )
 
 void InterPredInterpolation::xWeightedAverage( const CodingUnit& cu, const CPelUnitBuf& pcYuvSrc0, const CPelUnitBuf& pcYuvSrc1, PelUnitBuf& pcYuvDst, const bool bdofApplied, PelUnitBuf *yuvPredTmp )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xWeightedAverage);
+
   const bool lumaOnly = (cu.mcControl >> 1) == 1;
   const bool chromaOnly = cu.mcControl > 3;
   CHECK((chromaOnly && lumaOnly), "should not happen");
@@ -1041,6 +1069,7 @@ void InterPredInterpolation::xWeightedAverage( const CodingUnit& cu, const CPelU
       {
         yuvPredTmp->addAvg( pcYuvSrc0, pcYuvSrc1, clpRngs, chromaOnly, lumaOnly );
       }
+	  ApproxSS::end_level();
       return;
     }
     
@@ -1079,6 +1108,8 @@ void InterPredInterpolation::xWeightedAverage( const CodingUnit& cu, const CPelU
       pcYuvDst.copyClip(pcYuvSrc1, clpRngs, lumaOnly, chromaOnly);
     }
   }
+
+  ApproxSS::end_level();
 }
 
 void InterPrediction::motionCompensationGeo(CodingUnit& cu, PelUnitBuf& predBuf, const MergeCtx &geoMrgCtx)
@@ -1346,6 +1377,8 @@ static void xDMVRSubPixelErrorSurface( int16_t *totalDeltaMV, int16_t *deltaMV, 
 
 void DMVR::xProcessDMVR( const CodingUnit& cu, PelUnitBuf& pcYuvDst, const ClpRngs &clpRngs, const bool bioApplied )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xProcessDMVR);
+
   PROFILER_SCOPE_AND_STAGE_EXT( 1, _TPROF, P_INTER_MRG_DMVR, cu.cs, CH_L );
   /*Always High Precision*/
   const int csx      = getChannelTypeScaleX( CH_C, cu.chromaFormat );
@@ -1553,6 +1586,8 @@ void DMVR::xProcessDMVR( const CodingUnit& cu, PelUnitBuf& pcYuvDst, const ClpRn
       num++;
     }
   }
+
+  ApproxSS::end_level();
 }
 
 bool InterPredInterpolation::isSubblockVectorSpreadOverLimit(int a, int b, int c, int d, int predType)
@@ -1597,6 +1632,8 @@ bool InterPredInterpolation::isSubblockVectorSpreadOverLimit(int a, int b, int c
 
 void InterPredInterpolation::xPredAffineBlk(const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv* _mv, PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng, const RefPicList refPicList)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xPredAffineBlk);
+
   const ChromaFormat chFmt = cu.chromaFormat;
   int iScaleX = getComponentScaleX(compID, chFmt);
   int iScaleY = getComponentScaleY(compID, chFmt);
@@ -1961,6 +1998,7 @@ void InterPredInterpolation::xPredAffineBlk(const ComponentID compID, const Codi
     }
   }
 
+  ApproxSS::end_level();
 }
 
 bool InterPredInterpolation::xIsAffineMvInRangeFPP( const CodingUnit &cu, const Mv* _mv, const int ifpLines, const int mvPrecShift )

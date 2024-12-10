@@ -265,14 +265,39 @@
 				constexpr int64_t xCheckRDCostIntra = 7;
 
 				constexpr int64_t xCheckRDCostInter = 3;
-					constexpr int64_t xMotionEstimation = 1;
-						constexpr int64_t Full_Search_MPV = 1;
-						constexpr int64_t xPatternSearch = 2;
-						constexpr int64_t xTZSearch = 3;
-							constexpr int64_t xTZSearch_MVP = 1;
-							constexpr int64_t xTZSearch_Start_Search = 2;
-							constexpr int64_t xTZSearch_Raster = 3;
-							constexpr int64_t xTZSearch_Refinement = 4;
+					constexpr int64_t xEncodeInterResidual = ?;
+					constexpr int64_t predInterSearch = ?;
+						constexpr int64_t xMotionEstimation = 1;
+							constexpr int64_t Full_Search_MPV = 1;
+							constexpr int64_t xPatternSearch = 2;
+							constexpr int64_t xTZSearch = 3;
+								constexpr int64_t xTZSearch_MVP = 1;
+								constexpr int64_t xTZSearch_Start_Search = 2;
+								constexpr int64_t xTZSearch_Raster = 3;
+								constexpr int64_t xTZSearch_Refinement = 4;
+							constexpr int64_t xPatternSearchFracDIF = 4;
+								constexpr int64_t xPatternSearchFracDIF_HalfPixel = 1;
+								constexpr int64_t xPatternSearchFracDIF_QuarterPixel = 2;
+							constexpr int64_t xPatternSearchIntRefine = 5;
+						constexpr int64_t xPredAffineInterSearch = ?;
+							constexpr int64_t xAffineMotionEstimation = ?;
+
+					constexpr int64_t motionCompensation = ?;
+						constexpr int64_t xPredInterUni = ?;
+							constexpr int64_t xPredAffineBlk = ?;
+							constexpr int64_t xPredInterBlk = ?;
+						constexpr int64_t xPredInterBi = ?;
+							constexpr int64_t xWeightedAverage = ?;
+						constexpr int64_t xSubPuBDOF = ?;
+						constexpr int64_t xProcessDMVR = ?;
+						
+					constexpr int64_t motionCompensationIBC = ?;
+
+
+				constexpr int64_t SSE = ?;
+				constexpr int64_t SAD = ?;
+				constexpr int64_t HAD = ?;
+						
 			}
 
 			namespace ConfigurationId {

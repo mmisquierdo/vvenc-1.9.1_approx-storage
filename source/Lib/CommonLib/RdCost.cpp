@@ -313,6 +313,8 @@ Distortion RdCost::getDistPart( const CPelBuf& org, const CPelBuf& cur, int bitD
 
 Distortion RdCost::xGetSAD( const DistParam& rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -338,6 +340,7 @@ Distortion RdCost::xGetSAD( const DistParam& rcDtParam )
     }
     if (rcDtParam.maximumDistortionForEarlyExit < ( uiSum >> distortionShift ))
     {
+	  ApproxSS::end_level();
       return ( uiSum >> distortionShift );
     }
     piOrg += iStrideOrg;
@@ -345,11 +348,14 @@ Distortion RdCost::xGetSAD( const DistParam& rcDtParam )
   }
 
   uiSum <<= iSubShift;
+  ApproxSS::end_level();
   return ( uiSum >> distortionShift );
 }
 
 Distortion RdCost::xGetSAD4( const DistParam& rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -377,11 +383,14 @@ Distortion RdCost::xGetSAD4( const DistParam& rcDtParam )
   }
 
   uiSum <<= iSubShift;
+  ApproxSS::end_level();
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
 Distortion RdCost::xGetSAD8( const DistParam& rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -413,11 +422,14 @@ Distortion RdCost::xGetSAD8( const DistParam& rcDtParam )
   }
 
   uiSum <<= iSubShift;
+  ApproxSS::end_level();
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
 Distortion RdCost::xGetSAD16( const DistParam& rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -457,12 +469,15 @@ Distortion RdCost::xGetSAD16( const DistParam& rcDtParam )
   }
 
   uiSum <<= iSubShift;
+  ApproxSS::end_level();
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
 
 Distortion RdCost::xGetSAD128( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   const Pel* piOrg  = rcDtParam.org.buf;
   const Pel* piCur  = rcDtParam.cur.buf;
   int  iRows        = rcDtParam.org.height;
@@ -500,11 +515,15 @@ Distortion RdCost::xGetSAD128( const DistParam &rcDtParam )
   }
 
   uiSum <<= iSubShift;
+
+  ApproxSS::end_level();
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
 Distortion RdCost::xGetSAD32( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -560,12 +579,16 @@ Distortion RdCost::xGetSAD32( const DistParam &rcDtParam )
   }
 
   uiSum <<= iSubShift;
+
+  ApproxSS::end_level();
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
 
 Distortion RdCost::xGetSAD64( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -653,6 +676,8 @@ Distortion RdCost::xGetSAD64( const DistParam &rcDtParam )
   }
 
   uiSum <<= iSubShift;
+
+  ApproxSS::end_level();
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
@@ -663,6 +688,8 @@ Distortion RdCost::xGetSAD64( const DistParam &rcDtParam )
 
 Distortion RdCost::xGetSSE( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -691,11 +718,14 @@ Distortion RdCost::xGetSSE( const DistParam &rcDtParam )
     piCur += iStrideCur;
   }
 
+  ApproxSS::end_level();
   return ( uiSum );
 }
 
 Distortion RdCost::xGetSSE4( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if ( rcDtParam.applyWeight )
   {
     CHECK( rcDtParam.org.width != 4, "Invalid size" );
@@ -725,11 +755,14 @@ Distortion RdCost::xGetSSE4( const DistParam &rcDtParam )
     piCur += iStrideCur;
   }
 
+  ApproxSS::end_level();
   return ( uiSum );
 }
 
 Distortion RdCost::xGetSSE8( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if ( rcDtParam.applyWeight )
   {
     CHECK( rcDtParam.org.width != 8, "Invalid size" );
@@ -762,11 +795,14 @@ Distortion RdCost::xGetSSE8( const DistParam &rcDtParam )
     piCur += iStrideCur;
   }
 
+  ApproxSS::end_level();
   return ( uiSum );
 }
 
 Distortion RdCost::xGetSSE16( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if ( rcDtParam.applyWeight )
   {
     CHECK( rcDtParam.org.width != 16, "Invalid size" );
@@ -808,11 +844,14 @@ Distortion RdCost::xGetSSE16( const DistParam &rcDtParam )
     piCur += iStrideCur;
   }
 
+  ApproxSS::end_level();
   return ( uiSum );
 }
 
 Distortion RdCost::xGetSSE128( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -856,11 +895,14 @@ Distortion RdCost::xGetSSE128( const DistParam &rcDtParam )
     piCur += iStrideCur;
   }
 
+  ApproxSS::end_level();
   return ( uiSum );
 }
 
 Distortion RdCost::xGetSSE32( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -917,11 +959,14 @@ Distortion RdCost::xGetSSE32( const DistParam &rcDtParam )
     piCur += iStrideCur;
   }
 
+  ApproxSS::end_level();
   return ( uiSum );
 }
 
 Distortion RdCost::xGetSSE64( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if ( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -1009,6 +1054,7 @@ Distortion RdCost::xGetSSE64( const DistParam &rcDtParam )
     piCur += iStrideCur;
   }
 
+  ApproxSS::end_level();
   return ( uiSum );
 }
 
@@ -1780,6 +1826,8 @@ static Distortion xCalcHADs8x4( const Pel* piOrg, const Pel* piCur, int iStrideO
 
 Distortion RdCost::xGetHAD2SADs( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::HAD);
+
   if( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -1824,13 +1872,16 @@ Distortion RdCost::xGetHAD2SADs( const DistParam &rcDtParam )
 
     distSad = (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
   }
-
+  
+  ApproxSS::end_level();
   return std::min( distHad, 2*distSad);
 }
 
 template<bool fastHad>
 Distortion RdCost::xGetHADs( const DistParam &rcDtParam )
-{
+{  
+  ApproxSS::start_level(ApproxInter::LevelId::HAD);
+
   if( rcDtParam.applyWeight )
   {
     THROW(" no support");
@@ -1947,6 +1998,7 @@ Distortion RdCost::xGetHADs( const DistParam &rcDtParam )
     THROW( "Invalid size" );
   }
 
+  ApproxSS::end_level()
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
@@ -2033,6 +2085,8 @@ static Distortion fixWeightedSSE_Core( const DistParam& rcDtParam, uint32_t fixe
 
 Distortion RdCost::xGetSSE_WTD( const DistParam &rcDtParam ) const
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   if( rcDtParam.applyWeight )
   {
     THROW("no support");
@@ -2042,17 +2096,22 @@ Distortion RdCost::xGetSSE_WTD( const DistParam &rcDtParam ) const
   {
     const uint32_t fixedPTweight = ( uint32_t ) ( m_chromaWeight * ( double ) ( 1 << 16 ) );
 
+	ApproxSS::end_level();
     return m_fxdWtdPredPtr( rcDtParam, fixedPTweight );
   }
   else
-  {
+  { 
+	ApproxSS::end_level();
     return m_wtdPredPtr[getComponentScaleX(rcDtParam.compID, m_cf)]( rcDtParam, m_cf, m_reshapeLumaLevelToWeightPLUT );
   }
 
+  ApproxSS::end_level();
   return 0;
 }
 
 void RdCost::xGetSAD8X5(const DistParam& rcDtParam, Distortion* cost, bool isCalCentrePos) {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   DistParam rcDtParamTmp0 = rcDtParam;
 
   DistParam rcDtParamTmp1 = rcDtParam;
@@ -2076,9 +2135,13 @@ void RdCost::xGetSAD8X5(const DistParam& rcDtParam, Distortion* cost, bool isCal
   if (isCalCentrePos) cost[2] = (RdCost::xGetSAD8(rcDtParamTmp2)) >> 1;
   cost[3] = (RdCost::xGetSAD8(rcDtParamTmp3)) >> 1;
   cost[4] = (RdCost::xGetSAD8(rcDtParamTmp4)) >> 1;
+
+  ApproxSS::end_level();
 }
 
 void RdCost::xGetSAD16X5(const DistParam& rcDtParam, Distortion* cost, bool isCalCentrePos) {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   DistParam rcDtParamTmp0 = rcDtParam;
 
   DistParam rcDtParamTmp1 = rcDtParam;
@@ -2102,6 +2165,8 @@ void RdCost::xGetSAD16X5(const DistParam& rcDtParam, Distortion* cost, bool isCa
   if (isCalCentrePos) cost[2] = (RdCost::xGetSAD16(rcDtParamTmp2)) >> 1;
   cost[3] = (RdCost::xGetSAD16(rcDtParamTmp3)) >> 1;
   cost[4] = (RdCost::xGetSAD16(rcDtParamTmp4)) >> 1;
+
+  ApproxSS::end_level();
 }
 
 void RdCost::setDistParamGeo(DistParam &rcDP, const CPelBuf &org, const Pel *piRefY, int iRefStride, const Pel *mask,
@@ -2146,6 +2211,8 @@ Distortion RdCost::xGetSADwMask(const DistParam &rcDtParam)
   const int      strideMask2     = rcDtParam.maskStride2;
   const uint32_t distortionShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   Distortion sum = 0;
   for (; rows != 0; rows -= subStep)
   {
@@ -2160,6 +2227,8 @@ Distortion RdCost::xGetSADwMask(const DistParam &rcDtParam)
     mask += strideMask2;
   }
   sum <<= subShift;
+
+  ApproxSS::end_level();
   return (sum >> distortionShift);
 }
 

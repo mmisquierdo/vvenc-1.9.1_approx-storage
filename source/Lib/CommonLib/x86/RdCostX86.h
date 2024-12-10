@@ -64,6 +64,8 @@ typedef Pel Tcur;
 template<X86_VEXT vext >
 Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   const Torg* pSrc1     = (const Torg*)rcDtParam.org.buf;
   const Tcur* pSrc2     = (const Tcur*)rcDtParam.cur.buf;
   int  iRows            = rcDtParam.org.height;
@@ -136,6 +138,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
     uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
   }
 
+  ApproxSS::end_level();
   return uiRet;
 }
 
@@ -143,6 +146,8 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
 template<int iWidth, X86_VEXT vext >
 Distortion RdCost::xGetSSE_NxN_SIMD( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SSE);
+
   const Torg* pSrc1     = (const Torg*)rcDtParam.org.buf;
   const Tcur* pSrc2     = (const Tcur*)rcDtParam.cur.buf;
   int  iRows            = rcDtParam.org.height;
@@ -218,6 +223,7 @@ Distortion RdCost::xGetSSE_NxN_SIMD( const DistParam &rcDtParam )
     }
   }
 
+  ApproxSS::end_level();
   return uiRet;
 }
 
@@ -226,6 +232,8 @@ Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
 {
   if( rcDtParam.org.width < 4 )
     return RdCost::xGetSAD( rcDtParam );
+
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
 
   const short* pSrc1   = (const short*)rcDtParam.org.buf;
   const short* pSrc2   = (const short*)rcDtParam.cur.buf;
@@ -311,6 +319,7 @@ Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
   }
 
   uiSum <<= iSubShift;
+  ApproxSS::end_level();
   return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
@@ -318,6 +327,8 @@ Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
 template< int iWidth, X86_VEXT vext >
 Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   //  assert( rcDtParam.iCols == iWidth);
   const short* pSrc1   = (const short*)rcDtParam.org.buf;
   const short* pSrc2   = (const short*)rcDtParam.cur.buf;
@@ -401,7 +412,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
           Distortion distTemp = _mm256_extract_epi32( vsum32, 0 ) + _mm256_extract_epi32( vsum32, 4 );
           distTemp <<= iSubShift;
           distTemp >>= DISTORTION_PRECISION_ADJUSTMENT( rcDtParam.bitDepth );
-          if( distTemp > rcDtParam.maximumDistortionForEarlyExit ) return distTemp;
+          if( distTemp > rcDtParam.maximumDistortionForEarlyExit ) {ApproxSS::end_level(); return distTemp;}
           checkExit = 3;
         }
         else if( earlyExitAllowed )
@@ -499,6 +510,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
       uiSum = _mm_cvtsi128_si32( vsum32 );
 
       uiSum <<= 1;
+	  ApproxSS::end_level();
       return uiSum >> DISTORTION_PRECISION_ADJUSTMENT( rcDtParam.bitDepth );
     }
     else
@@ -547,7 +559,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
           Distortion distTemp = _mm_cvtsi128_si32( vsum32 );
           distTemp <<= iSubShift;
           distTemp >>= DISTORTION_PRECISION_ADJUSTMENT( rcDtParam.bitDepth );
-          if( distTemp > rcDtParam.maximumDistortionForEarlyExit ) return distTemp;
+          if( distTemp > rcDtParam.maximumDistortionForEarlyExit ) { ApproxSS::end_level(); return distTemp;}
           checkExit = 3;
         }
         else if( earlyExitAllowed )
@@ -562,6 +574,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
   }
 
   uiSum <<= iSubShift;
+  ApproxSS::end_level();
   return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
@@ -2633,6 +2646,8 @@ Distortion RdCost::xGetSADwMask_SIMD(const DistParam &rcDtParam)
   if (rcDtParam.org.width < 4 || rcDtParam.bitDepth > 10 || rcDtParam.applyWeight)
     return RdCost::xGetSADwMask(rcDtParam);
 
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);	
+
   const short *src1       = (const short *) rcDtParam.org.buf;
   const short *src2       = (const short *) rcDtParam.cur.buf;
   const short *weightMask = (const short *) rcDtParam.mask;
@@ -2715,6 +2730,8 @@ Distortion RdCost::xGetSADwMask_SIMD(const DistParam &rcDtParam)
     sum    = _mm_cvtsi128_si32(vsum32);
   }
   sum <<= subShift;
+
+  ApproxSS::end_level();
   return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
@@ -3148,6 +3165,8 @@ static Distortion fixWeightedSSE_SIMD( const DistParam& rcDtParam, uint32_t fixe
 
 template <X86_VEXT vext, bool isCalCentrePos>
 void xGetSADX5_8xN_SIMDImp(const DistParam& rcDtParam, Distortion* cost) {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   int i;
   const Pel* piOrg = rcDtParam.org.buf;
   const Pel* piCur = rcDtParam.cur.buf - 4;
@@ -3229,6 +3248,8 @@ void xGetSADX5_8xN_SIMDImp(const DistParam& rcDtParam, Distortion* cost) {
   _mm_storeu_si128( ( __m128i* ) &cost[0], _mm_unpacklo_epi32( sum0, _mm_setzero_si128() ) );
   if (isCalCentrePos) cost[2] = (_mm_cvtsi128_si32(sum2));
   _mm_storeu_si128( ( __m128i* ) &cost[3], _mm_unpackhi_epi32( sum0, _mm_setzero_si128() ) );
+
+  ApproxSS::end_level();
 }
 
 template <X86_VEXT vext>
@@ -3246,6 +3267,8 @@ void RdCost::xGetSADX5_8xN_SIMD(const DistParam& rcDtParam, Distortion* cost, bo
 
 template <X86_VEXT vext, bool isCalCentrePos>
 void xGetSADX5_16xN_SIMDImp(const DistParam& rcDtParam, Distortion* cost) {
+  ApproxSS::start_level(ApproxInter::LevelId::SAD);
+
   int i, j;
   const Pel* piOrg = rcDtParam.org.buf;
   const Pel* piCur = rcDtParam.cur.buf - 4;
@@ -3540,6 +3563,8 @@ void xGetSADX5_16xN_SIMDImp(const DistParam& rcDtParam, Distortion* cost) {
     if (isCalCentrePos) cost[2] = (_mm_cvtsi128_si32(sum2));
     _mm_storeu_si128( ( __m128i* ) &cost[3], _mm_unpackhi_epi32( sum0, _mm_setzero_si128() ) );
   }
+
+  ApproxSS::end_level();
 }
 
 template <X86_VEXT vext>
