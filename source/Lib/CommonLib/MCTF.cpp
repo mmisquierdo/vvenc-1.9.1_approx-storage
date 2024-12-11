@@ -148,7 +148,7 @@ int motionErrorLumaFrac6( const Pel *org, const ptrdiff_t origStride, const Pel 
 {
   int error = 0;
   Pel tempArray[64 + 8][64];
-  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8][64], ApproxInter::BufferId::MCTF_motionErrorLumaFrac6_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8 - 1][64], ApproxInter::BufferId::MCTF_motionErrorLumaFrac6_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como motionErrorLumaFrac6_tempArray
 
   int sum, base;
@@ -198,12 +198,12 @@ int motionErrorLumaFrac6( const Pel *org, const ptrdiff_t origStride, const Pel 
     }
     if( error > besterror )
     {
-	  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8][64]);
+	  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8 - 1][64]);
       return error;
     }
   }
   
-  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8][64]);
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 8 - 1][64]);
   return error;
 }
 
@@ -211,7 +211,7 @@ int motionErrorLumaFrac4( const Pel* org, const ptrdiff_t origStride, const Pel*
 {
   int error = 0;
   Pel tempArray[64 + 4][64];
-  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4][64], ApproxInter::BufferId::MCTF_motionErrorLumaFrac4_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4 - 1][64], ApproxInter::BufferId::MCTF_motionErrorLumaFrac4_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como motionErrorLumaFrac4_tempArray
   
   int sum, base;
@@ -257,12 +257,12 @@ int motionErrorLumaFrac4( const Pel* org, const ptrdiff_t origStride, const Pel*
     }
     if( error > besterror )
     {
-	  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4][64]);
+	  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4 - 1][64]);
       return error;
     }
   }
 
-  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4][64]);
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + 4 - 1][64]);
   return error;
 }
 
@@ -273,7 +273,7 @@ void applyFrac8Core_6Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
   const int maxValue        = ( 1 << bitDepth ) - 1;
 
   Pel tempArray[64 + numFilterTaps][64];
-  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64], ApproxInter::BufferId::MCTF_applyFrac8Core_6Tap_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps - 1][64], ApproxInter::BufferId::MCTF_applyFrac8Core_6Tap_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como applyFrac8Core_6Tap_tempArray
 
   for( int by = 1; by < h + numFilterTaps - 1; by++ )
@@ -319,7 +319,7 @@ void applyFrac8Core_6Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
     }
   }
   
-  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64]);
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps - 1][64]);
 }
 
 void applyFrac8Core_4Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, const ptrdiff_t dstStride, const int w, const int h, const int16_t* xFilter, const int16_t* yFilter, const int bitDepth )
@@ -329,7 +329,7 @@ void applyFrac8Core_4Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
   const int maxValue        = ( 1 << bitDepth ) - 1;
 
   Pel tempArray[64 + numFilterTaps][64];
-  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64], ApproxInter::BufferId::MCTF_applyFrac8Core_6Tap_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
+  ApproxSS::add_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps - 1][64], ApproxInter::BufferId::MCTF_applyFrac8Core_6Tap_tempArray, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(Pel));
   //JICS: instrumentar como applyFrac8Core_4Tap_tempArray
 
 
@@ -372,7 +372,7 @@ void applyFrac8Core_4Tap( const Pel* org, const ptrdiff_t origStride, Pel* dst, 
     }
   }
   
-  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps][64]);
+  ApproxSS::remove_approx((void*) &tempArray[0][0], (void*) &tempArray[64 + numFilterTaps - 1][64]);
 }
 
 inline static float fastExp( float n, float d )

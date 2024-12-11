@@ -1998,7 +1998,7 @@ Distortion RdCost::xGetHADs( const DistParam &rcDtParam )
     THROW( "Invalid size" );
   }
 
-  ApproxSS::end_level()
+  ApproxSS::end_level();
   return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 

@@ -15,7 +15,7 @@ namespace ApproxSS {
 
 	int __attribute__((optimize("O0"))) remove_approx(void * const start_address, void const * const end_address, const bool giveAwayRecords = true); //3 parameters
 
-	int __attribute__((optimize("O0"))) next_period(int a = 0, int b = 0); // 2 parameters
+	int __attribute__((optimize("O0"))) next_period(const uint64_t period = 0, int b = 0); // 2 parameters
 
 	int __attribute__((optimize("O0"))) enable_global_injection(int a = 0, int b = 0, int c = 0, int d = 0); //4 parameters
 
