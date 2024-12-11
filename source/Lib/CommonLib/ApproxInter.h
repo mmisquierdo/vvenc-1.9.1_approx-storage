@@ -256,47 +256,47 @@
 			}
 
 			namespace LevelId {
-				constexpr int64_t OTHER = 0;
-				constexpr int64_t xCheckRDCostMerge = 1;
-				constexpr int64_t xCheckRDCostMergeGeo = 2;
-				constexpr int64_t xCheckRDCostInterIMV = 4;
-				constexpr int64_t xCheckRDCostIBCModeMerge2Nx2N = 5;
-				constexpr int64_t xCheckRDCostIBCMode = 6;
-				constexpr int64_t xCheckRDCostIntra = 7;
+				constexpr int64_t OTHER = 10;
+				constexpr int64_t xCheckRDCostMerge = 11;
+				constexpr int64_t xCheckRDCostMergeGeo = 12;
+				constexpr int64_t xCheckRDCostInterIMV = 13;
+				constexpr int64_t xCheckRDCostIBCModeMerge2Nx2N = 14;
+				constexpr int64_t xCheckRDCostIBCMode = 15;
+				constexpr int64_t xCheckRDCostIntra = 16;
 
-				constexpr int64_t xCheckRDCostInter = 3;
-					constexpr int64_t xEncodeInterResidual = ?;
-					constexpr int64_t predInterSearch = ?;
-						constexpr int64_t xMotionEstimation = 1;
-							constexpr int64_t Full_Search_MPV = 1;
-							constexpr int64_t xPatternSearch = 2;
-							constexpr int64_t xTZSearch = 3;
-								constexpr int64_t xTZSearch_MVP = 1;
-								constexpr int64_t xTZSearch_Start_Search = 2;
-								constexpr int64_t xTZSearch_Raster = 3;
-								constexpr int64_t xTZSearch_Refinement = 4;
-							constexpr int64_t xPatternSearchFracDIF = 4;
-								constexpr int64_t xPatternSearchFracDIF_HalfPixel = 1;
-								constexpr int64_t xPatternSearchFracDIF_QuarterPixel = 2;
-							constexpr int64_t xPatternSearchIntRefine = 5;
-						constexpr int64_t xPredAffineInterSearch = ?;
-							constexpr int64_t xAffineMotionEstimation = ?;
+				constexpr int64_t xCheckRDCostInter = 17;
+					constexpr int64_t xEncodeInterResidual = 20;
+					constexpr int64_t predInterSearch = 21;
+						constexpr int64_t xMotionEstimation = 22;
+							constexpr int64_t Full_Search_MPV = 23;
+							constexpr int64_t xPatternSearch = 24;
+							constexpr int64_t xTZSearch = 25;
+								constexpr int64_t xTZSearch_MVP = 26;
+								constexpr int64_t xTZSearch_Start_Search = 27;
+								constexpr int64_t xTZSearch_Raster = 28;
+								constexpr int64_t xTZSearch_Refinement = 29;
+							constexpr int64_t xPatternSearchFracDIF = 30;
+								constexpr int64_t xPatternSearchFracDIF_HalfPixel = 31;
+								constexpr int64_t xPatternSearchFracDIF_QuarterPixel = 32;
+							constexpr int64_t xPatternSearchIntRefine = 33;
+						constexpr int64_t xPredAffineInterSearch = 34;
+							constexpr int64_t xAffineMotionEstimation = 35;
 
-					constexpr int64_t motionCompensation = ?;
-						constexpr int64_t xPredInterUni = ?;
-							constexpr int64_t xPredAffineBlk = ?;
-							constexpr int64_t xPredInterBlk = ?;
-						constexpr int64_t xPredInterBi = ?;
-							constexpr int64_t xWeightedAverage = ?;
-						constexpr int64_t xSubPuBDOF = ?;
-						constexpr int64_t xProcessDMVR = ?;
+					constexpr int64_t motionCompensation = 36;
+						constexpr int64_t xPredInterUni = 37;
+							constexpr int64_t xPredAffineBlk = 38;
+							constexpr int64_t xPredInterBlk = 39;
+						constexpr int64_t xPredInterBi = 40;
+							constexpr int64_t xWeightedAverage = 41;
+						constexpr int64_t xSubPuBDOF = 42;
+						constexpr int64_t xProcessDMVR = 43;
 						
-					constexpr int64_t motionCompensationIBC = ?;
+					constexpr int64_t motionCompensationIBC = 44;
 
 
-				constexpr int64_t SSE = ?;
-				constexpr int64_t SAD = ?;
-				constexpr int64_t HAD = ?;
+				constexpr int64_t SSE = 97;
+				constexpr int64_t SAD = 98;
+				constexpr int64_t HAD = 99;
 						
 			}
 

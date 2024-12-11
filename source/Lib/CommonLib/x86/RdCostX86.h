@@ -2572,6 +2572,8 @@ static uint32_t xCalcHAD8x16_AVX2( const Pel* piOrg, const Pel* piCur, const int
 template<X86_VEXT vext >
 Distortion RdCost::xGetHAD2SADs_SIMD( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::HAD);
+
   Distortion distHad = xGetHADs_SIMD<vext, false>( rcDtParam );
   Distortion distSad = 0;
 
@@ -2637,6 +2639,7 @@ Distortion RdCost::xGetHAD2SADs_SIMD( const DistParam &rcDtParam )
     distSad = uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
   }
 
+  ApproxSS::end_level();
   return std::min( distHad, 2*distSad);
 }
 
@@ -2738,6 +2741,8 @@ Distortion RdCost::xGetSADwMask_SIMD(const DistParam &rcDtParam)
 template<X86_VEXT vext, bool fastHad>
 Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::HAD);
+
   const Pel*  piOrg = rcDtParam.org.buf;
   const Pel*  piCur = rcDtParam.cur.buf;
   const int iRows = rcDtParam.org.height;
@@ -2880,6 +2885,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     THROW( "Unsupported size" );
   }
 
+  ApproxSS::end_level();
   return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 

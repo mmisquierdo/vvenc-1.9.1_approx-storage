@@ -752,6 +752,8 @@ static uint32_t xCalcHAD8x8_Neon( const Pel *piOrg, const Pel *piCur, const int 
 template<ARM_VEXT vext, bool fastHad>
 Distortion RdCost::xGetHADs_ARMSIMD( const DistParam &rcDtParam )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::HAD);
+
   const Pel*  piOrg = rcDtParam.org.buf;
   const Pel*  piCur = rcDtParam.cur.buf;
   const int iRows = rcDtParam.org.height;
@@ -888,6 +890,7 @@ Distortion RdCost::xGetHADs_ARMSIMD( const DistParam &rcDtParam )
     THROW( "Unsupported size" );
   }
 
+  ApproxSS::end_level();
   return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
