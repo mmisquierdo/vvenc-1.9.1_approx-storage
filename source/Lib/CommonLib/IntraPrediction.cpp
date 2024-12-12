@@ -272,7 +272,8 @@ IntraPrediction::~IntraPrediction()
 
 void IntraPrediction::destroy()
 {
-  delete[] m_pMdlmTemp;
+  //delete[] m_pMdlmTemp;
+  xFree(m_pMdlmTemp);
   m_pMdlmTemp = nullptr;
 }
 

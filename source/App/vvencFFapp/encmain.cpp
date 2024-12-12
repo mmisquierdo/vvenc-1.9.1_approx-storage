@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
   //<Matheus>
   ApproxInter::PrintMacrosStates();
   ApproxInter::PrintBuffersInfo();
+  ApproxSS::start_level(ApproxInter::LevelId::OTHER);
   //</Matheus>
 
   vvenc_set_logging_callback( nullptr, msgFnc ); // register global log callback ( deprecated, will be removed)
@@ -99,6 +100,7 @@ int main(int argc, char* argv[])
 
   if( ! vvenc_set_SIMD_extension( simdOpt.c_str() ) )
   {
+	ApproxSS::end_level();
     return 1;
   }
 
@@ -107,11 +109,13 @@ int main(int argc, char* argv[])
   // parse configuration
   if ( ! pcEncApp->parseCfg( argc, argv ) )
   {
+	ApproxSS::end_level();
     return 1;
   }
 
   if( pcEncApp->isShowVersionHelp() )
   {
+	ApproxSS::end_level();
     return 0;
   }
 
@@ -135,6 +139,7 @@ int main(int argc, char* argv[])
   msgApp( VVENC_INFO, "\nvvencFFapp [info]: finished @ %s", std::ctime(&endTime2) );
   msgApp( VVENC_INFO, "vvencFFapp [info]: Total Time: %12.3f sec. [user] %12.3f sec. [elapsed]\n", (endClock - startClock) * 1.0 / CLOCKS_PER_SEC, encTime / 1000.0);
 
+  ApproxSS::end_level();
   return ret;
 }
 

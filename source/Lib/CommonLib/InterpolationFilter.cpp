@@ -810,7 +810,7 @@ void InterpolationFilter::filterXxY_N2( const ClpRng& clpRng, Pel const *src, in
   }
 
   int *tmp = ( int * ) alloca( w * h * sizeof( int ) );
-  ApproxSS::add_approx((void*) &tmp[0], (void*) &tmp[w * h], ApproxInter::BufferId::filterXxY_N2_temp, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(int));
+  ApproxSS::add_approx((void*) &tmp[0], (void*) &tmp[w * h], ApproxInter::BufferId::filterXxY_N2_temp_int, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(int));
   //JICS: instrumentar como filterXxY_N2_tmp
   memset( tmp, 0, w * h * sizeof( int ) );
 
@@ -893,7 +893,7 @@ void InterpolationFilter::filterXxY_N4( const ClpRng& clpRng, const Pel* src, in
   src -= 1 + srcStride;
 
   int *tmp = ( int * ) alloca( w * height * sizeof( int ) );
-  ApproxSS::add_approx((void*) &tmp[0], (void*) &tmp[w * height], ApproxInter::BufferId::filterXxY_N4_temp, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(int));
+  ApproxSS::add_approx((void*) &tmp[0], (void*) &tmp[w * height], ApproxInter::BufferId::filterXxY_N4_temp_int, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(int));
 
   //JICS: instrumentar como filterXxY_N4
   memset( tmp, 0, w * height * sizeof( int ) );
@@ -987,7 +987,7 @@ void InterpolationFilter::filterXxY_N8( const ClpRng& clpRng, const Pel* src, in
   src -= 3 * ( 1 + srcStride );
 
   int *tmp = ( int * ) alloca( w * h * sizeof( int ) );
-  ApproxSS::add_approx((void*) &tmp[0], (void*) &tmp[w * h], ApproxInter::BufferId::filterXxY_N8_temp, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(int));
+  ApproxSS::add_approx((void*) &tmp[0], (void*) &tmp[w * h], ApproxInter::BufferId::filterXxY_N8_temp_int, ApproxInter::ConfigurationId::JUST_TRACKING, sizeof(int));
   //JICS: instrumentar filterXxY_N8
   memset( tmp, 0, w * h * sizeof( int ) );
 

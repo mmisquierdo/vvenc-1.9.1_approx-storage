@@ -76,31 +76,28 @@
 			namespace BufferId {
 				constexpr int64_t OTHERS = 0;
 				constexpr int64_t PIC_RECONSTRUCTION_Y = 10;
-				constexpr int64_t PIC_RECONSTRUCTION_Cb = 11;
-				constexpr int64_t PIC_RECONSTRUCTION_Cr = 12;
+
+				constexpr int64_t CS_PIC_RECONSTRUCTION_Y = 910;
+
 				constexpr int64_t PIC_ORIGINAL_Y = 20;
-				constexpr int64_t PIC_ORIGINAL_Cb = 21;
-				constexpr int64_t PIC_ORIGINAL_Cr = 22;
 
 				constexpr int64_t PIC_RESIDUAL_Y = 50;
-				constexpr int64_t PIC_RESIDUAL_Cb = 51;
-				constexpr int64_t PIC_RESIDUAL_Cr = 52;
+
+				constexpr int64_t CS_PIC_RESIDUAL_Y = 950;
 
 				constexpr int64_t PIC_PREDICTION_Y = 40;
-				constexpr int64_t PIC_PREDICTION_Cb = 41;
-				constexpr int64_t PIC_PREDICTION_Cr = 42;
+
+				constexpr int64_t CS_PIC_PREDICTION_Y = 940;
 
 				constexpr int64_t PIC_SAO_TEMP_Y = 70;
-				constexpr int64_t PIC_SAO_TEMP_Cb = 71;
-				constexpr int64_t PIC_SAO_TEMP_Cr = 72;
 
 				constexpr int64_t PIC_ORIGINAL_RSP_REC_Y = 90;
-				constexpr int64_t PIC_ORIGINAL_RSP_REC_Cb = 91;
-				constexpr int64_t PIC_ORIGINAL_RSP_REC_Cr = 92;
 
-				constexpr int64_t AdaptiveLoopFilter_tempBuf_Y = 100;
+				constexpr int64_t CS_PIC_ORIGINAL_RSP_REC_Y = 990;
 
-				constexpr int64_t AdaptiveLoopFilter_tempBuf2_Y = 110;
+				constexpr int64_t AdaptiveLoopFilter_tempBuf = 100;
+
+				constexpr int64_t AdaptiveLoopFilter_tempBuf2 = 110;
 
 				constexpr int64_t mipMatrixMulCore_buffer = 120;
 
@@ -112,15 +109,15 @@
 
 				constexpr int64_t filterXxY_N2_cH = 160; 
 				constexpr int64_t filterXxY_N2_cV = 170; 
-				constexpr int64_t filterXxY_N2_temp = 180; 
+				constexpr int64_t filterXxY_N2_temp_int = 180; 
 
 				constexpr int64_t filterXxY_N4_cH = 190; 
 				constexpr int64_t filterXxY_N4_cV = 200; 
-				constexpr int64_t filterXxY_N4_temp = 210; 
+				constexpr int64_t filterXxY_N4_temp_int = 210; 
 
 				constexpr int64_t filterXxY_N8_cH = 220; 
 				constexpr int64_t filterXxY_N8_cV = 230; 
-				constexpr int64_t filterXxY_N8_temp = 240; 
+				constexpr int64_t filterXxY_N8_temp_int = 240; 
 
 				constexpr int64_t InterPrediction_m_yuvPred = 250;
 				
@@ -207,7 +204,7 @@
 				constexpr int64_t InterSearch_m_tmpAffiError = 800; 
 				constexpr int64_t InterSearch_m_tmpAffiDeri0 = 810; 
 				constexpr int64_t InterSearch_m_tmpAffiDeri1 = 820;  
-				constexpr int64_t vvenc_YUVBuffer_alloc_buffer_yuvPlane = 830;
+				constexpr int64_t vvenc_YUVBuffer_alloc_buffer_yuvPlane_int16 = 830;
 
 
 
