@@ -155,58 +155,57 @@ void BlkStat::setSliceMaxBT( Slice& slice )
 
 
 Picture::Picture()
-    : cs                ( nullptr )
-    , vps               ( nullptr )
-    , dci               ( nullptr )
-    , picApsMap         ( MAX_NUM_APS * MAX_NUM_APS_TYPE )
-    , isInitDone        ( false )
-    , isReconstructed   ( false )
-    , isBorderExtended  ( false )
-    , isReferenced      ( false )
-    , isNeededForOutput ( false )
-    , isFinished        ( false )
-    , isLongTerm        ( false )
-    , isFlush           ( false )
-    , isInProcessList   ( false )
-    , precedingDRAP     ( false )
-    , gopEntry          ( nullptr )
-    , refCounter        ( 0 )
-    , poc               ( 0 )
-    , TLayer            ( std::numeric_limits<uint32_t>::max() )
-    , layerId           ( 0 )
+    : cs                  ( nullptr )
+    , vps                 ( nullptr )
+    , dci                 ( nullptr )
+    , picApsMap           ( MAX_NUM_APS * MAX_NUM_APS_TYPE )
+    , isInitDone          ( false )
+    , isReconstructed     ( false )
+    , isBorderExtended    ( false )
+    , isReferenced        ( false )
+    , isNeededForOutput   ( false )
+    , isFinished          ( false )
+    , isLongTerm          ( false )
+    , isFlush             ( false )
+    , isInProcessList     ( false )
+    , precedingDRAP       ( false )
+    , gopEntry            ( nullptr )
+    , refCounter          ( 0 )
+    , poc                 ( 0 )
+    , TLayer              ( std::numeric_limits<uint32_t>::max() )
+    , layerId             ( 0 )
     , isSubPicBorderSaved (false)
-    , sliceDataNumBins  ( 0 )
-    , cts               ( 0 )
-    , ctsValid          ( false )
-    , isPreAnalysis     ( false )
-    , m_picShared       ( nullptr )
-    , gopAdaptedQP      ( 0 )
+    , sliceDataNumBins    ( 0 )
+    , cts                 ( 0 )
+    , ctsValid            ( false )
+    , isPreAnalysis       ( false )
+    , m_picShared         ( nullptr )
+    , gopAdaptedQP        ( 0 )
+    , force2ndOrder       ( false )
     , isSceneCutGOP       ( false )
     , isSceneCutCheckAdjQP( false )
-    , isMeanQPLimited   ( false )
-    , picInitialQP      ( -1 )
-    , picInitialLambda  ( -1.0 )
-    , picMemorySTA      ( -1 )
-    , picVisActTL0      ( 0 )
-    , picVisActY        ( 0 )
-    , picSpVisAct       ( 0 )
-    , isSccWeak         ( false )
-    , isSccStrong       ( false )
-    , useME           ( false )
-    , useMCTF         ( false )
-    , useTS           ( false )
-    , useBDPCM        ( false )
-    , useIBC          ( false )
-    , useLMCS         ( false )
-    , useSAO          ( false )
-    , useNumRefs      ( false )
-    , useFastMrg      ( 0 )
-    , useQtbttSpeedUpMode( 0 )
-    , actualHeadBits    ( 0 )
-    , actualTotalBits   ( 0 )
-    , encRCPic          ( nullptr )
-    , picApsGlobal      ( nullptr )
-    , refApsGlobal      ( nullptr )
+    , isMeanQPLimited     ( false )
+    , picInitialQP        ( -1 )
+    , picInitialLambda    ( -1.0 )
+    , picMemorySTA        ( -1 )
+    , picVA               ()
+    , isSccWeak           ( false )
+    , isSccStrong         ( false )
+    , useME               ( false )
+    , useMCTF             ( false )
+    , useTS               ( false )
+    , useBDPCM            ( false )
+    , useIBC              ( false )
+    , useLMCS             ( false )
+    , useSAO              ( false )
+    , useNumRefs          ( false )
+    , useFastMrg          ( 0 )
+    , useQtbttSpeedUpMode ( 0 )
+    , actualHeadBits      ( 0 )
+    , actualTotalBits     ( 0 )
+    , encRCPic            ( nullptr )
+    , picApsGlobal        ( nullptr )
+    , refApsGlobal        ( nullptr )
 {
   std::fill_n( m_sharedBufs, (int)NUM_PIC_TYPES, nullptr );
   std::fill_n( m_bufsOrigPrev, NUM_QPA_PREV_FRAMES, nullptr );
@@ -249,34 +248,37 @@ void Picture::create( ChromaFormat _chromaFormat, const Size& size, unsigned _ma
 void Picture::reset()
 {
   // reset picture
-  isInitDone          = false;
-  isReconstructed     = false;
-  isBorderExtended    = false;
-  isReferenced        = true;
-  isNeededForOutput   = true;
-  isFinished          = false;
-  isLongTerm          = false;
-  isFlush             = false;
-  isInProcessList     = false;
-  isMeanQPLimited     = false;
-  precedingDRAP       = false;
+  isInitDone           = false;
+  isReconstructed      = false;
+  isBorderExtended     = false;
+  isReferenced         = true;
+  isNeededForOutput    = true;
+  isFinished           = false;
+  isLongTerm           = false;
+  isFlush              = false;
+  isInProcessList      = false;
+  isMeanQPLimited      = false;
+  precedingDRAP        = false;
 
-  gopEntry            = nullptr;
-  refCounter          = 0;
-  poc                 = -1;
-  TLayer              = std::numeric_limits<uint32_t>::max();
-  gopAdaptedQP        = 0;
+  gopEntry             = nullptr;
+  refCounter           = 0;
+  poc                  = -1;
+  TLayer               = std::numeric_limits<uint32_t>::max();
+  gopAdaptedQP         = 0;
+  force2ndOrder        = false;
   isSceneCutGOP        = false;
   isSceneCutCheckAdjQP = false;
-  actualHeadBits      = 0;
-  actualTotalBits     = 0;
-  encRCPic            = nullptr;
-  picApsGlobal        = nullptr;
-  refApsGlobal        = nullptr;
+  actualHeadBits       = 0;
+  actualTotalBits      = 0;
+  encRCPic             = nullptr;
+  picApsGlobal         = nullptr;
+  refApsGlobal         = nullptr;
+
+  picVA.reset();
 
   std::fill_n( m_sharedBufs, (int)NUM_PIC_TYPES, nullptr );
   std::fill_n( m_bufsOrigPrev, NUM_QPA_PREV_FRAMES, nullptr );
- 
+
   if( m_tileColsDone )
     std::fill( m_tileColsDone->begin(), m_tileColsDone->end(), 0 );
 
@@ -525,43 +527,6 @@ void Picture::extendPicBorder()
     for (int y = 0; y < ymargin; y++ )
     {
       ::memcpy( pi - (y+1)*p.stride, pi, sizeof(Pel)*(p.width + (xmargin<<1)) );
-    }
-
-    // reference picture with horizontal wrapped boundary
-    if (cs->sps->wrapAroundEnabled)
-    {
-      p = m_picBufs[ PIC_RECON_WRAP ].get( compID );
-      p.copyFrom(m_picBufs[ PIC_RECONSTRUCTION ].get( compID ));
-      piTxt = p.bufAt(0,0);
-      pi = piTxt;
-      int xoffset = cs->pps->wrapAroundOffset >> getComponentScaleX( compID, cs->area.chromaFormat );
-      for (int y = 0; y < p.height; y++)
-      {
-        for (int x = 0; x < xmargin; x++ )
-        {
-          if( x < xoffset )
-          {
-            pi[ -x - 1 ] = pi[ -x - 1 + xoffset ];
-            pi[  p.width + x ] = pi[ p.width + x - xoffset ];
-          }
-          else
-          {
-            pi[ -x - 1 ] = pi[ 0 ];
-            pi[  p.width + x ] = pi[ p.width - 1 ];
-          }
-        }
-        pi += p.stride;
-      }
-      pi -= (p.stride + xmargin);
-      for (int y = 0; y < ymargin; y++ )
-      {
-        ::memcpy( pi + (y+1)*p.stride, pi, sizeof(Pel)*(p.width + (xmargin << 1)));
-      }
-      pi -= ((p.height-1) * p.stride);
-      for (int y = 0; y < ymargin; y++ )
-      {
-        ::memcpy( pi - (y+1)*p.stride, pi, sizeof(Pel)*(p.width + (xmargin<<1)) );
-      }
     }
   }
 

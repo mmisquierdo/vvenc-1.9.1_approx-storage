@@ -54,25 +54,25 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "vvenc/version.h"
 #include "CommonLib/CommonDef.h"
-#include "CommonLib/Picture.h"
 #include "CommonLib/Nal.h"
+#include "CommonLib/Picture.h"
 #include "EncoderLib/EncGOP.h"
-
 #include "EncoderLib/EncLib.h"
-#if defined( TARGET_SIMD_X86 )
-#  include "CommonLib/x86/CommonDefX86.h"
-#  if ENABLE_SIMD_TRAFO
-#    include "CommonLib/TrQuant_EMT.h"
-#  endif   // ENABLE_SIMD_TRAFO
-#endif     // TARGET_SIMD_X86
+
+#if ENABLE_SIMD_TRAFO
+#include "CommonLib/TrQuant_EMT.h"
+#endif  // ENABLE_SIMD_TRAFO
 
 #if defined( __linux__ )
-#  include <malloc.h>
+#include <malloc.h>
 #endif
 
+#if defined( TARGET_SIMD_X86 )
+#include "CommonLib/x86/CommonDefX86.h"
+#endif  // defined( TARGET_SIMD_X86 )
 #if defined( TARGET_SIMD_ARM )
-#  include "CommonLib/arm/CommonDefARM.h"
-#endif
+#include "CommonLib/arm/CommonDefARM.h"
+#endif  // defined( TARGET_SIMD_ARM )
 
 #if _DEBUG
 #define HANDLE_EXCEPTION 0
@@ -149,7 +149,14 @@ int VVEncImpl::init( vvenc_config* config )
   { 
     msg.setCallback( config->m_msgCtx, config->m_msgFnc );
   }
-  
+
+  #if !IFP_RC_DETERMINISTIC
+  if( m_cVVEncCfg.m_RCTargetBitrate != 0 && m_cVVEncCfg.m_ifp )
+  {
+    msg.log( VVENC_WARNING, "Using RC with IFP. Results are non-deterministic!\n" );
+  }
+#endif
+
   // initialize the encoder
   m_pEncLib = new EncLib ( msg );
 
@@ -790,38 +797,71 @@ void VVEncImpl::registerMsgCbf( void * ctx, vvencLoggingCallback msgFnc )
 const char* VVEncImpl::setSIMDExtension( const char* simdId )
 {
   const std::string simdReqStr( simdId ? simdId : "" );
-#if defined( TARGET_SIMD_X86 )
-#  if HANDLE_EXCEPTION
+#if defined( TARGET_SIMD_X86 ) || defined( TARGET_SIMD_ARM )
+#if HANDLE_EXCEPTION
   try
-#  endif   // HANDLE_EXCEPTION
+#endif  // HANDLE_EXCEPTION
   {
-    X86_VEXT request_ext = string_to_vext( simdReqStr );
+#if defined( TARGET_SIMD_ARM )
+    ARM_VEXT arm_ext = string_to_arm_vext( simdReqStr );
+#if defined( TARGET_SIMD_X86 )
+    // Translate any non-scalar Arm SIMD request to enable SIMDe.
+    X86_VEXT x86_ext = arm_ext == arm_simd::UNDEFINED ? x86_simd::UNDEFINED
+                     : arm_ext == arm_simd::SCALAR    ? x86_simd::SCALAR
+                                                      : SIMD_EVERYWHERE_EXTENSION_LEVEL;
+#endif
     try
     {
-      read_x86_extension_flags( request_ext );
-#if defined( TARGET_SIMD_ARM )
-      read_arm_extension_flags( request_ext == x86_simd::UNDEFINED ? arm_simd::UNDEFINED : request_ext != x86_simd::SCALAR ? arm_simd::NEON : arm_simd::SCALAR );
+#if defined( TARGET_SIMD_X86 )
+      read_x86_extension_flags( x86_ext );
 #endif
+      read_arm_extension_flags( arm_ext );
     }
     catch( Exception& )
     {
-      // not using the actual message from the exception here, because we need to insert the SIMD-level name instead of the enum
-      THROW( "requested SIMD level (" << simdReqStr << ") not supported by current CPU (max " << read_x86_extension_name() << ")." );
+      // Not using the actual message from the exception here, because we need to insert the SIMD-level name instead of
+      // the enum.
+      THROW( "requested SIMD level (" << simdReqStr << ") not supported by current CPU (max "
+                                      << read_arm_extension_name() << ")." );
     }
+#else  // defined( TARGET_SIMD_X86 )
+    X86_VEXT request_ext = string_to_x86_vext( simdReqStr );
+    try
+    {
+      read_x86_extension_flags( request_ext );
+    }
+    catch( Exception& )
+    {
+      // Not using the actual message from the exception here, because we need to insert the SIMD-level name instead of
+      // the enum.
+      THROW( "requested SIMD level (" << simdReqStr << ") not supported by current CPU (max "
+                                      << read_x86_extension_name() << ")." );
+    }
+#endif
 
 #if ENABLE_SIMD_OPT_BUFFER
-  #if defined( TARGET_SIMD_X86 )
+#if defined( TARGET_SIMD_X86 )
     g_pelBufOP.initPelBufOpsX86();
-  #endif
-  #if defined( TARGET_SIMD_ARM )
+#endif
+#if defined( TARGET_SIMD_ARM )
     g_pelBufOP.initPelBufOpsARM();
-  #endif
 #endif
-#if ENABLE_SIMD_TRAFO
-  g_tCoeffOps.initTCoeffOpsX86();
-#endif
+#endif  // ENABLE_SIMD_OPT_BUFFER
 
+#if ENABLE_SIMD_TRAFO
+#if defined( TARGET_SIMD_X86 )
+    g_tCoeffOps.initTCoeffOpsX86();
+#endif
+#if defined( TARGET_SIMD_ARM )
+    g_tCoeffOps.initTCoeffOpsARM();
+#endif
+#endif  // ENABLE_SIMD_TRAFO
+
+#if defined( TARGET_SIMD_ARM )
+    return read_arm_extension_name().c_str();
+#else
     return read_x86_extension_name().c_str();
+#endif
   }
 #if HANDLE_EXCEPTION
   catch( Exception& e )
@@ -830,8 +870,8 @@ const char* VVEncImpl::setSIMDExtension( const char* simdId )
     msg.log( VVENC_ERROR, "\n%s\n", e.what() );
     return nullptr;
   }
-#endif   // HANDLE_EXCEPTION
-#else      // !TARGET_SIMD_X86
+#endif  // HANDLE_EXCEPTION
+#else   // !defined( TARGET_SIMD_X86 ) && !defined( TARGET_SIMD_ARM )
   if( !simdReqStr.empty() && simdReqStr != "SCALAR" )
   {
     MsgLog msg;
@@ -839,7 +879,7 @@ const char* VVEncImpl::setSIMDExtension( const char* simdId )
     return nullptr;
   }
   return "SCALAR";
-#endif     // TARGET_SIMD_X86
+#endif  // defined( TARGET_SIMD_X86 ) || defined( TARGET_SIMD_ARM )
 }
 
 ///< creates compile info string containing OS, Compiler and Bit-depth (e.g. 32 or 64 bit).
@@ -856,13 +896,15 @@ std::string VVEncImpl::getCompileInfoString()
 std::string VVEncImpl::createEncoderInfoStr()
 {
   std::stringstream cssCap;
-#if defined( TARGET_SIMD_X86 )
-  setSIMDExtension( nullptr );   // ensure SIMD-detection is finished
+#if defined( TARGET_SIMD_ARM )
+  setSIMDExtension( nullptr );  // Ensure SIMD-detection is finished
+  cssCap << getCompileInfoString() << "[SIMD=" << read_arm_extension_name() << "]";
+#elif defined( TARGET_SIMD_X86 )
+  setSIMDExtension( nullptr );  // Ensure SIMD-detection is finished
   cssCap << getCompileInfoString() << "[SIMD=" << read_x86_extension_name() <<"]";
-#else   // !TARGET_SIMD_X86
+#else  // !TARGET_SIMD_X86 && !TARGET_SIMD_ARM
   cssCap << getCompileInfoString() << "[SIMD=SCALAR]";
-#endif  // !TARGET_SIMD_X86
-
+#endif
 
   std::string cInfoStr;
   cInfoStr  = "VVenC, the Fraunhofer H.266/VVC Encoder, version " VVENC_VERSION;

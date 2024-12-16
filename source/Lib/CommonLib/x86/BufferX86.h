@@ -594,7 +594,7 @@ void roundGeo_SSE( const Pel* src, Pel* dst, const int numSamples, unsigned shif
     for( int col = 0; col < numSamples; col += 16 )
     {
       __m256i val = _mm256_load_si256( ( const __m256i* )&src[col] );
-      val = _mm256_add_epi16         ( val, voffset );
+      val = _mm256_adds_epi16        ( val, voffset );
       val = _mm256_srai_epi16        ( val, shift );
       val = _mm256_min_epi16( vibdimax, _mm256_max_epi16( vibdimin, val ) );
       _mm256_store_si256( ( __m256i * )&dst[col], val );
@@ -612,8 +612,8 @@ void roundGeo_SSE( const Pel* src, Pel* dst, const int numSamples, unsigned shif
       for( int col = 0; col < numSamples; col += 8 )
       {
         __m128i val = _mm_load_si128 ( (const __m128i *)&src[col] );
-        val  = _mm_add_epi16        ( val, voffset );
-        val  = _mm_srai_epi16       ( val, shift );
+        val  = _mm_adds_epi16        ( val, voffset );
+        val  = _mm_srai_epi16        ( val, shift );
         val  = _mm_min_epi16( vibdimax, _mm_max_epi16( vibdimin, val ) );
         _mm_store_si128( ( __m128i * )&dst[col], val );
       }
@@ -621,7 +621,7 @@ void roundGeo_SSE( const Pel* src, Pel* dst, const int numSamples, unsigned shif
     else //if( numSamples == 4 )
     {
       __m128i val = _mm_loadl_epi64  ( ( const __m128i * )&src[0] );
-      val = _mm_add_epi16            ( val, voffset );
+      val = _mm_adds_epi16           ( val, voffset );
       val = _mm_srai_epi16           ( val, shift );
       val = _mm_min_epi16( vibdimax, _mm_max_epi16( vibdimin, val ) );
       _mm_storel_epi64( ( __m128i * )&dst[0], val );
@@ -647,8 +647,8 @@ void recoCore_SSE( const Pel* src0, const Pel* src1, Pel* dst, int numSamples, c
       __m256i vdest = _mm256_load_si256 ( ( const __m256i * )&src0[n] );
       __m256i vsrc1 = _mm256_load_si256( ( const __m256i * )&src1[n] );
 
-      vdest = _mm256_add_epi16( vdest, vsrc1 );
-      vdest = _mm256_min_epi16( vbdmax, _mm256_max_epi16( vbdmin, vdest ) );
+      vdest = _mm256_adds_epi16( vdest, vsrc1 );
+      vdest = _mm256_min_epi16 ( vbdmax, _mm256_max_epi16( vbdmin, vdest ) );
 
       _mm256_store_si256( ( __m256i * )&dst[n], vdest );
     }
@@ -665,8 +665,8 @@ void recoCore_SSE( const Pel* src0, const Pel* src1, Pel* dst, int numSamples, c
       __m128i vdest = _mm_load_si128 ( ( const __m128i * )&src0[n] );
       __m128i vsrc1 = _mm_load_si128( ( const __m128i * )&src1[n] );
 
-      vdest = _mm_add_epi16( vdest, vsrc1 );
-      vdest = _mm_min_epi16( vbdmax, _mm_max_epi16( vbdmin, vdest ) );
+      vdest = _mm_adds_epi16( vdest, vsrc1 );
+      vdest = _mm_min_epi16 ( vbdmax, _mm_max_epi16( vbdmin, vdest ) );
 
       _mm_store_si128( ( __m128i * )&dst[n], vdest );
     }
@@ -679,8 +679,8 @@ void recoCore_SSE( const Pel* src0, const Pel* src1, Pel* dst, int numSamples, c
     __m128i vsrc = _mm_loadl_epi64( ( const __m128i * )&src0[0] );
     __m128i vdst = _mm_loadl_epi64( ( const __m128i * )&src1[0] );
 
-    vdst = _mm_add_epi16( vdst, vsrc );
-    vdst = _mm_min_epi16( vbdmax, _mm_max_epi16( vbdmin, vdst ) );
+    vdst = _mm_adds_epi16( vdst, vsrc );
+    vdst = _mm_min_epi16 ( vbdmax, _mm_max_epi16( vbdmin, vdst ) );
 
     _mm_storel_epi64( ( __m128i * )&dst[0], vdst );
   }
@@ -1092,8 +1092,8 @@ void reco_SSE( const int16_t* src0, int src0Stride, const int16_t* src1, int src
           __m256i vdest = _mm256_loadu_si256 ( ( const __m256i * )&src0[col] );
           __m256i vsrc1 = _mm256_loadu_si256( ( const __m256i * )&src1[col] );
 
-          vdest = _mm256_add_epi16( vdest, vsrc1 );
-          vdest = _mm256_min_epi16( vbdmax, _mm256_max_epi16( vbdmin, vdest ) );
+          vdest = _mm256_adds_epi16( vdest, vsrc1 );
+          vdest = _mm256_min_epi16 ( vbdmax, _mm256_max_epi16( vbdmin, vdest ) );
 
           _mm256_storeu_si256( ( __m256i * )&dst[col], vdest );
         }
@@ -1116,8 +1116,8 @@ void reco_SSE( const int16_t* src0, int src0Stride, const int16_t* src1, int src
           __m128i vdest = _mm_loadu_si128 ( ( const __m128i * )&src0[col] );
           __m128i vsrc1 = _mm_loadu_si128( ( const __m128i * )&src1[col] );
 
-          vdest = _mm_add_epi16( vdest, vsrc1 );
-          vdest = _mm_min_epi16( vbdmax, _mm_max_epi16( vbdmin, vdest ) );
+          vdest = _mm_adds_epi16( vdest, vsrc1 );
+          vdest = _mm_min_epi16 ( vbdmax, _mm_max_epi16( vbdmin, vdest ) );
 
           _mm_storeu_si128( ( __m128i * )&dst[col], vdest );
         }
@@ -1140,8 +1140,8 @@ void reco_SSE( const int16_t* src0, int src0Stride, const int16_t* src1, int src
         __m128i vsrc = _mm_loadl_epi64( ( const __m128i * )&src0[col] );
         __m128i vdst = _mm_loadl_epi64( ( const __m128i * )&src1[col] );
 
-        vdst = _mm_add_epi16( vdst, vsrc );
-        vdst = _mm_min_epi16( vbdmax, _mm_max_epi16( vbdmin, vdst ) );
+        vdst = _mm_adds_epi16( vdst, vsrc );
+        vdst = _mm_min_epi16 ( vbdmax, _mm_max_epi16( vbdmin, vdst ) );
 
         _mm_storel_epi64( ( __m128i * )&dst[col], vdst );
       }
@@ -1286,13 +1286,13 @@ void sub_SSE( const Pel* src0, int src0Stride, const Pel* src1, int src1Stride, 
 
 template<bool doShift, bool shiftR, typename T> static inline void do_shift( T &vreg, int num );
 #if USE_AVX2
-template<> inline void do_shift<true,  true , __m256i>( __m256i &vreg, int num ) { vreg = _mm256_srai_epi32( vreg, num ); }
-template<> inline void do_shift<true,  false, __m256i>( __m256i &vreg, int num ) { vreg = _mm256_slli_epi32( vreg, num ); }
+template<> inline void do_shift<true,  true , __m256i>( __m256i &vreg, int num ) { vreg = _mm256_sra_epi32( vreg, _mm_cvtsi32_si128( num ) ); }
+template<> inline void do_shift<true,  false, __m256i>( __m256i &vreg, int num ) { vreg = _mm256_sll_epi32( vreg, _mm_cvtsi32_si128( num ) ); }
 template<> inline void do_shift<false, true , __m256i>( __m256i &vreg, int num ) { }
 template<> inline void do_shift<false, false, __m256i>( __m256i &vreg, int num ) { }
 #endif
-template<> inline void do_shift<true,  true , __m128i>( __m128i &vreg, int num ) { vreg = _mm_srai_epi32( vreg, num ); }
-template<> inline void do_shift<true,  false, __m128i>( __m128i &vreg, int num ) { vreg = _mm_slli_epi32( vreg, num ); }
+template<> inline void do_shift<true,  true , __m128i>( __m128i &vreg, int num ) { vreg = _mm_sra_epi32( vreg, _mm_cvtsi32_si128( num ) ); }
+template<> inline void do_shift<true,  false, __m128i>( __m128i &vreg, int num ) { vreg = _mm_sll_epi32( vreg, _mm_cvtsi32_si128( num ) ); }
 template<> inline void do_shift<false, true , __m128i>( __m128i &vreg, int num ) { }
 template<> inline void do_shift<false, false, __m128i>( __m128i &vreg, int num ) { }
 

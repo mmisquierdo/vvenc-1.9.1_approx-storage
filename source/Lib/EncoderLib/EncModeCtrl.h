@@ -67,8 +67,6 @@ enum EncTestModeType
   ETM_MERGE_SKIP,
   ETM_INTER_ME,
   ETM_INTER_IMV,
-  ETM_AFFINE,
-  ETM_MERGE_GEO,
   ETM_INTRA,
   ETM_SPLIT_QT,
   ETM_SPLIT_BT_H,
@@ -143,8 +141,6 @@ inline bool isModeInter( const EncTestMode& encTestmode ) // perhaps remove
   return (   encTestmode.type == ETM_INTER_ME
           || encTestmode.type == ETM_INTER_IMV
           || encTestmode.type == ETM_MERGE_SKIP
-          || encTestmode.type == ETM_AFFINE
-          || encTestmode.type == ETM_MERGE_GEO
          );
 }
 
@@ -178,13 +174,9 @@ struct ComprCUCtx
     , bestCU        ( nullptr    )
     , bestTU        ( nullptr    )
     , bestMode      ()
-    , bestInterCost             ( MAX_DOUBLE )
-    , bestCostBeforeSplit       ( MAX_DOUBLE )
+    , bestCostBeforeSplit   (MAX_DOUBLE)
     , bestCostVertSplit     (MAX_DOUBLE)
     , bestCostHorzSplit     (MAX_DOUBLE)
-    , bestCostTriVertSplit  (MAX_DOUBLE)
-    , bestCostTriHorzSplit  (MAX_DOUBLE)
-    , bestCostImv           (MAX_DOUBLE *.5)
     , bestCostNoImv         (MAX_DOUBLE *.5)
     , grad_horVal           (0)
     , grad_verVal           (0)
@@ -203,11 +195,11 @@ struct ComprCUCtx
     , doVerChromaSplit      (false)
     , doQtChromaSplit       (false)
     , isBestNoSplitSkip     (false)
-    , skipSecondMTSPass     (false)
     , intraWasTested        (false)
     , relatedCuIsValid      (false)
     , isIntra               (false)
     , nonSkipWasTested      (false)
+    , bestNsPredMode        (EncTestMode())
   {
   }
 
@@ -217,13 +209,9 @@ struct ComprCUCtx
   CodingUnit*       bestCU;
   TransformUnit*    bestTU;
   EncTestMode       bestMode;
-  double            bestInterCost;
   double            bestCostBeforeSplit;
   double            bestCostVertSplit;
   double            bestCostHorzSplit;
-  double            bestCostTriVertSplit;
-  double            bestCostTriHorzSplit;
-  double            bestCostImv;
   double            bestCostNoImv;
   double            grad_horVal;
   double            grad_verVal;
@@ -243,11 +231,11 @@ struct ComprCUCtx
   bool              doVerChromaSplit;
   bool              doQtChromaSplit;
   bool              isBestNoSplitSkip;
-  bool              skipSecondMTSPass;
   bool              intraWasTested;
   bool              relatedCuIsValid;
   bool              isIntra;
   bool              nonSkipWasTested;
+  EncTestMode       bestNsPredMode;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -324,9 +312,10 @@ private:
   XUCache              m_dummyCache;
 
 protected:
-
-  void create   ( const ChromaFormat chFmt );
+  bool                 m_reuseCuResults;
+  void create   ( const bool reuseCuResults, const ChromaFormat chFmt );
   void destroy  ();
+
 public:
   BestEncInfoCache() : m_pcv( nullptr ), m_pCoeff( nullptr ), m_encInfoBuf( nullptr ), m_dmvrMvBuf( nullptr ), m_dummyCS( m_dummyCache, nullptr ) {}
   ~BestEncInfoCache() {}

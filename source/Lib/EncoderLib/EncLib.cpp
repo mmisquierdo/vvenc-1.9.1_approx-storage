@@ -282,6 +282,8 @@ void EncLib::initPass( int pass, const char* statsFName )
   // additional pictures due to structural delay
   m_maxNumPicShared += m_preProcess->getGOPCfg()->getNumReorderPics()[ m_encCfg.m_maxTLayer ];
   m_maxNumPicShared += 3;
+  // increase number of picture buffers for GOP parallel processing
+  m_maxNumPicShared += m_encCfg.m_numParallelGOPs ? (m_encCfg.m_GOPSize + 1) * m_encCfg.m_numParallelGOPs: 0;
 
   if( m_rateCtrl->rcIsFinalPass )
   {
@@ -365,10 +367,21 @@ void EncLib::xInitRCCfg()
     m_firstPassCfg.m_SourceHeight = ( m_encCfg.m_SourceHeight >> 1 ) & ( ~7 );
     m_firstPassCfg.m_PadSourceWidth  = m_firstPassCfg.m_SourceWidth;
     m_firstPassCfg.m_PadSourceHeight = m_firstPassCfg.m_SourceHeight;
+#if TILES_IFP_2PRC_HOTFIX
+    if( m_firstPassCfg.m_ifp && (m_firstPassCfg.m_numTileCols > 1 || m_firstPassCfg.m_numTileRows > 1) )
+    {
+      // due to sub-sampling, expected different tile configuration in cfg (m_tileRowHeight[], m_tileColumnWidth[])
+      // currently, disable auto tiles for the first pass
+      m_firstPassCfg.m_numTileCols = 1;
+      m_firstPassCfg.m_numTileRows = 1;
+      m_firstPassCfg.m_picPartitionFlag = false;
+    }
+#endif
   }
 
   // preserve some settings
   m_firstPassCfg.m_intraQPOffset   = m_encCfg.m_intraQPOffset;
+  m_firstPassCfg.m_GOPQPA          = m_encCfg.m_GOPQPA;
   if( m_firstPassCfg.m_usePerceptQPA && ( m_firstPassCfg.m_QP <= MAX_QP_PERCEPT_QPA || m_firstPassCfg.m_framesToBeEncoded == 1 ) )
   {
     m_firstPassCfg.m_CTUSize       = m_encCfg.m_CTUSize;

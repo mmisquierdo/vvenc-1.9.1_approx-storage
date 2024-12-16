@@ -612,10 +612,10 @@ struct VUI
   uint32_t   chromaSampleLocType;
 
   VUI()
-    : progressiveSourceFlag         (false)
+    : progressiveSourceFlag         (true)
     , interlacedSourceFlag          (false)
-    , nonPackedFlag                 (false)
-    , nonProjectedFlag              (false)
+    , nonPackedFlag                 (true)
+    , nonProjectedFlag              (true)
     , aspectRatioInfoPresent        (false) //TODO: This initialiser list contains magic numbers
     , aspectRatioConstantFlag       (false)
     , aspectRatioIdc                    (0)
@@ -1298,8 +1298,8 @@ public:
   void                        checkLeadingPictureRestrictions( const PicList& rcListPic ) const;
   void                        applyReferencePictureListBasedMarking( const PicList& rcListPic, const ReferencePictureList* pRPL0, const ReferencePictureList* pRPL1, const int layerId, const PPS& pps, const bool usingLongTerm = true )  const;
   bool                        isStepwiseTemporalLayerSwitchingPointCandidate( const PicList& rcListPic ) const;
-  bool                        isRplPicMissing( const PicList& rcListPic, const RefPicList refList, int& missingPoc ) const;
-  void                        createExplicitReferencePictureSetFromReference( const PicList& rcListPic, const ReferencePictureList* pRPL0, const ReferencePictureList* pRPL1 );
+  bool                        isRplPicMissing( const PicList& rcListPic, const RefPicList refList, int& missingPoc, int ip ) const;
+  void                        createExplicitReferencePictureSetFromReference( const PicList& rcListPic, const ReferencePictureList* pRPL0, const ReferencePictureList* pRPL1, int ip );
   void                        getWpScaling( RefPicList e, int iRefIdx, WPScalingParam *&wp) const;
 
   void                        resetWpScaling();
@@ -1313,6 +1313,8 @@ public:
   unsigned                    getMinPictureDistance()                           const ;
 
   bool                        isPocRestrictedByDRAP( int poc, bool precedingDRAPInDecodingOrder ) const;
+  bool                        refPicIsFutureIDRnoLP( int candPoc, int ipc ) const;
+
   void                        setAlfApsIds( const std::vector<int>& ApsIDs);
 private:
   Picture*                    xGetLongTermRefPic(const PicList& rcListPic, int poc, bool pocHasMsb);
@@ -1579,7 +1581,6 @@ public:
     , lumaHeight          ( pps.picHeightInLumaSamples )
     , fastDeltaQPCuMaxSize( Clip3<unsigned>( (1 << sps.log2MinCodingBlockSize), sps.CTUSize, 32u) )
     , ISingleTree         ( !sps.dualITree )
-    , wrapArround         ( sps.wrapAroundEnabled )
     , maxMTTDepth         { sps.maxMTTDepth[0], sps.maxMTTDepth[1], sps.maxMTTDepth[2] }
     , minTSize            { 1u << sps.log2MinCodingBlockSize, 1u << sps.log2MinCodingBlockSize, 1u << sps.log2MinCodingBlockSize }
     , maxBtSize           { sps.maxBTSize[0], sps.maxBTSize[1], sps.maxBTSize[2] }
@@ -1605,7 +1606,6 @@ public:
   const unsigned     lumaHeight;
   const unsigned     fastDeltaQPCuMaxSize;
   const bool         ISingleTree;
-  const bool         wrapArround;
 
 private:
   const unsigned     maxMTTDepth[3];

@@ -255,7 +255,7 @@ private:
   template <X86_VEXT vext>
   static void xGetSADX5_8xN_SIMD    ( const DistParam& rcDtParam, Distortion* cost, bool isCalCentrePos );
   template <X86_VEXT vext>
-  static void xGetSADX5_16xN_SIMD   ( const DistParam& rcDtParam, Distortion* cost, bool isCalCentrePos );
+  static void xGetSADX5_16xN_SIMD_X86   ( const DistParam& rcDtParam, Distortion* cost, bool isCalCentrePos );
 
   template<X86_VEXT vext, bool fastHad>
   static Distortion xGetHADs_SIMD   ( const DistParam& pcDtParam );
@@ -268,13 +268,19 @@ private:
 
 #ifdef TARGET_SIMD_ARM
   template <ARM_VEXT vext>
-  static void xGetSADX5_16xN_SIMD   ( const DistParam& rcDtParam, Distortion* cost, bool isCalCentrePos );
+  static void xGetSADX5_16xN_SIMD_ARM   ( const DistParam& rcDtParam, Distortion* cost, bool isCalCentrePos );
 
   template <ARM_VEXT vext>
   static Distortion xGetHAD2SADs_ARMSIMD( const DistParam &rcDtParam );
 
   template <ARM_VEXT vext, bool fastHad>
   static Distortion xGetHADs_ARMSIMD   ( const DistParam& pcDtParam );
+
+  template<ARM_VEXT vext> 
+  static Distortion xGetSADwMask_ARMSIMD(const DistParam &rcDtParam);
+
+  template< int iWidth, ARM_VEXT vext >
+  static Distortion xGetSAD_NxN_ARMSIMD( const DistParam &rcDtParam );
 #endif
 	
   unsigned int   getBitsMultiplePredsIBC(int x, int y, bool useIMV);

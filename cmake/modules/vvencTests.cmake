@@ -1,6 +1,10 @@
 # enable testing with ctest
 enable_testing()
 
+if( VVENC_LIBRARY_ONLY )
+  message( WARNING "The test suite will not be able to run, when building the vvenc library only (VVENC_LIBRARY_ONLY=ON)" )
+endif()
+
 set( TEST_YUV "${PROJECT_SOURCE_DIR}/test/data/RTn23_80x44p15_f15.yuv" )
 set( TEST_CFG "${PROJECT_SOURCE_DIR}/test/data/RTn23.cfg" )
 set( CFG_DIR  "${PROJECT_SOURCE_DIR}/cfg" )
@@ -14,6 +18,8 @@ add_test( NAME Test_vvenclibtest-input_params            COMMAND vvenclibtest 3 
 add_test( NAME Test_vvenclibtest-sdk_default             COMMAND vvenclibtest 4 )
 add_test( NAME Test_vvenclibtest-sdk_stringapi_interface COMMAND vvenclibtest 5 )
 add_test( NAME Test_vvenclibtest-timestamps              COMMAND vvenclibtest 6 )
+
+add_test( NAME Test_vvenc_unit_test COMMAND vvenc_unit_test )
 
 set( CLEANUP_TEST_FILES "" )
 

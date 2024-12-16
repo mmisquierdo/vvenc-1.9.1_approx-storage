@@ -98,6 +98,12 @@ protected:
   void _initInterPredictionX86();
 #endif
 
+#if ENABLE_SIMD_OPT_BDOF && defined( TARGET_SIMD_ARM )
+  void initInterPredictionARM();
+  template <ARM_VEXT vext>
+  void _initInterPredictionARM();
+#endif
+
 protected:
   void xWeightedAverage       ( const CodingUnit& cu, const CPelUnitBuf& pcYuvSrc0, const CPelUnitBuf& pcYuvSrc1, PelUnitBuf& pcYuvDst, const bool bdofApplied, PelUnitBuf *yuvPredTmp = NULL );
   void xPredAffineBlk         ( const ComponentID compID, const CodingUnit& cu, const Picture* refPic, const Mv* _mv, PelUnitBuf& dstPic, const bool bi, const ClpRng& clpRng, const RefPicList refPicList = REF_PIC_LIST_X);
@@ -175,7 +181,7 @@ public:
   void    destroy               ();
 
   // inter
-  bool    motionCompensation    ( CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList refPicList = REF_PIC_LIST_X, PelUnitBuf* predBufDfltWght = NULL );
+  bool    motionCompensation    ( CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList& eRefPicList = REF_PIC_LIST_X, PelUnitBuf* predBufDfltWght = NULL );
   void    motionCompensationIBC ( CodingUnit& cu, PelUnitBuf& predBuf );
   void    xSubPuMC              ( CodingUnit& cu, PelUnitBuf& predBuf, const RefPicList& eRefPicList = REF_PIC_LIST_X );
   void    motionCompensationGeo ( CodingUnit& cu, PelUnitBuf& predBuf, const MergeCtx& geoMrgCtx );

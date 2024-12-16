@@ -10,7 +10,7 @@ if( NOT CMAKE_VERSION VERSION_LESS 3.13.0 )
 endif()
 
 # project name
-project( vvenc VERSION 1.12.0 )
+project( vvenc VERSION 1.13.0 )
 
 # set alternative version numbering for release candidates
 #set( PROJECT_VERSION_RC rc1 )
@@ -21,22 +21,29 @@ endif()
 set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" )
 message( STATUS "CMAKE_MODULE_PATH: updating module path to: ${CMAKE_MODULE_PATH}" )
 
-# check for arm architecture support
-set( VVENC_ARM_SIMD_DEFAULT FALSE )
-if( ( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64\|arm"
-    OR "${CMAKE_CXX_COMPILER}" MATCHES "aarch64\|arm"
-    OR "${CMAKE_OSX_ARCHITECTURES}" MATCHES "arm64\|armv" )
-    AND NOT "${CMAKE_OSX_ARCHITECTURES}" MATCHES "x86\|x64" )
+include( vvencCompilerSupport )
+
+detect_target_architecture( VVENC_TARGET_ARCH )
+if( VVENC_TARGET_ARCH MATCHES "ARM\|AARCH64" )
   set( VVENC_ARM_SIMD_DEFAULT TRUE )
+
+  # Avoid non-portable type casting in Arm vector kernels.
+  if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-lax-vector-conversions" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-lax-vector-conversions" )
+  endif()
+
+  # Check if SVE/SVE2 flags are supported by the compiler.
+  set_if_compiler_supports_arm_extensions( FLAG_sve FLAG_sve2 )
 endif()
 
-# we enable x86 intrinsics for all target architectures, because they are implemented through simd-everywhere on non-x86
-set( VVENC_ENABLE_X86_SIMD TRUE                      CACHE BOOL "enable x86 intrinsics" )
-set( VVENC_ENABLE_ARM_SIMD ${VVENC_ARM_SIMD_DEFAULT} CACHE BOOL "enable ARM intrinsics" )
+# We enable x86 intrinsics for all target architectures, because they are implemented through SIMD-everywhere on non-x86.
+set( VVENC_ENABLE_X86_SIMD TRUE                      CACHE BOOL "Enable x86 intrinsics" )
+set( VVENC_ENABLE_ARM_SIMD ${VVENC_ARM_SIMD_DEFAULT} CACHE BOOL "Enable Arm Neon intrinsics" )
+set( VVENC_ENABLE_ARM_SIMD_SVE FALSE                 CACHE BOOL "Enable Arm SVE intrinsics" )
+set( VVENC_ENABLE_ARM_SIMD_SVE2 FALSE                CACHE BOOL "Enable Arm SVE2 intrinsics" )
 
-include( vvencCompilerSupport )
 check_problematic_compiler( VVENC_PROBLEMATIC_COMPILER "MSVC" 19.38 19.39 )
-
 if( VVENC_PROBLEMATIC_COMPILER )
   set( VVENC_OVERRIDE_COMPILER_CHECK      OFF        CACHE BOOL "Build with known problematic compiler version" )
 
@@ -54,7 +61,6 @@ if( VVENC_PROBLEMATIC_COMPILER )
           "Binaries compiled with ${CMAKE_CXX_COMPILER} version ${CMAKE_CXX_COMPILER_VERSION} are known not to behave as intended. "
           "The problematic version range is ${VVENC_PROBLEMATIC_COMPILER_VERSION_RANGE}. Please consider using a different compiler.\n"
           ${VVENC_PROBLEMATIC_COMPILER_MSG_OVERRIDE} )
-
 endif()
 
 # enable sse4.1 build for all source files for gcc and clang
@@ -71,12 +77,46 @@ if( VVENC_ENABLE_X86_SIMD )
   endif()
 
   message( STATUS "x86 SIMD intrinsics enabled (using SIMDE for non-x86 targets)" )
-  add_compile_definitions( TARGET_SIMD_X86 )
+  add_compile_definitions( TARGET_SIMD_X86=1 )
 endif()
 
-if( VVENC_ENABLE_ARM_SIMD )
-  message( STATUS "ARM SIMD intrinsics enabled" )
-  add_compile_definitions( TARGET_SIMD_ARM )
+if( VVENC_TARGET_ARCH STREQUAL "AARCH64" )
+  if( VVENC_ENABLE_ARM_SIMD )
+    message( STATUS "AArch64 Neon intrinsics enabled" )
+    add_compile_definitions( TARGET_SIMD_ARM=1 )
+  endif()
+
+  # If Neon is disabled or SVE is not supported, make sure that SVE is disabled.
+  if ( NOT VVENC_ENABLE_ARM_SIMD OR NOT FLAG_sve )
+    message( STATUS "Disabling AArch64 SVE/SVE2 intrinsics" )
+    set( VVENC_ENABLE_ARM_SIMD_SVE FALSE )
+  elseif( VVENC_ENABLE_ARM_SIMD_SVE )
+    message( STATUS "AArch64 SVE intrinsics enabled" )
+    add_compile_definitions( TARGET_SIMD_ARM_SVE=1 )
+  endif()
+
+  # If SVE is disabled or SVE2 is not supported, make sure that SVE2 is disabled.
+  if ( NOT VVENC_ENABLE_ARM_SIMD_SVE OR NOT FLAG_sve2 )
+    message( STATUS "Disabling AArch64 SVE2 intrinsics" )
+    # If SVE is disabled make sure that SVE2 are also disabled.
+    set( VVENC_ENABLE_ARM_SIMD_SVE2 FALSE )
+  elseif( VVENC_ENABLE_ARM_SIMD_SVE2 )
+    message( STATUS "AArch64 SVE2 intrinsics enabled" )
+    add_compile_definitions( TARGET_SIMD_ARM_SVE2=1 )
+  endif()
+endif()
+
+if( VVENC_TARGET_ARCH STREQUAL "ARM" )
+  if( VVENC_ENABLE_ARM_SIMD )
+    message( STATUS "Arm Neon intrinsics enabled" )
+    add_compile_definitions( TARGET_SIMD_ARM=1 )
+
+    # When building for 32-bit Arm platforms with SIMD, unconditionally enable Neon.
+    set_if_compiler_supports_flag( FLAG_mfpu_neon -mfpu=neon )
+    add_compile_options( ${FLAG_mfpu_neon} )
+  else()
+    message( STATUS "Arm Neon intrinsics disabled" )
+  endif()
 endif()
 
 if( NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
@@ -102,6 +142,10 @@ endif()
 # enable install target
 set( VVENC_ENABLE_INSTALL                   ON  CACHE BOOL   "Enable or disable install target" )
 
+set( VVENC_LIBRARY_ONLY                     OFF CACHE BOOL   "Build libvvenc only (no vvencapp,vvencFFapp,vvenclibtest,vvencinterfacetest" )
+
+set( BUILD_SHARED_LIBS                      OFF CACHE BOOL   "Build libvvenc as a shared library" )
+
 # enable postfix
 set( VVENC_ENABLE_BUILD_TYPE_POSTFIX        OFF CACHE BOOL   "Enable or disable build type postfix for apps and libs" )
 
@@ -110,6 +154,8 @@ set( VVENC_ENABLE_LINK_TIME_OPT             ON  CACHE BOOL   "Enable link time o
 set( VVENC_ENABLE_THIRDPARTY_JSON           ON  CACHE BOOL   "Enable use of thirdparty json library" )
 
 set( VVENC_INSTALL_FULLFEATURE_APP          OFF CACHE BOOL   "Install the full-feature app: vvencFFapp" )
+
+set( VVENC_ENABLE_WERROR                    ON  CACHE BOOL   "Treat warnings as errors (-Werror or /WX)" )
 
 if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
     CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
@@ -214,6 +260,12 @@ endif()
 
 if( VVENC_ENABLE_TRACING )
   add_definitions( -DENABLE_TRACING=1 )
+endif()
+
+if( VVENC_ENABLE_WERROR )
+  add_compile_options( "$<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror>" )
+  add_compile_options( "$<$<CXX_COMPILER_ID:GNU>:-Werror>" )
+  add_compile_options( "$<$<CXX_COMPILER_ID:MSVC>:/WX>" )
 endif()
 
 if( VVENC_ENABLE_X86_SIMD )
@@ -324,12 +376,17 @@ if( VVENC_ENABLE_INSTALL )
   endif()
 endif()
 
+set( VVENC_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source/Lib" )
 
 add_subdirectory( "source/Lib/vvenc" )
 add_subdirectory( "source/App/vvencapp" )
 add_subdirectory( "source/App/vvencFFapp" )
 add_subdirectory( "test/vvenclibtest" )
 add_subdirectory( "test/vvencinterfacetest" )
+
+if( NOT BUILD_SHARED_LIBS )
+  add_subdirectory( "test/vvenc_unit_test" )
+endif()
 
 include( cmake/modules/vvencTests.cmake )
 

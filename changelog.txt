@@ -1,4 +1,63 @@
 /////////////////////////////////////////
+tag 1.13.0
+
+* libvvenc:
+  - many ARM SIMD optimizations for both NEON and SVE
+  - added parameters
+    - m_GOPQPA: enableed GOP adaptive QP cascade (default: on if QPA off)
+    - m_numParallelGOPs: allows to encode multiple GOPs at once, improving multi-threading for large number of threads (default: off)
+    - m_fga (experimental): enables film grain analysis and embeds FGS SEI in the encoded bitstreams (default: off)
+  - changed parameters:
+    - m_DecodingRefreshType: added a DASH optimized mode VVENC_DRT_IDR_NO_RADL - starts each intra period with an IDR frame
+                             without leading picture, allowing simple splitting into segments at each IDR.
+  - preset adjustments:
+    - 5% speedup for medium
+    - 2% speedup for slow and slower
+  - memory reduction for medium/fast/faster
+  - bugfixes
+  - cleanups
+
+* vvencFFapp:
+  - added parameters:
+    - GOPQPA: enabled GOP adaptive QP cascade (default: on if QPA off)
+    - NumParallelGOPs: allows to encode multiple GOPs at once (default: off)
+    - FGA: enables the experimental film grain analysis (default: off)
+  - changed parameters:
+    - DecodingRefreshType: now also accepts values "6" and "idr_no_radl" enabling the new DASH optimized IDR only structure.
+
+* vvencapp:
+  - changed parameters:
+    - refreshtype: now also accepts values "6" and "idr_no_radl" enabling the new DASH optimized IDR only structure.
+
+/////////////////////////////////////////
+tag 1.12.1
+
+* libvvenc:
+  - changed parameters (vvenc_config::) for proper VUI signalization:
+    - m_aspectRatioIdc=1 per default (sar 1x1)
+    - m_chromaLocInfoPresent=-1 and m_chromaSampleLocType=-1 per default (auto behavior depending on HDR/SDR mode)
+      m_chromaSampleLocType is auto set, depending on m_horCollocatedChromaFlag and m_verCollocatedChromaFlag
+      m_chromaLocInfoPresent=1 and m_chromaSampleLocType=2 for VVENC_HDR_PQ, VVENC_HDR_PQ_BT2020,
+      VVENC_HDR_HLG, VVENC_HDR_HLG_BT2020, VVENC_SDR_BT2020
+      else m_chromaLocInfoPresent=0 and m_chromaSampleLocType=0
+    - m_aspectRatioInfoPresent flag is auto on, if m_aspectRatioIdc>0 or non-default Sar is given
+    - m_overscanInfoPresent flag is auto on, when m_overscanAppropriateFlag is enabled
+    - m_chromaSampleLocTypeTopField and m_chromaSampleLocTypeBottomField unused now (will be removed in next major release)
+  - VUI defaults changed:
+    - progressiveSourceFlag=1
+    - nonPackedFlag=1
+    - nonProjectedFlag=1
+
+* vvencFFapp:
+  - added parameters:
+    - Sar: specify Sample aspect ratio - ratio of width to height (WidthxHeight)
+  - removed unused parameter: ChromaSampleLocTypeTopField, ChromaSampleLocTypeBottomField
+  - changed parameter section:
+    - cleanup section "VUI and SEI options" into separate sections:
+      "HDR/SDR and Color Options", "SEI and auxiliary options", "VUI options"
+    - "ChromaLocInfoPresent" is now auto behavior "Signals whether chroma_sample_loc_type is present (-1: auto, 0: off, 1: on)")
+
+/////////////////////////////////////////
 tag 1.12.0
 
 * libvvenc:

@@ -12,10 +12,10 @@ else()
 endif()
 
 # get source files
-file( GLOB BASE_SRC_FILES "*.cpp"  "../CommonLib/*.cpp"  "../Utilities/*.cpp" "../DecoderLib/*.cpp" "../EncoderLib/*.cpp" )
+file( GLOB BASE_SRC_FILES CONFIGURE_DEPENDS "*.cpp"  "../CommonLib/*.cpp"  "../Utilities/*.cpp" "../DecoderLib/*.cpp" "../EncoderLib/*.cpp" )
 
 # get include files
-file( GLOB BASE_INC_FILES "*.h" "../CommonLib/*.h"  "../Utilities/*.h" "../DecoderLib/*.h" "../EncoderLib/*.h" "../apputils/*.h" )
+file( GLOB BASE_INC_FILES CONFIGURE_DEPENDS "*.h" "../CommonLib/*.h"  "../Utilities/*.h" "../DecoderLib/*.h" "../EncoderLib/*.h" "../apputils/*.h" )
 
 
 if( NOT DEFINED VVENC_ENABLE_X86_SIMD )
@@ -24,33 +24,37 @@ endif()
 
 if( VVENC_ENABLE_X86_SIMD )
   # get x86 source files
-  file( GLOB X86_SRC_FILES "../CommonLib/x86/*.cpp" )
+  file( GLOB X86_SRC_FILES CONFIGURE_DEPENDS "../CommonLib/x86/*.cpp" )
 
-  # get x86 include files
-  file( GLOB X86_INC_FILES "../CommonLib/x86/*.h" )
-
-  # get avx source files
-  file( GLOB AVX_SRC_FILES "../CommonLib/x86/avx/*.cpp" )
-
-  # get avx2 source files
-  file( GLOB AVX2_SRC_FILES "../CommonLib/x86/avx2/*.cpp" )
+  # get x86 source files
+  file( GLOB X86_INC_FILES CONFIGURE_DEPENDS "../CommonLib/x86/*.h" )
 
   # get sse4.1 source files
-  file( GLOB SSE41_SRC_FILES "../CommonLib/x86/sse41/*.cpp" )
-
+  file( GLOB SSE41_SRC_FILES CONFIGURE_DEPENDS "../CommonLib/x86/sse41/*.cpp" )
+  
   # get sse4.2 source files
-  file( GLOB SSE42_SRC_FILES "../CommonLib/x86/sse42/*.cpp" )
+  file( GLOB SSE42_SRC_FILES CONFIGURE_DEPENDS "../CommonLib/x86/sse42/*.cpp" )
+  
+  # get avx source files
+  file( GLOB AVX_SRC_FILES CONFIGURE_DEPENDS "../CommonLib/x86/avx/*.cpp" )
+
+  if( ${VVENC_TARGET_ARCH} STREQUAL "X86" )
+    # get avx2 source files
+    file( GLOB AVX2_SRC_FILES CONFIGURE_DEPENDS "../CommonLib/x86/avx2/*.cpp" )
+  endif()
 endif()
 
 if( VVENC_ENABLE_ARM_SIMD )
-  file( GLOB ARM_SRC_FILES      "../CommonLib/arm/*.cpp"      )
-  file( GLOB ARM_INC_FILES      "../CommonLib/arm/*.h"        )
+  file( GLOB ARM_SRC_FILES CONFIGURE_DEPENDS      "../CommonLib/arm/*.cpp"      )
+  file( GLOB ARM_INC_FILES CONFIGURE_DEPENDS      "../CommonLib/arm/*.h"        )
 
-  file( GLOB ARM_NEON_SRC_FILES "../CommonLib/arm/neon/*.cpp" )
+  file( GLOB ARM_NEON_SRC_FILES CONFIGURE_DEPENDS "../CommonLib/arm/neon/*.cpp" )
+  file( GLOB ARM_SVE_SRC_FILES  CONFIGURE_DEPENDS "../CommonLib/arm/sve/*.cpp" )
+  file( GLOB ARM_SVE2_SRC_FILES CONFIGURE_DEPENDS "../CommonLib/arm/sve2/*.cpp" )
 endif()
 
 # get public/extern include files
-file( GLOB PUBLIC_INC_FILES  "../../../include/${LIB_NAME}/*.h" )
+file( GLOB PUBLIC_INC_FILES CONFIGURE_DEPENDS  "../../../include/${LIB_NAME}/*.h" )
 
 # get all private include files
 set( PRIVATE_INC_FILES ${BASE_INC_FILES} ${X86_INC_FILES} ${ARM_INC_FILES} )
@@ -61,7 +65,7 @@ set( INC_FILES ${PRIVATE_INC_FILES} ${PUBLIC_INC_FILES}  )
 
 # NATVIS files for Visual Studio
 if( MSVC )
-  file( GLOB NATVIS_FILES "../../VisualStudio/*.natvis" )
+  file( GLOB NATVIS_FILES CONFIGURE_DEPENDS "../../VisualStudio/*.natvis" )
 
   # example: place header files in different folders
   source_group( "Natvis Files" FILES ${NATVIS_FILES} )
@@ -79,9 +83,9 @@ include_directories( . .. ../DecoderLib ../EncoderLib ../CommonLib ../CommonLib/
 include_directories( SYSTEM ../../../thirdparty )
 
 # set common warning flags
-add_compile_options( "$<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall;-Werror;-Wno-deprecated-register;-Wno-unused-const-variable;-Wno-unknown-attributes>" )
-add_compile_options( "$<$<CXX_COMPILER_ID:GNU>:-Wall;-Werror;-Wno-unused-function;;-Wno-unused-variable;;-Wno-sign-compare;;-fdiagnostics-show-option;-Wno-ignored-attributes>" )
-add_compile_options( "$<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/wd4100;/wd4127;/wd4244;/wd4245;/wd4251;/wd4310;/wd4389;/wd4456;/wd4457;/wd4458;/wd4459;/wd4505;/wd4701;/wd4702;/wd4703;/wd4996>" )
+add_compile_options( "$<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall;-Wno-deprecated-register;-Wno-unused-const-variable;-Wno-unknown-attributes>" )
+add_compile_options( "$<$<CXX_COMPILER_ID:GNU>:-Wall;-Wno-unused-function;;-Wno-unused-variable;-Wno-sign-compare;-fdiagnostics-show-option;-Wno-ignored-attributes>" )
+add_compile_options( "$<$<CXX_COMPILER_ID:MSVC>:/W4;/wd4100;/wd4127;/wd4244;/wd4245;/wd4251;/wd4310;/wd4389;/wd4456;/wd4457;/wd4458;/wd4459;/wd4505;/wd4701;/wd4702;/wd4703;/wd4996>" )
 
 # don't export all symbols from shared libraries by default (gcc: -fvisibility=hidden), only those marked as VVENC_DECL
 #  behavior similar to __declspec(dllexport) on windows
@@ -109,7 +113,7 @@ if( VVENC_ENABLE_X86_SIMD )
     set_if_compiler_supports_flag( FLAG_mavx   -mavx    )
     set_if_compiler_supports_flag( FLAG_mavx2  -mavx2   )
 
-    set_property( SOURCE ${X86_SRC_FILES}   APPEND PROPERTY COMPILE_FLAGS ${FLAG_mxsave} )
+    set_property( SOURCE ${X86_SRC_FILES}   APPEND PROPERTY COMPILE_FLAGS "${FLAG_mxsave}" )
     set_property( SOURCE ${SSE41_SRC_FILES} APPEND PROPERTY COMPILE_FLAGS "${FLAG_msse41}" )
     set_property( SOURCE ${SSE42_SRC_FILES} APPEND PROPERTY COMPILE_FLAGS "${FLAG_msse42}" )
     set_property( SOURCE ${AVX_SRC_FILES}   APPEND PROPERTY COMPILE_FLAGS "${FLAG_mavx}"   )
@@ -117,7 +121,8 @@ if( VVENC_ENABLE_X86_SIMD )
   endif()
 
   add_library( ${LIB_NAME}_x86_simd OBJECT ${SSE41_SRC_FILES} ${SSE42_SRC_FILES} ${AVX_SRC_FILES} ${AVX2_SRC_FILES} )
-  # disble LTO for the files compiled with special architecture flags
+
+  # Disble LTO for the files compiled with special architecture flags.
   set_target_properties( ${LIB_NAME}_x86_simd PROPERTIES
                                               INTERPROCEDURAL_OPTIMIZATION                OFF
                                               INTERPROCEDURAL_OPTIMIZATION_RELEASE        OFF
@@ -128,16 +133,37 @@ if( VVENC_ENABLE_X86_SIMD )
 endif()
 
 if( VVENC_ENABLE_ARM_SIMD )
-  # set needed compile definitions
+  # Set needed compile definitions.
   set_property( SOURCE ${ARM_NEON_SRC_FILES} APPEND PROPERTY COMPILE_DEFINITIONS USE_NEON )
 
-  add_library( ${LIB_NAME}_arm_simd OBJECT ${ARM_NEON_SRC_FILES} )
-  # NEON is enabled by default for all files, so don't need to disable LTO
-  # set_target_properties( ${LIB_NAME}_arm_simd PROPERTIES
-  #                                             INTERPROCEDURAL_OPTIMIZATION                OFF
-  #                                             INTERPROCEDURAL_OPTIMIZATION_RELEASE        OFF
-  #                                             INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO OFF
-  #                                             INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL     OFF )
+  if(( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64" ) OR ( ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64" ))
+    # Neon is mandatory in AArch64, so no additional compile flags needed here.
+  else()
+    set_if_compiler_supports_flag( FLAG_mfpu_neon "-mfpu=neon" )
+    set_property( SOURCE ${ARM_NEON_SRC_FILES} APPEND PROPERTY COMPILE_FLAGS "${FLAG_mfpu_neon}" )
+  endif()
+  list( APPEND ARM_SIMD_SRC_FILES ${ARM_NEON_SRC_FILES} )
+
+  if( VVENC_ENABLE_ARM_SIMD_SVE )
+    set_property( SOURCE ${ARM_SVE_SRC_FILES} APPEND PROPERTY COMPILE_DEFINITIONS USE_NEON USE_SVE )
+    set_property( SOURCE ${ARM_SVE_SRC_FILES} APPEND PROPERTY COMPILE_FLAGS ${FLAG_sve} )
+    list( APPEND ARM_SIMD_SRC_FILES ${ARM_SVE_SRC_FILES} )
+  endif()
+
+  if( VVENC_ENABLE_ARM_SIMD_SVE2 )
+    set_property( SOURCE ${ARM_SVE2_SRC_FILES} APPEND PROPERTY COMPILE_DEFINITIONS USE_NEON USE_SVE USE_SVE2 )
+    set_property( SOURCE ${ARM_SVE2_SRC_FILES} APPEND PROPERTY COMPILE_FLAGS ${FLAG_sve2} )
+    list( APPEND ARM_SIMD_SRC_FILES ${ARM_SVE2_SRC_FILES} )
+  endif()
+
+  add_library( ${LIB_NAME}_arm_simd OBJECT ${ARM_SIMD_SRC_FILES} )
+
+  # Disable LTO for the files compiled with special architecture flags.
+  set_target_properties( ${LIB_NAME}_arm_simd PROPERTIES
+                                              INTERPROCEDURAL_OPTIMIZATION                OFF
+                                              INTERPROCEDURAL_OPTIMIZATION_RELEASE        OFF
+                                              INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO OFF
+                                              INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL     OFF )
 
   set_target_properties( ${LIB_NAME}_arm_simd PROPERTIES FOLDER lib )
 endif()
@@ -170,8 +196,14 @@ else()
   target_link_libraries( ${LIB_NAME} PRIVATE Threads::Threads )
 endif()
 
+if( CMAKE_USE_PTHREADS_INIT )
+  target_compile_definitions( ${LIB_NAME} PRIVATE HAVE_PTHREADS )
+endif()
+
 # set the folder where to place the projects
 set_target_properties( ${LIB_NAME} PROPERTIES
                                    VERSION ${PROJECT_VERSION}
                                    SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+                                   INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib
+                                   MACOSX_RPATH FALSE
                                    FOLDER lib )

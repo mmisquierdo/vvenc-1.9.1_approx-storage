@@ -14,3 +14,7 @@
 * Jens Güther, , Fraunhofer HHI
 * Florian Eisenreich, , Fraunhofer HHI
 * Hossein Pejman, , École de technologie supérieure (ÉTS)
+* Vignesh V Menon, , Fraunhofer HHI
+* George Steed, @georges-arm, Arm
+* Yiqun Liu, , Fraunhofer HHI
+* Mehrdad Ghafari, , Fraunhofer HHI

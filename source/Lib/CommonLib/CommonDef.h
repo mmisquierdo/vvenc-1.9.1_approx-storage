@@ -61,6 +61,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #if defined( __x86_64__ ) || defined( _M_X64 ) || defined( __i386__ ) || defined( __i386 ) || defined( _M_IX86 )
 # define REAL_TARGET_X86 1
 #elif defined( __aarch64__ ) || defined( _M_ARM64 ) || defined( __arm__ ) || defined( _M_ARM )
+# if defined( __aarch64__ ) || defined( _M_ARM64 )
+#  define REAL_TARGET_AARCH64 1
+# endif
 # define REAL_TARGET_ARM 1
 #elif defined( __wasm__ ) || defined( __wasm32__ )
 # define REAL_TARGET_WASM 1
@@ -174,12 +177,12 @@ namespace vvenc {
 #define NULL              0
 #endif
 
-typedef enum
+enum EAffineModel : uint8_t
 {
   AFFINEMODEL_4PARAM,
   AFFINEMODEL_6PARAM,
   AFFINE_MODEL_NUM
-} EAffineModel;
+};
 
 static constexpr int AFFINE_ME_LIST_SIZE =                             4;
 static constexpr int AFFINE_ME_LIST_SIZE_LD =                          3;
@@ -382,6 +385,27 @@ static constexpr int MMVD_MAX_REFINE_NUM =                              (MMVD_RE
 static constexpr int MMVD_BASE_MV_NUM =                                 2; ///< max number of base candidate
 static constexpr int MMVD_ADD_NUM =                                     (MMVD_MAX_REFINE_NUM * MMVD_BASE_MV_NUM);///< total number of mmvd candidate
 
+union MmvdIdx
+{
+  using T = uint8_t;
+
+  static constexpr int LOG_REFINE_STEP = 3;
+  static constexpr int REFINE_STEP     = 1 << LOG_REFINE_STEP;
+  static constexpr int LOG_BASE_MV_NUM = 1;
+  static constexpr int BASE_MV_NUM     = 1 << LOG_BASE_MV_NUM;
+  static constexpr int MAX_REFINE_NUM  = 4 * REFINE_STEP;
+  static constexpr int ADD_NUM         = MAX_REFINE_NUM * BASE_MV_NUM;
+  static constexpr int INVALID         = std::numeric_limits<T>::max();
+
+  struct
+  {
+    T position : 2;
+    T step     : LOG_REFINE_STEP;
+    T baseIdx  : LOG_BASE_MV_NUM;
+  } pos;
+  T val;
+};
+
 static constexpr int MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT =            28;
 
 static constexpr int BDOF_EXTEND_SIZE             =                     1;
@@ -428,6 +452,7 @@ static constexpr double MRG_FAST_RATIOMYV[4] =                        { 1.15, 1.
 static constexpr int    NUM_AMAXBT_LAYER =                             10;
 static constexpr double AMAXBT_TH32 =                                  15.0;
 static constexpr double AMAXBT_TH64 =                                  30.0;
+static constexpr int    NUM_AFF_MRG_SATD_CAND =                         2;
 
 // Threshholds for Fast Chroma Block Partitoning. Only used in Intra Only Coding
 static constexpr int    FCBP_TH1 =                                     18000;
@@ -462,7 +487,7 @@ static constexpr int SBT_NUM_SL =                                      10; ///< 
 static constexpr int SBT_NUM_SL =                                       4; ///< maximum number of historical PU decision saved for a CU
 #endif
 static constexpr int SBT_NUM_RDO =                                      2; ///< maximum number of SBT mode tried for a PU
-static constexpr int SBT_FAST64_WIDTH_THRESHOLD =                    1920;
+static constexpr unsigned SBT_FAST64_WIDTH_THRESHOLD =               1920;
 
 static constexpr int NUM_INTER_CU_INFO_SAVE =                           8; ///< maximum number of inter cu information saved for fast algorithm
 static constexpr int LDT_MODE_TYPE_INHERIT =                            0; ///< No need to signal mode_constraint_flag, and the modeType of the region is inherited from its parent node
@@ -502,7 +527,7 @@ static constexpr int CCALF_SMALL_TAB[CCALF_CANDS_COEFF_NR] = { 0, 1, 2, 4, 8, 16
 static constexpr uint8_t MIP_SHIFT_MATRIX  =  6;
 static constexpr uint8_t MIP_OFFSET_MATRIX = 32;
 static constexpr uint8_t SORTED_BUFS = 9;
-static constexpr uint8_t MAX_TMP_BUFS = 6;
+static constexpr uint8_t MAX_TMP_BUFS = 2 + 2 * GEO_MAX_NUM_UNI_CANDS;
 
 static constexpr int QPA_MAX_NOISE_LEVELS = 8;
 
@@ -523,8 +548,8 @@ struct ClpRng
 struct ClpRngs : public ClpRng
 {
   // bitdepth has to be the same for all channels
-  const ClpRng& operator[] ( const ComponentID compID ) const { return *this; }
-  const ClpRng& operator[] ( const int         compID ) const { return *this; }
+  const ClpRng& operator[] ( const ComponentID /*compID*/ ) const { return *this; }
+  const ClpRng& operator[] ( const int         /*compID*/ ) const { return *this; }
   //const ClpRng& operator[] ( const ComponentID compId ) const { return comp[compId]; }
   //ClpRng comp[MAX_NUM_COMP]; ///< the bit depth as indicated in the SPS
 };
@@ -758,12 +783,14 @@ namespace x86_simd
 namespace arm_simd
 {
 #ifdef TARGET_SIMD_ARM
-  typedef enum
-  {
-    UNDEFINED = -1,
-    SCALAR    = 0,
-    NEON,
-  } ARM_VEXT;
+typedef enum
+{
+  UNDEFINED = -1,
+  SCALAR    = 0,
+  NEON,
+  SVE,
+  SVE2,
+} ARM_VEXT;
 #endif   // TARGET_SIMD_ARM
 }   // namespace arm_simd
 
