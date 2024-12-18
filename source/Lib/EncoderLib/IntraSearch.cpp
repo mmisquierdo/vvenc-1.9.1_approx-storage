@@ -416,6 +416,8 @@ void IntraSearch::xEstimateLumaRdModeList(int& numModesForFullRD,
 
 bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, double bestCost)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::estIntraPredLumaQT);
+
   CodingStructure       &cs           = *cu.cs;
   const int             width         = partitioner.currArea().lwidth();
   const int             height        = partitioner.currArea().lheight();
@@ -510,6 +512,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, d
     {
       cs.dist = MAX_DISTORTION;
       cs.interHad = 0;
+	  ApproxSS::end_level();
       return false;
     }
   }
@@ -717,11 +720,15 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, d
 
   csBest->releaseIntermediateData();
 
+  ApproxSS::end_level();
   return validReturn;
 }
 
 void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner, const double maxCostAllowed )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::estIntraPredChromaQT);
+
+
   PROFILER_SCOPE_AND_STAGE_EXT( 0, _TPROF, P_INTRA_CHROMA, cu.cs, CH_C );
   const TempCtx ctxStart( m_CtxCache, m_CABACEstimator->getCtx() );
   CodingStructure &cs   = *cu.cs;
@@ -982,6 +989,8 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit& cu, Partitioner& partitioner
   {
     cu.ispMode = 0;
   }
+
+  ApproxSS::end_level();
 }
 
 void IntraSearch::saveCuAreaCostInSCIPU( Area area, double cost )
@@ -1263,6 +1272,8 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID compI
     return;
   }
 
+  ApproxSS::start_level(ApproxInter::LevelId::xIntraCodingTUBlock);
+
   CodingStructure &cs             = *tu.cs;
   const CompArea      &area       = tu.blocks[compID];
   const SPS           &sps        = *cs.sps;
@@ -1386,6 +1397,7 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID compI
     {
       // ISP has to have at least one non-zero CBF
       ruiDist = MAX_INT;
+	  ApproxSS::end_level();
       return;
     }
     //--- inverse transform ---
@@ -1438,6 +1450,7 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID compI
       if( tu.jointCbCr != codedCbfMask )
       {
         ruiDist = MAX_DISTORTION;
+		ApproxSS::end_level();
         return;
       }
       m_pcTrQuant->invTransformICT( tu, piResi, crResi );
@@ -1496,10 +1509,14 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID compI
       ruiDist += m_pcRdCost->getDistPart( crOrg, crReco, bitDepth, COMP_Cr, DF_SSE );
     }
   }
+
+  ApproxSS::end_level();
 }
 
 void IntraSearch::xIntraCodingLumaQT(CodingStructure& cs, Partitioner& partitioner, PelUnitBuf* predBuf, const double bestCostSoFar, int numMode, bool disableMTS)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xIntraCodingLumaQT);
+
   PROFILER_SCOPE_AND_STAGE_EXT( 0, _TPROF, P_INTRA_RD_SEARCH_LUMA, &cs, partitioner.chType );
   const UnitArea& currArea  = partitioner.currArea();
   uint32_t        currDepth = partitioner.currTrDepth;
@@ -1981,14 +1998,19 @@ void IntraSearch::xIntraCodingLumaQT(CodingStructure& cs, Partitioner& partition
 
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L, g_cuCounters1D[CU_RD_TESTS][0][!cs.slice->isIntra() + cs.slice->depth] );
   STAT_COUNT_CU_MODES( partitioner.chType == CH_L && !cs.slice->isIntra(), g_cuCounters2D[CU_RD_TESTS][Log2( cs.area.lheight() )][Log2( cs.area.lwidth() )] );
+
+  ApproxSS::end_level();
 }
 
 ChromaCbfs IntraSearch::xIntraChromaCodingQT(CodingStructure& cs, Partitioner& partitioner)
 {
   UnitArea    currArea      = partitioner.currArea();
 
-  if( !currArea.Cb().valid() ) 
+  if( !currArea.Cb().valid() ) {
     return ChromaCbfs(false);
+  }
+
+  ApproxSS::start_level(ApproxInter::LevelId::xIntraChromaCodingQT);
 
   TransformUnit& currTU     = *cs.getTU( currArea.chromaPos(), CH_C );
   const CodingUnit& cu  = *cs.getCU( currArea.chromaPos(), CH_C, TREE_D );
@@ -1999,6 +2021,7 @@ ChromaCbfs IntraSearch::xIntraChromaCodingQT(CodingStructure& cs, Partitioner& p
   {
     if (!currArea.Cb().valid() || !currArea.Cr().valid())
     {
+	  ApproxSS::end_level();
       return cbfs;
     }
 
@@ -2579,6 +2602,7 @@ ChromaCbfs IntraSearch::xIntraChromaCodingQT(CodingStructure& cs, Partitioner& p
       }
     }
   }
+  ApproxSS::end_level();
   return cbfs;
 }
 

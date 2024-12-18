@@ -2689,7 +2689,7 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
   ApproxSS::end_level();
   
   
-  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_MVP);
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_Start_Search);
 
   // start search
   iDist = 0;
@@ -2739,6 +2739,10 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
     xTZ2PointSearch( cStruct );
   }
 
+  ApproxSS::end_level();
+  
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_Raster);
+
   // raster search if distance is too big
   if( bUseAdaptiveRaster )
   {
@@ -2782,7 +2786,7 @@ void InterSearch::xTZSearch( const CodingUnit& cu,
   
   ApproxSS::end_level();
   
-  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_Raster);
+  ApproxSS::start_level(ApproxInter::LevelId::xTZSearch_RasterRefinement);
 
   // raster refinement
 

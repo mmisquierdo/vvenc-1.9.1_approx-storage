@@ -255,11 +255,22 @@
 			namespace LevelId {
 				constexpr int64_t OTHER = 10;
 				constexpr int64_t xCheckRDCostMerge = 11;
+					constexpr int64_t xCheckRDCostMerge_start = 46;
+					constexpr int64_t xCheckRDCostMerge_SATDCost = 47;
+					constexpr int64_t xCheckRDCostMerge_RDChecking = 48;
+					constexpr int64_t generateMergePrediction = 49;
 				constexpr int64_t xCheckRDCostMergeGeo = 12;
 				constexpr int64_t xCheckRDCostInterIMV = 13;
 				constexpr int64_t xCheckRDCostIBCModeMerge2Nx2N = 14;
 				constexpr int64_t xCheckRDCostIBCMode = 15;
 				constexpr int64_t xCheckRDCostIntra = 16;
+					constexpr int64_t estIntraPredLumaQT = 50;
+						constexpr int64_t xIntraCodingLumaQT = 51;
+						constexpr int64_t xIntraChromaCodingQT = 52;
+						constexpr int64_t predIntraChromaLM = 53;
+						constexpr int64_t predIntraAng = 54;
+						constexpr int64_t xIntraCodingTUBlock = 55;
+					constexpr int64_t estIntraPredChromaQT = 51;
 
 				constexpr int64_t xCheckRDCostInter = 17;
 					constexpr int64_t xEncodeInterResidual = 20;
@@ -271,6 +282,7 @@
 								constexpr int64_t xTZSearch_MVP = 26;
 								constexpr int64_t xTZSearch_Start_Search = 27;
 								constexpr int64_t xTZSearch_Raster = 28;
+								constexpr int64_t xTZSearch_RasterRefinement = 45; //!!!!
 								constexpr int64_t xTZSearch_Refinement = 29;
 							constexpr int64_t xPatternSearchFracDIF = 30;
 								constexpr int64_t xPatternSearchFracDIF_HalfPixel = 31;

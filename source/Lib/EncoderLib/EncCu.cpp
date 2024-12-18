@@ -1662,6 +1662,8 @@ int getDmvrMvdNum( const CodingUnit &cu )
 
 void EncCu::xCheckRDCostUnifiedMerge( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, EncTestMode &encTestMode )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostMerge_start);
+
   const Slice &slice = *tempCS->slice;
 
   CHECK( slice.sliceType == VVENC_I_SLICE, "Merge modes not available for I-slices" );
@@ -1747,6 +1749,10 @@ void EncCu::xCheckRDCostUnifiedMerge( CodingStructure *&tempCS, CodingStructure 
 
   numMergeSatdCand  = std::min( numMergeSatdCand, m_pcEncCfg->m_maxMergeRdCandNumTotal );
 
+  ApproxSS::end_level();
+
+  ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostMerge_SATDCost);
+
   // 1. Pass: get SATD-cost for selected candidates and reduce their count
   m_mergeItemList.resetList( numMergeSatdCand );
   const TempCtx ctxStart   ( m_CtxCache, m_CABACEstimator->getCtx() );
@@ -1823,6 +1829,10 @@ void EncCu::xCheckRDCostUnifiedMerge( CodingStructure *&tempCS, CodingStructure 
   {
     numMergeSatdCand       = std::min<int>( numMergeSatdCand, ( int ) m_mergeItemList.size() );
   }
+
+  ApproxSS::end_level();
+  
+  ApproxSS::start_level(ApproxInter::LevelId::xCheckRDCostMerge_RDChecking);
 
   // 2. Pass: RD checking 
   tempCS->initStructData( encTestMode.qp );
@@ -1957,6 +1967,8 @@ void EncCu::xCheckRDCostUnifiedMerge( CodingStructure *&tempCS, CodingStructure 
       tempCS->initStructData( encTestMode.qp );
     }   // end loop mrgHadIdx
   }
+
+  ApproxSS::end_level();
 }
 
 unsigned int EncCu::updateRdCheckingNum( MergeItemList &mergeItemList, double threshold, unsigned int numMergeSatdCand )
@@ -1976,6 +1988,8 @@ unsigned int EncCu::updateRdCheckingNum( MergeItemList &mergeItemList, double th
 void EncCu::generateMergePrediction( const UnitArea &unitArea, MergeItem *mergeItem, CodingUnit &pu, bool luma, bool chroma,
                                      PelUnitBuf &dstBuf, bool finalRd, bool forceNoResidual, PelUnitBuf *predBuf1, PelUnitBuf *predBuf2 )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::generateMergePrediction);
+
   CHECK( ( luma && mergeItem->lumaPredReady ) || ( chroma && mergeItem->chromaPredReady ), "Prediction has been avaiable" );
 
   pu.mcControl = ( !luma ? 4 : 0 ) | ( !chroma ? 2 : 0 );
@@ -2058,6 +2072,8 @@ void EncCu::generateMergePrediction( const UnitArea &unitArea, MergeItem *mergeI
     mergeItem->lumaPredReady   |= luma;
     mergeItem->chromaPredReady |= chroma;
   }
+
+  ApproxSS::end_level();
 }
 
 void EncCu::addRegularCandsToPruningList( const MergeCtx &mergeCtx, const UnitArea &localUnitArea, double sqrtLambdaForFirstPassIntra, const TempCtx &ctxStart,

@@ -352,6 +352,8 @@ int IntraPrediction::getWideAngle( int width, int height, int predMode )
 
 void IntraPrediction::predIntraAng( const ComponentID compId, PelBuf& piPred, const CodingUnit& cu)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::predIntraAng);
+
   const ComponentID    compID       = compId;
   const ChannelType    channelType  = toChannelType( compID );
   const uint32_t       uiDirMode = cu.bdpcmM[channelType] ? BDPCM_IDX : CU::getFinalIntraMode(cu, channelType);
@@ -380,10 +382,14 @@ void IntraPrediction::predIntraAng( const ComponentID compId, PelBuf& piPred, co
       IntraPredSampleFilter(piPred, srcBuf);
     }
   }
+
+  ApproxSS::end_level();
 }
 
 void IntraPrediction::predIntraChromaLM(const ComponentID compID, PelBuf& piPred, const CodingUnit& cu, const CompArea& chromaArea, int intraDir)
 {
+  ApproxSS::start_level(ApproxInter::LevelId::predIntraChromaLM);
+
   CHECK( piPred.width > MAX_TB_SIZEY || piPred.height > MAX_TB_SIZEY, "not enough memory");
   const int iLumaStride = 2 * MAX_TB_SIZEY + 1;
   PelBuf Temp = PelBuf(m_pMdlmTemp + iLumaStride + 1, iLumaStride, Size(chromaArea));
@@ -394,6 +400,8 @@ void IntraPrediction::predIntraChromaLM(const ComponentID compID, PelBuf& piPred
   ////// final prediction
   piPred.copyFrom(Temp);
   piPred.linearTransform(a, iShift, b, true, cu.cs->slice->clpRngs[compID]);
+
+  ApproxSS::end_level();
 }
 
 /** Function for deriving planar intra prediction. This function derives the prediction samples for planar mode (intra coding).
