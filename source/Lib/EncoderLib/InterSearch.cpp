@@ -4970,7 +4970,7 @@ void InterSearch::xPredAffineInterSearch( CodingUnit& cu,
   //<Matheus>
   //std::cout << "TEST: xPredAffineInterSearch" << std::endl;
   //</Matheus>
-  ApproxSS::start_level(ApproxInter::LevelId::xPredAffineBlk);
+  ApproxSS::start_level(ApproxInter::LevelId::xPredAffineInterSearch);
 
   const Slice &slice = *cu.slice;
 

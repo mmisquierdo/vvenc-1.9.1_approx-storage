@@ -260,7 +260,6 @@
 					constexpr int64_t xCheckRDCostMerge_RDChecking = 48;
 					constexpr int64_t generateMergePrediction = 49;
 				constexpr int64_t xCheckRDCostMergeGeo = 12;
-				constexpr int64_t xCheckRDCostInterIMV = 13;
 				constexpr int64_t xCheckRDCostIBCModeMerge2Nx2N = 14;
 				constexpr int64_t xCheckRDCostIBCMode = 15;
 				constexpr int64_t xCheckRDCostIntra = 16;
@@ -272,6 +271,7 @@
 						constexpr int64_t xIntraCodingTUBlock = 55;
 					constexpr int64_t estIntraPredChromaQT = 51;
 
+				constexpr int64_t xCheckRDCostInterIMV = 13;
 				constexpr int64_t xCheckRDCostInter = 17;
 					constexpr int64_t xEncodeInterResidual = 20;
 					constexpr int64_t predInterSearch = 21;
@@ -288,12 +288,12 @@
 								constexpr int64_t xPatternSearchFracDIF_HalfPixel = 31;
 								constexpr int64_t xPatternSearchFracDIF_QuarterPixel = 32;
 							constexpr int64_t xPatternSearchIntRefine = 33;
-						constexpr int64_t xPredAffineInterSearch = 34;
+						constexpr int64_t xPredAffineInterSearch = 34;  //DO NOT TRUST FOR JICS 2025, WAS NOT PROPERLY MARKEK
 							constexpr int64_t xAffineMotionEstimation = 35;
 
 					constexpr int64_t motionCompensation = 36;
 						constexpr int64_t xPredInterUni = 37;
-							constexpr int64_t xPredAffineBlk = 38;
+							constexpr int64_t xPredAffineBlk = 38; 	//DO NOT TRUST FOR JICS 2025, WAS NOT PROPERLY MARKEK
 							constexpr int64_t xPredInterBlk = 39;
 						constexpr int64_t xPredInterBi = 40;
 							constexpr int64_t xWeightedAverage = 41;
