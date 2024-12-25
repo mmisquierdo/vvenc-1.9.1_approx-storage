@@ -286,7 +286,12 @@
 								constexpr int64_t xTZSearch_Refinement = 29;
 							constexpr int64_t xPatternSearchFracDIF = 30;
 								constexpr int64_t xPatternSearchFracDIF_HalfPixel = 31;
+									constexpr int64_t xExtDIFUpSamplingH = 61;
 								constexpr int64_t xPatternSearchFracDIF_QuarterPixel = 32;
+									constexpr int64_t xExtDIFUpSamplingQ = 62;
+								
+								constexpr int64_t m_fastSubPel = 63;
+
 							constexpr int64_t xPatternSearchIntRefine = 33;
 						constexpr int64_t xPredAffineInterSearch = 34;  //DO NOT TRUST FOR JICS 2025, WAS NOT PROPERLY MARKEK
 							constexpr int64_t xAffineMotionEstimation = 35;

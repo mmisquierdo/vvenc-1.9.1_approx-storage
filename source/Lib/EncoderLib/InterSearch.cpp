@@ -835,6 +835,7 @@ Distortion InterSearch::xPatternRefinement( const CPelBuf* pcPatternKey,
 
         if( 0 == i )
         {
+          ApproxSS::start_level(ApproxInter::LevelId::m_fastSubPel);
           // split the prediction with funny widths into power-of-2 and +1 parts for the sake of SIMD speed-up
           m_if.filterHor( COMP_Y, srcPtr, srcStride, m_filteredBlockTmp[ 0 ][ 0 ], intStride, width, height + filterSize, 0 << MV_FRACTIONAL_BITS_DIFF, false, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
           m_if.filterHor( COMP_Y, srcPtr + width, srcStride, m_filteredBlockTmp[ 0 ][ 0 ] + width, intStride, 1, height + filterSize, 0 << MV_FRACTIONAL_BITS_DIFF, false, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
@@ -846,28 +847,35 @@ Distortion InterSearch::xPatternRefinement( const CPelBuf* pcPatternKey,
           intPtr = m_filteredBlockTmp[ 0 ][ 0 ] + halfFilterSize * intStride + 1;
           dstPtr = m_filteredBlock[ 0 ][ 0 ][ 0 ];
           m_if.filterVer( COMP_Y, intPtr, intStride, dstPtr, dstStride, width + 0, height + 0, 0 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
+          ApproxSS::end_level();
         }
         else if( 1 == i )
         {
+          ApproxSS::start_level(ApproxInter::LevelId::m_fastSubPel);
           intPtr = m_filteredBlockTmp[ 0 ][ 0 ] + ( halfFilterSize - 1 ) * intStride + 1;
           dstPtr = m_filteredBlock[ 2 ][ 0 ][ 0 ];
           m_if.filterVer( COMP_Y, intPtr, intStride, dstPtr, dstStride, width + 0, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
+          ApproxSS::end_level();
         }
         else if( 3 == i )
         {
+          ApproxSS::start_level(ApproxInter::LevelId::m_fastSubPel);
           intPtr = m_filteredBlockTmp[ 2 ][ 0 ] + halfFilterSize * intStride;
           dstPtr = m_filteredBlock[ 0 ][ 2 ][ 0 ];
           // split the prediction with funny widths into power-of-2 and +1 parts for the sake of SIMD speed-up
           m_if.filterVer( COMP_Y, intPtr, intStride, dstPtr, dstStride, width, height + 0, 0 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
           m_if.filterVer( COMP_Y, intPtr + width, intStride, dstPtr + width, dstStride, 1, height + 0, 0 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
+          ApproxSS::end_level();
         }
         else if( 5 == i )
         {
+          ApproxSS::start_level(ApproxInter::LevelId::m_fastSubPel);
           intPtr = m_filteredBlockTmp[ 2 ][ 0 ] + ( halfFilterSize - 1 ) * intStride;
           dstPtr = m_filteredBlock[ 2 ][ 2 ][ 0 ];
           // split the prediction with funny widths into power-of-2 and +1 parts for the sake of SIMD speed-up
           m_if.filterVer( COMP_Y, intPtr, intStride, dstPtr, dstStride, width, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
           m_if.filterVer( COMP_Y, intPtr + width, intStride, dstPtr + width, dstStride, 1, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
+          ApproxSS::end_level();
         }
       }
     }
@@ -3308,6 +3316,8 @@ void InterSearch::xSymMotionEstimation( CodingUnit& cu, CPelUnitBuf& origBuf, Mv
 */
 void InterSearch::xExtDIFUpSamplingH(CPelBuf* pattern, bool useAltHpelIf)
 {
+ ApproxSS::start_level(ApproxInter::LevelId::xExtDIFUpSamplingH);
+
   PROFILER_SCOPE_AND_STAGE( 0, _TPROF, P_HPEL_INTERP );
   const ClpRng& clpRng = m_lumaClpRng;
   int width      = pattern->width;
@@ -3352,6 +3362,8 @@ void InterSearch::xExtDIFUpSamplingH(CPelBuf* pattern, bool useAltHpelIf)
   // split the prediction with funny widths into power-of-2 and +1 parts for the sake of SIMD speed-up
   m_if.filterVer( COMP_Y, intPtr,         intStride, dstPtr,         dstStride, width, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
   m_if.filterVer( COMP_Y, intPtr + width, intStride, dstPtr + width, dstStride,     1, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, useAltHpelIf, 0, reduceTap );
+
+  ApproxSS::end_level();
 }
 
 
@@ -3367,6 +3379,8 @@ void InterSearch::xExtDIFUpSamplingH(CPelBuf* pattern, bool useAltHpelIf)
 */
 void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef, int& patternId )
 {
+  ApproxSS::start_level(ApproxInter::LevelId::xExtDIFUpSamplingQ);
+
   PROFILER_SCOPE_AND_STAGE( 0, _TPROF, P_QPEL_INTERP );
   const ClpRng& clpRng = m_lumaClpRng;
   int width      = pattern->width;
@@ -3564,6 +3578,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef, int& patt
       m_if.filterVer( COMP_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, false, 0, reduceTap );
     }
   }
+
+  ApproxSS::end_level();
 }
 
 
